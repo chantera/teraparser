@@ -8,7 +8,9 @@ import java.util.UUID;
  * @author Hiroki Teranishi
  */
 public class StringUtils {
-    private StringUtils() {}
+    private StringUtils() {
+        throw new AssertionError();
+    }
 
     public static String[] rsplit(String str, String regex, int limit) {
         String[] split = str.split(regex);

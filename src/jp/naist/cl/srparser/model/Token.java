@@ -66,14 +66,34 @@ public class Token {
         String[] attributes = {
             "0",      // ID
             "<ROOT>", // FORM
-            "_",      // LEMMA
+            "<ROOT>", // LEMMA
             "ROOT",   // CPOSTAG
             "ROOT",   // POSTAG
             "_",      // FEATS
-            "1",      // HEAD
-            "_",      // DEPREL
+            "-1",     // HEAD
+            "ROOT",   // DEPREL
             "_",      // PHEAD
             "_"       // PDEPREL
+        };
+        return new Token(attributes);
+    }
+
+    public boolean isRoot() {
+        return this.id == 0;
+    }
+
+    public static Token createNull() {
+        String[] attributes = {
+            "-10",    // ID
+            "<NULL>", // FORM
+            "<NULL>", // LEMMA
+            "NULL",   // CPOSTAG
+            "NULL",   // POSTAG
+            "",       // FEATS
+            "-11",    // HEAD
+            "NULL",   // DEPREL
+            "",       // PHEAD
+            ""        // PDEPREL
         };
         return new Token(attributes);
     }

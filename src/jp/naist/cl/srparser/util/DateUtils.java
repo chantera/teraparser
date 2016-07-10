@@ -12,9 +12,12 @@ import java.util.Date;
  * @author Hiroki Teranishi
  */
 public class DateUtils {
-    private DateUtils() {}
     private final static String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final static Calendar calendar = Calendar.getInstance();
+
+    private DateUtils() {
+        throw new AssertionError();
+    }
 
     private static class SafeDateFormat {
         private static final ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>(){

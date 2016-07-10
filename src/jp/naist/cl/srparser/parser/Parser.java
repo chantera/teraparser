@@ -1,11 +1,13 @@
 package jp.naist.cl.srparser.parser;
 
+import jp.naist.cl.srparser.model.Feature;
+import jp.naist.cl.srparser.model.Feature.Index;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
+import jp.naist.cl.srparser.util.Tuple;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Map;
+import java.awt.datatransfer.FlavorEvent;
+import java.util.*;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -15,28 +17,26 @@ import java.util.Map;
 public class Parser {
     private boolean initialized = false;
     private Classifier classifier;
-    private LinkedList<Token> stack;
-    private LinkedList<Token> buffer;
-    private LinkedList<Token> output;
-    private double[] weights;
+    private LinkedList<Token> stack = new LinkedList<>();
+    private LinkedList<Token> buffer = new LinkedList<>();
+    private LinkedList<Token> output = new LinkedList<>();
+    private Map<Action, Map<Index, Double>> weights;
+
+    private LinkedList<Tuple<State, Action>> transiaions;
 
     public Parser() {
-        this(new double[10]);
+        this(null);
     }
 
-    public Parser(double[] weights) {
-        initialize(weights);
-    }
-
-    private void initialize(double[] weights) {
-        if (initialized) {
-            return;
+    public Parser(Map<Action, Map<Index, Double>> weights) {
+        if (weights == null) {
+            weights = new EnumMap<>(Action.class);
+            for (Action action : Action.values()) {
+                weights.put(action, new LinkedHashMap<Index, Double>());
+            }
         }
         this.weights = weights;
-        classifier = new SVMClassifier();
-        stack = new LinkedList<>();
-        buffer = new LinkedList<>();
-        output = new LinkedList<>();
+        classifier = new Perceptron();
         initialized = true;
     }
 
@@ -44,21 +44,36 @@ public class Parser {
         stack.clear();
         output.clear();
         buffer = new LinkedList<>(Arrays.asList(tokens));
+        transiaions = new LinkedList<>();
+        Action.SHIFT.exec(this);
     }
 
     public Sentence parse(Sentence sentence) {
         reset(sentence.tokens);
+        State state = new State(stack, buffer);
         while (buffer.size() > 0) {
-            getNextTransition().exec(this);
+            Action action = getNextAction(state);
+            action.exec(this);
+            transiaions.add(new Tuple<>(state, action));
+            state = new State(stack, buffer);
         }
         return new Sentence(output.toArray(new Token[output.size()]));
     }
 
-    private Transition getNextTransition() {
+    private Action getNextAction(State state) {
         if (stack.size() == 0) {
-            return Transition.SHIFT;
+            // throw new IllegalStateException("Initial State: stack is empty.");
+            return Action.SHIFT;
+        } else if (buffer.size() == 0) {
+            throw new IllegalStateException("Terminal State: buffer is empty.");
         }
-        return classifier.classify(new double[]{1.0}, new double[]{1.0});
+        List<Action> actions = new ArrayList<>();
+        if (!stack.getLast().isRoot()) {
+            actions.add(Action.LEFT);
+        }
+        actions.add(Action.RIGHT);
+        actions.add(Action.SHIFT);
+        return classifier.classify(state.features, weights, actions);
     }
 
     private void left() {
@@ -89,7 +104,33 @@ public class Parser {
         stack.add(buffer.pop());
     }
 
-    protected enum Transition {
+    private void extendWeightSize(int size) {
+        int weightSize = weights.get(Action.LEFT).size();
+        if (weightSize < size) {
+            for (Action action : Action.values()) {
+                Map<Index, Double> weight = weights.get(action);
+                for (int i = weightSize; i < size + 100; i++) {
+                    weight.put(new Index(i), 0.0);
+                }
+                weights.put(action, weight);
+            }
+        }
+    }
+
+    public class State {
+        public final List<Token> stack;
+        public final List<Token> buffer;
+        public final Index[] features;
+
+        public State(final List<Token> stack, final List<Token> buffer) {
+            this.stack = stack;
+            this.buffer = buffer;
+            this.features = Feature.extract(stack, buffer);
+            extendWeightSize(Feature.getSize());
+        }
+    }
+
+    protected enum Action {
         LEFT {
             @Override
             protected void exec(Parser parser) {

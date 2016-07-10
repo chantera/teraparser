@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.model;
 
+import jp.naist.cl.srparser.util.AbstractIntVO;
 import jp.naist.cl.srparser.util.StringUtils;
 
 /**
@@ -10,10 +11,18 @@ import jp.naist.cl.srparser.util.StringUtils;
 public class Sentence {
     public final Token[] tokens;
     public final int length;
+    public final ID id;
 
     public Sentence(Token[] tokens) {
+        this.id = new ID(0);
         this.tokens = tokens;
         this.length = tokens.length;
+    }
+
+    public final class ID extends AbstractIntVO {
+        private ID(int value) {
+            super(value);
+        }
     }
 
     @Override

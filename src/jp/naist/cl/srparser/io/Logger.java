@@ -4,6 +4,9 @@ import jp.naist.cl.srparser.util.DateUtils;
 import jp.naist.cl.srparser.util.StringUtils;
 import jp.naist.cl.srparser.util.Tuple;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * jp.naist.cl.srparser.io
  *
@@ -113,18 +116,21 @@ public class Logger {
     }
 
     private void printLog(LogLevel logLevel, String message) {
-        String output = buildLogOutput(logLevel, message);
         if (this.logLevel.isPriorTo(logLevel)) {
             // @TODO implement
-            System.out.println("[TODO: this should be written in a log file.]");
+            // System.out.println("[TODO: this should be written in a log file.]");
         }
         if (verbose) {
             if (LogLevel.NOTICE.isPriorTo(logLevel)) {
-                System.err.println(output);
+                System.err.println(message);
             } else {
-                System.out.println(output);
+                System.out.println(message);
             }
         }
+    }
+
+    private void printFormattedLog(LogLevel logLevel, String message) {
+        printLog(logLevel, buildLogOutput(logLevel, message));
     }
 
     public static void log(LogLevel logLevel, String format, Object... args) {
@@ -132,11 +138,20 @@ public class Logger {
     }
 
     public static void log(LogLevel logLevel, String message) {
-        getInstence().printLog(logLevel, message);
+        getInstence().printFormattedLog(logLevel, message);
     }
 
     public static void log(LogLevel logLevel, Object object) {
-        log(logLevel, object.toString());
+        if (object instanceof Exception) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ((Exception) object).printStackTrace(pw);
+            pw.flush();
+            getInstence().printFormattedLog(logLevel, object.toString());
+            getInstence().printLog(logLevel, sw.toString());
+        } else {
+            log(logLevel, object.toString());
+        }
     }
 
     public static class Builder {
