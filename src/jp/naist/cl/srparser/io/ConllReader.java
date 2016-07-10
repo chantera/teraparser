@@ -16,6 +16,7 @@ public class ConllReader extends Reader {
     private static final String SEPARATOR = "";
     private boolean readingSentence;
     private List<Token> readingTokens;
+    private int sentenceCount = 0;
 
     @Override
     public Sentence parse(String line) {
@@ -28,7 +29,8 @@ public class ConllReader extends Reader {
         if (readingSentence && (line.equals(SEPARATOR) || isEOF)) {
             Sentence sentence = null;
             if (readingTokens.size() > 0) {
-                sentence = new Sentence(readingTokens.toArray(new Token[readingTokens.size()]));
+                sentenceCount++;
+                sentence = new Sentence(sentenceCount, readingTokens.toArray(new Token[readingTokens.size()]));
                 readingTokens = new ArrayList<>();
                 readingTokens.add(Token.createRoot());
             }

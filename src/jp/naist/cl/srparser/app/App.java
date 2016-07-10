@@ -5,6 +5,8 @@ import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.DepTree;
 import jp.naist.cl.srparser.parser.Parser;
+import jp.naist.cl.srparser.parser.Trainer;
+import jp.naist.cl.srparser.parser.Trainer.Training;
 
 /**
  * jp.naist.cl.srparser.app
@@ -21,7 +23,8 @@ public final class App {
     public static void execute(String[] args) {
         App app = getInstance();
         try {
-            app.run();
+            // app.run();
+            app.train();
         } catch (Exception e) {
             Logger.error(e);
         } finally {
@@ -49,6 +52,17 @@ public final class App {
             Sentence parsed = parser.parse(sentence);
             Logger.trace(new DepTree(sentence));
             Logger.trace(new DepTree(parsed));
+        }
+    }
+
+    private void train() {
+        Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
+        Trainer trainer = new Trainer(sentences);
+        Training training = trainer.getIterator(Config.getInt(Config.Key.ITERATION));
+        while (training.hasNext()) {
+            Logger.info("Iteration: %d", training.getCurrentIteration());
+            training.exec();
+            training = training.next();
         }
     }
 

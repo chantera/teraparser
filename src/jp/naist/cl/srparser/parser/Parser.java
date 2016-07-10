@@ -6,7 +6,6 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.Tuple;
 
-import java.awt.datatransfer.FlavorEvent;
 import java.util.*;
 
 /**
@@ -17,12 +16,14 @@ import java.util.*;
 public class Parser {
     private boolean initialized = false;
     private Classifier classifier;
-    private LinkedList<Token> stack = new LinkedList<>();
-    private LinkedList<Token> buffer = new LinkedList<>();
-    private LinkedList<Token> output = new LinkedList<>();
+    protected Token[] tokens;
+    protected LinkedList<Token> stack;
+    protected LinkedList<Token> buffer;
+    protected Set<Tuple<Integer, Integer>> arc;
+    protected LinkedList<Token> output;
     private Map<Action, Map<Index, Double>> weights;
 
-    private LinkedList<Tuple<State, Action>> transiaions;
+    protected List<Tuple<State, Action>> transitions;
 
     public Parser() {
         this(null);
@@ -36,44 +37,95 @@ public class Parser {
             }
         }
         this.weights = weights;
-        classifier = new Perceptron();
         initialized = true;
     }
 
-    private void reset(Token[] tokens) {
-        stack.clear();
-        output.clear();
+    public void setClassifier(Classifier classifier) {
+        this.classifier = classifier;
+    }
+
+    public List<Tuple<State, Action>> getTransiaions() {
+        return transitions;
+    }
+
+    public Map<Action, Map<Index, Double>> getWeights() {
+        return weights;
+    }
+
+    public void setWeights(Map<Action, Map<Index, Double>> weights) {
+        this.weights = weights;
+    }
+
+    public Set<Tuple<Integer, Integer>> getArc() {
+        return arc;
+    }
+
+    protected void reset(Token[] tokens) {
+        this.tokens = tokens;
+        stack = new LinkedList<>();
         buffer = new LinkedList<>(Arrays.asList(tokens));
-        transiaions = new LinkedList<>();
+        arc = new LinkedHashSet<>();
+        output = new LinkedList<>();
+        transitions = new LinkedList<>();
         Action.SHIFT.exec(this);
     }
 
     public Sentence parse(Sentence sentence) {
+        if (classifier == null) {
+            throw new IllegalStateException("Classifier must be set.");
+        }
         reset(sentence.tokens);
         State state = new State(stack, buffer);
         while (buffer.size() > 0) {
             Action action = getNextAction(state);
             action.exec(this);
-            transiaions.add(new Tuple<>(state, action));
+            transitions.add(new Tuple<>(state, action));
             state = new State(stack, buffer);
         }
-        return new Sentence(output.toArray(new Token[output.size()]));
+        transitions.add(new Tuple<State, Action>(state, null));
+        return new Sentence(sentence.id.getValue(), output.toArray(new Token[output.size()]));
     }
 
-    private Action getNextAction(State state) {
-        if (stack.size() == 0) {
+    protected Action getNextAction(State state) {
+        if (state.stack.size() == 0) {
             // throw new IllegalStateException("Initial State: stack is empty.");
             return Action.SHIFT;
-        } else if (buffer.size() == 0) {
+        } else if (state.buffer.size() == 0) {
             throw new IllegalStateException("Terminal State: buffer is empty.");
         }
         List<Action> actions = new ArrayList<>();
-        if (!stack.getLast().isRoot()) {
+        if (!state.stack.getLast().isRoot()) {
             actions.add(Action.LEFT);
         }
         actions.add(Action.RIGHT);
         actions.add(Action.SHIFT);
         return classifier.classify(state.features, weights, actions);
+    }
+
+    protected Action getGoldAction(State state) {
+        if (state.stack.size() == 0) {
+            return Action.SHIFT;
+        } else if (state.buffer.size() == 0) {
+            throw new IllegalStateException("Terminal State: buffer is empty.");
+        }
+        Token sToken = state.stack.getLast();
+        Token bToken = state.buffer.getFirst();
+        if (sToken.head == bToken.id) {
+            return Action.LEFT;
+        } else if (bToken.head == sToken.id) {
+            Boolean valid = true;
+            for (Token token : tokens) {
+                // check if all dependents of bToken have already been attached
+                if (token.head == bToken.id && !arc.contains(new Tuple<>(bToken.id, token.id))) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) {
+                return Action.RIGHT;
+            }
+        }
+        return Action.SHIFT;
     }
 
     private void left() {
@@ -83,7 +135,9 @@ public class Parser {
         Map<Token.Attribute, String> attributes = stack.pop().cloneAttributes();
         Token modifier = buffer.getFirst();
         attributes.put(Token.Attribute.HEAD, String.valueOf(modifier.id));
-        output.add(new Token(attributes));
+        Token dependent = new Token(attributes);
+        arc.add(new Tuple<>(modifier.id, dependent.id));
+        output.add(dependent);
     }
 
     private void right() {
@@ -93,7 +147,9 @@ public class Parser {
         Map<Token.Attribute, String> attributes = buffer.getFirst().cloneAttributes();
         Token modifier = stack.pop();
         attributes.put(Token.Attribute.HEAD, String.valueOf(modifier.id));
-        output.add(new Token(attributes));
+        Token dependent = new Token(attributes);
+        arc.add(new Tuple<>(modifier.id, dependent.id));
+        output.add(dependent);
         buffer.set(0, modifier);
     }
 
@@ -117,12 +173,28 @@ public class Parser {
         }
     }
 
+    /*
+    public class Transition extends Tuple<State, Action>  {
+        public Transition(State state, Action action) {
+            super(state, action);
+        }
+
+        public State getState() {
+            return getLeft();
+        }
+
+        public Action getAction() {
+            return getRight();
+        }
+    }
+    */
+
     public class State {
-        public final List<Token> stack;
-        public final List<Token> buffer;
+        public final LinkedList<Token> stack;
+        public final LinkedList<Token> buffer;
         public final Index[] features;
 
-        public State(final List<Token> stack, final List<Token> buffer) {
+        public State(final LinkedList<Token> stack, final LinkedList<Token> buffer) {
             this.stack = stack;
             this.buffer = buffer;
             this.features = Feature.extract(stack, buffer);

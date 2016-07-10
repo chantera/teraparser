@@ -13,8 +13,8 @@ public class Sentence {
     public final int length;
     public final ID id;
 
-    public Sentence(Token[] tokens) {
-        this.id = new ID(0);
+    public Sentence(int id, Token[] tokens) {
+        this.id = new ID(id);
         this.tokens = tokens;
         this.length = tokens.length;
     }
