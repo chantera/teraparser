@@ -8,58 +8,62 @@ import java.util.Map;
  *
  * @author Hiroki Teranishi
  */
-public class Token {
+public class Token implements Cloneable {
     public final int id;
+    public final String form;
+    public final String lemma;
+    public final String cpostag;
+    public final String postag;
+    public final String feats;
     public final int head;
-    private final Map<Attribute, String> attributes;
+    public final String deprel;
+    public final String phead;
+    public final String pdeprel;
 
     public Token(String attributes[]) {
         this.id = Integer.parseInt(attributes[0]);
+        this.form = attributes[1];
+        this.lemma = attributes[2];
+        this.cpostag = attributes[3];
+        this.postag = attributes[4];
+        this.feats = attributes[5];
         this.head = Integer.parseInt(attributes[6]);
-        this.attributes = Attribute.createAttributes(attributes);
+        this.deprel = attributes[7];
+        this.phead = attributes[8];
+        this.pdeprel = attributes[9];
     }
 
-    public Token(Map<Attribute, String> attributes) {
-        this.id = Integer.parseInt(attributes.get(Attribute.ID));
-        this.head = Integer.parseInt(attributes.get(Attribute.HEAD));
-        this.attributes = attributes;
+    private Token(int head, Token token) {
+        this.head = head;
+        token = token.clone();
+        this.id = token.id;
+        this.form = token.form;
+        this.lemma = token.lemma;
+        this.cpostag = token.cpostag;
+        this.postag = token.postag;
+        this.feats = token.feats;
+        this.deprel = token.deprel;
+        this.phead = token.phead;
+        this.pdeprel = token.pdeprel;
     }
 
-    public Map<Attribute, String> cloneAttributes() {
-        return ((EnumMap<Attribute, String>) attributes).clone();
-    }
-
-    public String getAttribute(Attribute attributeName) {
-        return attributes.get(attributeName);
-    }
-
-    public enum Attribute {
-        ID,
-        FORM,
-        LEMMMA,
-        CPOSTAG,
-        POSTAG,
-        FEATS,
-        HEAD,
-        DEPREL,
-        PHEAD,
-        PDEPREL;
-
-        public static final Attribute[] values = Attribute.values();
-        public static final int size = values.length;
-
-        private static Map<Attribute, String> createAttributes(String attributes[]) {
-            if (attributes.length != Attribute.size) {
-                throw new IllegalArgumentException("attributes length should be " + Attribute.size);
-            }
-            Map<Attribute, String> attributeMap = new EnumMap<>(Attribute.class);
-            int i = 0;
-            for (Attribute name : values) {
-                attributeMap.put(name, attributes[i]);
-                i++;
-            }
-            return attributeMap;
+    @Override
+    public Token clone() {
+        Token token;
+        try {
+            token = (Token) super.clone();
+        }catch (CloneNotSupportedException e){
+            token = null;
         }
+        return token;
+    }
+
+    public Token clone(int head) {
+        return new Token(head, this);
+    }
+
+    public static Token clone(Token token, int head) {
+        return token.clone(head);
     }
 
     public static Token createRoot() {
@@ -100,6 +104,6 @@ public class Token {
 
     @Override
     public String toString() {
-        return getAttribute(Attribute.FORM);
+        return form;
     }
 }

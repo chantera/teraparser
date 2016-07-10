@@ -12,109 +12,87 @@ enum FeatureTemplate {
     S0_POS("s0_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(stack[0].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(stack[0].postag);
         }
     },
     S1_POS("s1_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(stack[1].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(stack[1].postag);
         }
     },
     B0_POS("b0_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[0].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(buffer[0].postag);
         }
     },
     B1_POS("b1_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[1].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(buffer[1].postag);
         }
     },
     B2_POS("b2_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[2].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(buffer[2].postag);
         }
     },
     B3_POS("b3_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[3].getAttribute(Token.Attribute.POSTAG));
+            return this.applyFormat(buffer[3].postag);
         }
     },
     S0_FORM("s0_form=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(stack[0].getAttribute(Token.Attribute.FORM));
+            return this.applyFormat(stack[0].form);
         }
     },
     B0_FORM("b0_form=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[0].getAttribute(Token.Attribute.FORM));
+            return this.applyFormat(buffer[0].form);
         }
     },
     B1_FORM("b1_form=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(buffer[1].getAttribute(Token.Attribute.FORM));
+            return this.applyFormat(buffer[1].form);
         }
     },
     // Bigrams
     S0_POS_B0_POS("s0_pos=%s:b0_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(
-                    stack[0].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[0].getAttribute(Token.Attribute.CPOSTAG)
-            );
+            return this.applyFormat(stack[0].postag, buffer[0].postag);
         }
     },
     // Trigrams
     S1_POS_S0_POS_B0_POS("s1_pos=%s:s0_pos=%s:b0_pos=%s") {
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(
-                    stack[1].getAttribute(Token.Attribute.CPOSTAG),
-                    stack[0].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[0].getAttribute(Token.Attribute.CPOSTAG)
-            );
+            return this.applyFormat(stack[1].postag, stack[0].postag, buffer[0].postag);
         }
     },
     S0_POS_B0_POS_B1_POS("s0_pos=%s:b0_pos=%s:b1_pos=%s") {
-
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(
-                    stack[0].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[0].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[1].getAttribute(Token.Attribute.CPOSTAG)
-            );
+            return this.applyFormat(stack[0].postag, buffer[0].postag, buffer[1].postag);
         }
     },
     B0_POS_B1_POS_B2_POS("b0_pos=%s:b1_pos=%s:b2_pos=%s") {
-
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(
-                    buffer[0].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[1].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[2].getAttribute(Token.Attribute.CPOSTAG)
-            );
+            return this.applyFormat(buffer[0].postag, buffer[1].postag, buffer[2].postag);
         }
     },
     B1_POS_B2_POS_B3_POS("b1_pos=%s:b2_pos=%s:b3_pos=%s") {
-
         @Override
         protected String generate(Token[] stack, Token[] buffer) {
-            return this.applyFormat(
-                    buffer[1].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[2].getAttribute(Token.Attribute.CPOSTAG),
-                    buffer[3].getAttribute(Token.Attribute.CPOSTAG)
-            );
+            return this.applyFormat(buffer[1].postag, buffer[2].postag, buffer[3].postag);
         }
     };
 

@@ -17,7 +17,7 @@ public class Trainer extends Parser {
     private Parser parser;
     private Sentence[] sentences;
     Map<Sentence.ID, List<Tuple<State, Action>>> goldTransitions = new LinkedHashMap<>();
-    Map<Sentence.ID, Set<Tuple<Integer, Integer>>> goldArcSets = new LinkedHashMap<>();
+    Map<Sentence.ID, Set<Arc>> goldArcSets = new LinkedHashMap<>();
 
     public Trainer(Sentence[] sentences) {
         setSentences(sentences);
@@ -48,23 +48,23 @@ public class Trainer extends Parser {
         public void exec() {
             for (Sentence sentence : sentences) {
                 List<Tuple<State, Action>> golds = goldTransitions.get(sentence.id);
-                Set<Tuple<Integer, Integer>> goldArcSet = goldArcSets.get(sentence.id);
+                Set<Arc> goldArcSet = goldArcSets.get(sentence.id);
                 if (golds == null) {
                     golds = getGoldTransition(sentence);
                     goldTransitions.put(sentence.id, golds);
-                    goldArcSet = getArc();
+                    goldArcSet = getArcSet();
                     goldArcSets.put(sentence.id, goldArcSet);
                 }
-                Logger.info(sentence);
+                Logger.info("[%05d] %s", sentence.id.getValue(), sentence);
 
                 Sentence output = parser.parse(sentence);
                 List<Tuple<State, Action>> predicts = parser.getTransiaions();
-                Set<Tuple<Integer, Integer>> predictArcSet = parser.getArc();
+                Set<Arc> predictArcSet = parser.getArcSet();
 
-                // Logger.trace(new DepTree(sentence));
-                // Logger.trace(new DepTree(output));
                 Logger.trace(goldArcSet);
                 Logger.trace(predictArcSet);
+                // Logger.trace(new DepTree(sentence));
+                // Logger.trace(new DepTree(output));
 
                 Map<Action, Map<Feature.Index, Double>> weights = parser.getWeights();
                 weights = Perceptron.update(weights, golds, predicts);
@@ -92,12 +92,12 @@ public class Trainer extends Parser {
 
     private List<Tuple<State, Action>> getGoldTransition(Sentence sentence) {
         reset(sentence.tokens);
-        State state = new State(stack, buffer);
+        State state = new State(stack, buffer, arcSet);
         while (buffer.size() > 0) {
             Action action = getGoldAction(state);
             action.exec(this);
             transitions.add(new Tuple<>(state, action));
-            state = new State(stack, buffer);
+            state = new State(stack, buffer, arcSet);
         }
         transitions.add(new Tuple<State, Action>(state, null));
         return transitions;

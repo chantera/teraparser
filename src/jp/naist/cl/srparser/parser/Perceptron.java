@@ -6,6 +6,7 @@ import jp.naist.cl.srparser.parser.Parser.Action;
 import jp.naist.cl.srparser.parser.Parser.State;
 import jp.naist.cl.srparser.util.Tuple;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * @author Hiroki Teranishi
  */
 public class Perceptron implements Classifier {
-    public Action classify(Index[] featureIndexes, Map<Action, Map<Index, Double>> weights, List<Action> options) {
+    public Action classify(Index[] featureIndexes, Map<Action, Map<Index, Double>> weights, Collection<Action> options) {
         double bestScore = -1.0;
         Action bestAction = Action.SHIFT;
         for (Action option : options) {

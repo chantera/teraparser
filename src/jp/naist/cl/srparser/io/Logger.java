@@ -108,10 +108,17 @@ public class Logger {
         String time = DateUtils.getCurrentDateTimeString(TIME_FORMAT);
         String level = loglevel.getLabel();
         String output = logFormat;
-        output = output.replaceAll("%\\(time\\)", time);
-        output = output.replaceAll("%\\(accessid\\)", accessId);
-        output = output.replaceAll("%\\(level\\)", level);
-        output = output.replaceAll("%\\(message\\)", message);
+        try {
+            output = output.replace("%(time)", time);
+            output = output.replace("%(accessid)", accessId);
+            output = output.replace("%(level)", level);
+            output = output.replace("%(message)", message);
+        } catch (Exception e) {
+            error(e.getMessage());
+            printLog(LogLevel.ERROR, "---- original message begin ----");
+            printLog(LogLevel.ERROR, message);
+            printLog(LogLevel.ERROR, "---- original message end   ----");
+        }
         return output;
     }
 
