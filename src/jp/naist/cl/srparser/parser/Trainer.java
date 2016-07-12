@@ -36,6 +36,8 @@ public class Trainer extends Parser {
     public class Training implements Iterator<Training> {
         private final int iteration;
         private int current = 1;
+        private Map<Sentence.ID, Set<Arc>> arcSets;
+
 
         public Training(int iteration) {
             this.iteration = iteration;
@@ -45,7 +47,16 @@ public class Trainer extends Parser {
             return current;
         }
 
+        public Map<Sentence.ID, Set<Arc>> getGoldArcSets() {
+            return goldArcSets;
+        }
+
+        public Map<Sentence.ID, Set<Arc>> getArcSets() {
+            return arcSets;
+        }
+
         public void exec() {
+            arcSets = new LinkedHashMap<>();
             for (Sentence sentence : sentences) {
                 List<Tuple<State, Action>> golds = goldTransitions.get(sentence.id);
                 Set<Arc> goldArcSet = goldArcSets.get(sentence.id);
@@ -65,6 +76,7 @@ public class Trainer extends Parser {
                 Logger.trace(predictArcSet);
                 // Logger.trace(new DepTree(sentence));
                 // Logger.trace(new DepTree(output));
+                arcSets.put(sentence.id, predictArcSet);
 
                 Map<Action, Map<Feature.Index, Double>> weights = parser.getWeights();
                 weights = Perceptron.update(weights, golds, predicts);

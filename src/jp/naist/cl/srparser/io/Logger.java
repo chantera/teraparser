@@ -13,7 +13,7 @@ import java.io.StringWriter;
  * @author Hiroki Teranishi
  */
 public class Logger {
-    public final static String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.S z";
+    public final static String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     public final static String DEFAULT_LOG_FORMAT = "%(time)\t%(accessid)\t[%(level)]\t%(message)";
     public final static String DEFAULT_FILE_FORMAT = "yyyy-MM-dd";
     private static Logger instance = null;

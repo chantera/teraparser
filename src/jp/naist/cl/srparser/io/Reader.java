@@ -19,7 +19,7 @@ public abstract class Reader implements LineParser {
     protected boolean isBOF;
     protected boolean isEOF;
 
-    public Sentence[] read(String filepath) {
+    public Sentence[] read(String filepath) throws IOException {
         ArrayList<Sentence> sentences = new ArrayList<>();
         isBOF = false;
         isEOF = false;
@@ -40,10 +40,12 @@ public abstract class Reader implements LineParser {
                     isBOF = false;
                 }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            throw t;
+        // } catch (FileNotFoundException e) {
+        //     e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
         }
         return sentences.toArray(new Sentence[sentences.size()]);
     }
