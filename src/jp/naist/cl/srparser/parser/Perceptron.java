@@ -27,6 +27,29 @@ public class Perceptron implements Classifier {
         return bestAction;
     }
 
+    /*
+    public static int[][] update(int[][] weights, State gold, State predict) {
+        while (!predict.isInitial()) {
+            Action predictAction = predict.prevAction;
+            if (predict.step > gold.step) {
+                decrease(weights[predictAction.index], predict.features);
+                predict = predict.prevState;
+            } else if (predict.step < gold.step) {
+                gold = gold.prevState;
+            } else {
+                Action goldAction = gold.prevAction;
+                if (predictAction != goldAction) {
+                    decrease(weights[predictAction.index], predict.features);
+                    increase(weights[goldAction.index], gold.features);
+                }
+                predict = predict.prevState;
+                gold = gold.prevState;
+            }
+        }
+        return weights;
+    }
+    */
+
     public static int[][] update(int[][] weights, List<Tuple<State, Action>> golds, List<Tuple<State, Action>> predicts) {
         for (int i = 0; i < predicts.size() - 1; i++) {
             Action predictAction = predicts.get(i).getRight();

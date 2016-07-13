@@ -2,11 +2,13 @@ package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.io.ConllReader;
 import jp.naist.cl.srparser.io.Logger;
+import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.DepTree;
+import jp.naist.cl.srparser.parser.Action;
 import jp.naist.cl.srparser.parser.Parser;
+import jp.naist.cl.srparser.parser.Perceptron;
 import jp.naist.cl.srparser.parser.Trainer;
-import jp.naist.cl.srparser.parser.Trainer.Training;
 
 /**
  * jp.naist.cl.srparser.app
@@ -47,12 +49,13 @@ public final class App {
     private void run() {
         try {
             Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
-            Parser parser = new Parser();
+            int[][] weights = new int[Action.SIZE][Feature.SIZE];
+            Parser parser = new Parser(weights, new Perceptron());
             for (Sentence sentence : sentences) {
                 Logger.trace(sentence.toString());
-                Sentence parsed = parser.parse(sentence);
-                Logger.trace(new DepTree(sentence));
-                Logger.trace(new DepTree(parsed));
+                parser.parse(sentence);
+                // Logger.trace(new DepTree(sentence));
+                // Logger.trace(new DepTree(parsed));
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -63,13 +66,15 @@ public final class App {
         try {
             Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
             Trainer trainer = new Trainer(sentences);
-            Training training = trainer.getIterator(Config.getInt(Config.Key.ITERATION));
-            while (training.hasNext()) {
-                Logger.info("Iteration: %d", training.getCurrentIteration());
-                training.exec();
-                training = training.next();
-                double uas = Evaluator.calcUAS(training.getGoldArcSets(), training.getArcSets());
-                Logger.info("UAS: %1.6f", uas);
+            int iteration = Config.getInt(Config.Key.ITERATION);
+            for (int i = 1; i <= iteration; i++) {
+                Logger.info("Iteration: %d", i);
+                trainer.train((gold, pred) -> {
+                    Logger.info(gold);
+                    Logger.info(pred);
+                    double uas = Evaluator.calcUAS(gold, pred);
+                    Logger.info("UAS: %1.6f", uas);
+                });
                 Logger.info("================");
             }
         } catch (Exception e) {

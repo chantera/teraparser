@@ -69,7 +69,7 @@ public class Config {
         protected DebugArgs() {
             super.logLevel = Logger.LogLevel.DEBUG;
             super.verbose = true;
-            super.iteration = 100;
+            super.iteration = 20;
             super.trainingFile = "/Users/hiroki/Desktop/NLP/work/data/wsj_23.dev.conll";
         }
     }

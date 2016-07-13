@@ -1,12 +1,16 @@
 package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.io.Logger;
-import jp.naist.cl.srparser.model.DepTree;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
+import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.Tuple;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -14,104 +18,75 @@ import java.util.*;
  * @author Hiroki Teranishi
  */
 public class Trainer extends Parser {
-    private Parser parser;
     private Sentence[] sentences;
-    Map<Sentence.ID, List<Tuple<State, Action>>> goldTransitions = new LinkedHashMap<>();
-    Map<Sentence.ID, Set<Arc>> goldArcSets = new LinkedHashMap<>();
+    private Map<Sentence.ID, Set<Arc>> goldArcSets = new LinkedHashMap<>();
+    // private Map<Sentence.ID, State> goldState = new LinkedHashMap<>();
+    private Map<Sentence.ID, List<Tuple<State, Action>>> goldTransitions = new LinkedHashMap<>();
 
     public Trainer(Sentence[] sentences) {
-        setSentences(sentences);
-    }
-
-    public void setSentences(Sentence[] sentences) {
-        parser = new Parser();
-        parser.setClassifier(new Perceptron());
+        super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
         this.sentences = sentences;
+        for (Sentence sentence : sentences) {
+            goldArcSets.put(sentence.id, parseGold(sentence));
+            // goldState.put(sentence.id, state);
+            goldTransitions.put(sentence.id, transitions);
+        }
+        setWeights(new int[Action.SIZE][Feature.SIZE]);
     }
 
-    public Training getIterator(int iteration) {
-        return new Training(iteration);
+    public void train() {
+        train(null);
     }
 
-    public class Training implements Iterator<Training> {
-        private final int iteration;
-        private int current = 1;
-        private Map<Sentence.ID, Set<Arc>> arcSets;
-
-
-        public Training(int iteration) {
-            this.iteration = iteration;
-        }
-
-        public int getCurrentIteration() {
-            return current;
-        }
-
-        public Map<Sentence.ID, Set<Arc>> getGoldArcSets() {
-            return goldArcSets;
-        }
-
-        public Map<Sentence.ID, Set<Arc>> getArcSets() {
-            return arcSets;
-        }
-
-        public void exec() {
-            arcSets = new LinkedHashMap<>();
-            for (Sentence sentence : sentences) {
-                List<Tuple<State, Action>> golds = goldTransitions.get(sentence.id);
-                Set<Arc> goldArcSet = goldArcSets.get(sentence.id);
-                if (golds == null) {
-                    golds = getGoldTransition(sentence);
-                    goldTransitions.put(sentence.id, golds);
-                    goldArcSet = getArcSet();
-                    goldArcSets.put(sentence.id, goldArcSet);
-                }
-                Logger.info("[%05d] %s", sentence.id.getValue(), sentence);
-
-                Sentence output = parser.parse(sentence);
-                List<Tuple<State, Action>> predicts = parser.getTransiaions();
-                Set<Arc> predictArcSet = parser.getArcSet();
-
-                Logger.trace(goldArcSet);
-                Logger.trace(predictArcSet);
-                // Logger.trace(new DepTree(sentence));
-                // Logger.trace(new DepTree(output));
-                arcSets.put(sentence.id, predictArcSet);
-
-                int[][] weights = parser.getWeights();
-                weights = Perceptron.update(weights, golds, predicts);
-                parser.setWeights(weights);
+    public void train(TrainCallback callback) {
+        Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
+        for (Sentence sentence : sentences) {
+            predArcSets.put(sentence.id, parse(sentence));
+            // setWeights(Perceptron.update(weights, goldState.get(sentence.id), state));
+            for (Tuple<State, Action> v : goldTransitions.get(sentence.id)) {
             }
+            setWeights(Perceptron.update(weights, goldTransitions.get(sentence.id), transitions));
         }
-
-        @Override
-        public boolean hasNext() {
-            return current < iteration;
+        if (callback != null) {
+            callback.accept(goldArcSets, predArcSets);
         }
-
-        @Override
-        public Training next() {
-            if (hasNext()) {
-                current++;
-                return this;
-            }
-            return null;
-        }
-
-        @Override
-        public void remove() {}
     }
 
-    private List<Tuple<State, Action>> getGoldTransition(Sentence sentence) {
+    private Set<Arc> parseGold(Sentence sentence) {
         reset(sentence.tokens);
-        State state = new State(stack, buffer, arcSet);
-        while (buffer.size() > 0) {
+        while (!state.isTerminal()) {
             Action action = getGoldAction(state);
             action.apply(stack, buffer, arcSet);
             transitions.add(new Tuple<>(state, action));
-            state = new State(stack, buffer, arcSet);
+            state = State.from(state, action).createNext(stack, buffer, arcSet);
         }
         transitions.add(new Tuple<>(state, null));
-        return transitions;
+        return arcSet;
     }
+
+    private Action getGoldAction(State state) {
+        Set<Action> actions = state.nextActions;
+        Token sToken = state.stackTop;
+        Token bToken = state.bufferHead;
+        if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
+            return Action.LEFT;
+        } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
+            return Action.RIGHT;
+        } else if (actions.contains(Action.REDUCE)) {
+            Boolean valid = true;
+            for (Token token : buffer) {
+                // check if all dependents of sToken have already been attached
+                if (token.head == sToken.id && !arcSet.contains(new Arc(sToken.id, token.id))) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) {
+                return Action.REDUCE;
+            }
+        }
+        return Action.SHIFT;
+    }
+
+    public interface TrainCallback extends BiConsumer<Map<Sentence.ID, Set<Arc>>, Map<Sentence.ID, Set<Arc>>> {}
 }
