@@ -1,13 +1,10 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
-import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -20,16 +17,14 @@ import java.util.function.BiConsumer;
 public class Trainer extends Parser {
     private Sentence[] sentences;
     private Map<Sentence.ID, Set<Arc>> goldArcSets = new LinkedHashMap<>();
-    // private Map<Sentence.ID, State> goldState = new LinkedHashMap<>();
-    private Map<Sentence.ID, List<Tuple<State, Action>>> goldTransitions = new LinkedHashMap<>();
+    private Map<Sentence.ID, State> goldState = new LinkedHashMap<>();
 
     public Trainer(Sentence[] sentences) {
         super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
         this.sentences = sentences;
         for (Sentence sentence : sentences) {
             goldArcSets.put(sentence.id, parseGold(sentence));
-            // goldState.put(sentence.id, state);
-            goldTransitions.put(sentence.id, transitions);
+            goldState.put(sentence.id, state);
         }
         setWeights(new int[Action.SIZE][Feature.SIZE]);
     }
@@ -42,10 +37,7 @@ public class Trainer extends Parser {
         Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
         for (Sentence sentence : sentences) {
             predArcSets.put(sentence.id, parse(sentence));
-            // setWeights(Perceptron.update(weights, goldState.get(sentence.id), state));
-            for (Tuple<State, Action> v : goldTransitions.get(sentence.id)) {
-            }
-            setWeights(Perceptron.update(weights, goldTransitions.get(sentence.id), transitions));
+            setWeights(Perceptron.update(weights, goldState.get(sentence.id), state));
         }
         if (callback != null) {
             callback.accept(goldArcSets, predArcSets);
@@ -57,10 +49,8 @@ public class Trainer extends Parser {
         while (!state.isTerminal()) {
             Action action = getGoldAction(state);
             action.apply(stack, buffer, arcSet);
-            transitions.add(new Tuple<>(state, action));
             state = State.from(state, action).createNext(stack, buffer, arcSet);
         }
-        transitions.add(new Tuple<>(state, null));
         return arcSet;
     }
 

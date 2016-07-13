@@ -2,12 +2,10 @@ package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
-import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,8 +19,6 @@ public class Parser extends AbstractParser {
     protected Set<Arc> arcSet;
     protected State state;
 
-    protected List<Tuple<State, Action>> transitions;
-
     public Parser(int[][] weights, Classifier classifier) {
         super(weights);
         setClassifier(classifier);
@@ -32,7 +28,6 @@ public class Parser extends AbstractParser {
         stack  = new LinkedList<>();
         buffer = new LinkedList<>(Arrays.asList(tokens));
         arcSet = new LinkedHashSet<>();
-        transitions = new LinkedList<>();
         Action.SHIFT.apply(stack, buffer, arcSet);
         state  = new State(stack, buffer, arcSet);
     }
@@ -43,10 +38,8 @@ public class Parser extends AbstractParser {
         while (!state.isTerminal()) {
             Action action = getNextAction(state);
             action.apply(stack, buffer, arcSet);
-            transitions.add(new Tuple<>(state, action));
             state = State.from(state, action).createNext(stack, buffer, arcSet);
         }
-        transitions.add(new Tuple<>(state, null));
         return arcSet;
     }
 

@@ -3,7 +3,6 @@ package jp.naist.cl.srparser.parser;
 import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -27,39 +26,21 @@ public class Perceptron implements Classifier {
         return bestAction;
     }
 
-    /*
     public static int[][] update(int[][] weights, State gold, State predict) {
         while (!predict.isInitial()) {
             Action predictAction = predict.prevAction;
             if (predict.step > gold.step) {
-                decrease(weights[predictAction.index], predict.features);
                 predict = predict.prevState;
+                decrease(weights[predictAction.index], predict.features);
             } else if (predict.step < gold.step) {
                 gold = gold.prevState;
             } else {
                 Action goldAction = gold.prevAction;
+                predict = predict.prevState;
+                gold = gold.prevState;
                 if (predictAction != goldAction) {
                     decrease(weights[predictAction.index], predict.features);
                     increase(weights[goldAction.index], gold.features);
-                }
-                predict = predict.prevState;
-                gold = gold.prevState;
-            }
-        }
-        return weights;
-    }
-    */
-
-    public static int[][] update(int[][] weights, List<Tuple<State, Action>> golds, List<Tuple<State, Action>> predicts) {
-        for (int i = 0; i < predicts.size() - 1; i++) {
-            Action predictAction = predicts.get(i).getRight();
-            if (i >= golds.size() - 1) {
-                decrease(weights[predictAction.index], predicts.get(i).getLeft().features);
-            } else {
-                Action goldAction = golds.get(i).getRight();
-                if (predictAction != goldAction) {
-                    decrease(weights[predictAction.index], predicts.get(i).getLeft().features);
-                    increase(weights[goldAction.index], golds.get(i).getLeft().features);
                 }
             }
         }
