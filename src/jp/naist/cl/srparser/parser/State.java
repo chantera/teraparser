@@ -15,7 +15,7 @@ public class State {
     public final LinkedList<Token> stack;
     public final LinkedList<Token> buffer;
     public final Set<Arc> arcSet;
-    public final Feature.Index[] features;
+    public final int[] features;
 
     public State(final LinkedList<Token> stack, final LinkedList<Token> buffer, final Set<Arc> arcSet) {
         this.stack = stack;

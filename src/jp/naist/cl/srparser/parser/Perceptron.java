@@ -1,6 +1,5 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.model.Feature.Index;
 import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.Collection;
@@ -12,17 +11,17 @@ import java.util.List;
  * @author Hiroki Teranishi
  */
 public class Perceptron implements Classifier {
-    public Action classify(Index[] featureIndexes, int[][] weights, Collection<Action> options) {
+    public Action classify(int[] featureIndexes, int[][] weights, Collection<Action> actions) {
         double bestScore = -1.0;
         Action bestAction = Action.SHIFT;
-        for (Action option : options) {
+        for (Action action : actions) {
             double score = 0.0;
-            for (Index index : featureIndexes) {
-                score += weights[option.index][index.getValue()];
+            for (int feature : featureIndexes) {
+                score += weights[action.index][feature];
             }
             if (score > bestScore) {
                 bestScore = score;
-                bestAction = option;
+                bestAction = action;
             }
         }
         return bestAction;
@@ -44,17 +43,17 @@ public class Perceptron implements Classifier {
         return weights;
     }
 
-    public static void decrease(int[] weight, Index[] featureIndexes) {
+    public static void decrease(int[] weight, int[] featureIndexes) {
         updateWeight(weight, featureIndexes, -1);
     }
 
-    public static void increase(int[] weight, Index[] featureIndexes) {
+    public static void increase(int[] weight, int[] featureIndexes) {
         updateWeight(weight, featureIndexes, 1);
     }
 
-    public static void updateWeight(int[] weight, Index[] featureIndexes, int value) {
-        for (Index index : featureIndexes) {
-            weight[index.getValue()] += value;
+    public static void updateWeight(int[] weight, int[] featureIndexes, int value) {
+        for (int feature : featureIndexes) {
+            weight[feature] += value;
         }
     }
 }

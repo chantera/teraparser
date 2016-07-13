@@ -57,8 +57,4 @@ public class StringUtils {
         }
         return buf.toString();
     }
-
-    public static String generateHexId() {
-        return UUID.randomUUID().toString().substring(0, 6);
-    }
 }

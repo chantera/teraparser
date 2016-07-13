@@ -10,5 +10,5 @@ import java.util.Collection;
  * @author Hiroki Teranishi
  */
 public interface Classifier {
-    public Action classify(Feature.Index[] featureIndexes, int[][] weights, Collection<Action> options);
+    public Action classify(int[] featureIndexes, int[][] weights, Collection<Action> actions);
 }

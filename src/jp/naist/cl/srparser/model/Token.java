@@ -1,7 +1,10 @@
 package jp.naist.cl.srparser.model;
 
-import java.util.EnumMap;
-import java.util.Map;
+import jp.naist.cl.srparser.util.Tuple;
+
+import java.util.LinkedList;
+import java.util.List;
+
 
 /**
  * jp.naist.cl.srparser.model
@@ -9,42 +12,77 @@ import java.util.Map;
  * @author Hiroki Teranishi
  */
 public class Token implements Cloneable {
+    private static List<Tuple<Attribute, String>> attributeRegistry = new LinkedList<>();
+
     public final int id;
-    public final String form;
-    public final String lemma;
-    public final String cpostag;
-    public final String postag;
-    public final String feats;
+    public final int form;
+    // public final int lemma;
+    // public final int cpostag;
+    public final int postag;
+    // public final int feats;
     public final int head;
-    public final String deprel;
-    public final String phead;
-    public final String pdeprel;
+    public final int deprel;
+    // public final int phead;
+    // public final int pdeprel;
+
+    private static int registerAttribute(Attribute name, String value) {
+        Tuple<Attribute, String> attribute = new Tuple<>(name, value);
+        int index = attributeRegistry.indexOf(attribute);
+        if (index == -1) {
+            synchronized (Token.class) {
+                index = attributeRegistry.size();
+                attributeRegistry.add(attribute);
+            }
+        }
+        return index;
+    }
+
+    private static String getAttribute(int index) {
+        Tuple<Attribute, String> attribute = attributeRegistry.get(index);
+        if (attribute == null) {
+            return null;
+        }
+        return attribute.getRight();
+    }
+
+    public enum Attribute {
+        ID,
+        FORM,
+        // LEMMA,
+        // CPOSTAG,
+        POSTAG,
+        // FEATS,
+        HEAD,
+        DEPREL;
+        // PHEAD,
+        // PDEPREL;
+    }
 
     public Token(String attributes[]) {
-        this.id = Integer.parseInt(attributes[0]);
-        this.form = attributes[1];
-        this.lemma = attributes[2];
-        this.cpostag = attributes[3];
-        this.postag = attributes[4];
-        this.feats = attributes[5];
-        this.head = Integer.parseInt(attributes[6]);
-        this.deprel = attributes[7];
-        this.phead = attributes[8];
-        this.pdeprel = attributes[9];
+        this.id      = Integer.parseInt(attributes[0]);
+        this.form    = registerAttribute(Attribute.FORM,    attributes[1]);
+        // this.lemma   = registerAttribute(Attribute.LEMMA,   attributes[2]);
+        // this.cpostag = registerAttribute(Attribute.CPOSTAG, attributes[3]);
+        this.postag  = registerAttribute(Attribute.POSTAG,  attributes[4]);
+        // this.feats   = registerAttribute(Attribute.FEATS,   attributes[5]);
+        this.head    = Integer.parseInt(attributes[6]);
+        this.deprel  = registerAttribute(Attribute.DEPREL,  attributes[7]);
+        // this.phead   = registerAttribute(Attribute.PHEAD,   attributes[8]);
+        // this.pdeprel = registerAttribute(Attribute.PDEPEL,  attributes[9]);
     }
 
     private Token(int head, Token token) {
-        this.head = head;
-        token = token.clone();
-        this.id = token.id;
-        this.form = token.form;
-        this.lemma = token.lemma;
-        this.cpostag = token.cpostag;
-        this.postag = token.postag;
-        this.feats = token.feats;
-        this.deprel = token.deprel;
-        this.phead = token.phead;
-        this.pdeprel = token.pdeprel;
+        this.head    = head;
+        token        = token.clone();
+        this.id      = token.id;
+        this.form    = token.form;
+        // this.lemma   = token.lemma;
+        // this.cpostag = token.cpostag;
+        this.postag  = token.postag;
+        // this.feats   = token.feats;
+        this.deprel  = token.deprel;
+        // this.phead   = token.phead;
+        // this.pdeprel = token.pdeprel;
     }
 
     @Override
@@ -86,11 +124,11 @@ public class Token implements Cloneable {
         return this.id == 0;
     }
 
-    public static Token createNull() {
+    public static Token createPad() {
         String[] attributes = {
             "-10",    // ID
-            "<NULL>", // FORM
-            "<NULL>", // LEMMA
+            "<PAD>",  // FORM
+            "<PAD>",  // LEMMA
             "NULL",   // CPOSTAG
             "NULL",   // POSTAG
             "",       // FEATS
@@ -104,6 +142,6 @@ public class Token implements Cloneable {
 
     @Override
     public String toString() {
-        return form;
+        return getAttribute(form);
     }
 }

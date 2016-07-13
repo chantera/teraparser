@@ -1,11 +1,10 @@
 package jp.naist.cl.srparser.model;
 
-import jp.naist.cl.srparser.util.AbstractIntVO;
+import jp.naist.cl.srparser.util.HashUtils;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * jp.naist.cl.srparser.model
@@ -13,60 +12,73 @@ import java.util.Map;
  * @author Hiroki Teranishi
  */
 public class Feature {
-    private static Feature instance = null;
-    // private Map<Sentence.ID, Index[]> registry = new LinkedHashMap<>();
-    private Map<String, Index> indexes = new HashMap<>();
+    public static final int SIZE = (int) Math.pow(2, 23);
 
-    private Feature() {}
+    public static int[] extract(List<Token> stack, List<Token> buffer) {
+        int stackSize  = stack.size();
+        int bufferSize = buffer.size();
+        Token pad = Token.createPad();
+        Token s0 = stackSize > 0 ? stack.get(stackSize - 1) : pad;
+        Token s1 = stackSize > 1 ? stack.get(stackSize - 2) : pad;
+        Token b0 = bufferSize > 0 ? buffer.get(0) : pad;
+        Token b1 = bufferSize > 1 ? buffer.get(1) : pad;
+        Token b2 = bufferSize > 2 ? buffer.get(2) : pad;
+        Token b3 = bufferSize > 3 ? buffer.get(3) : pad;
 
-    public static Feature getInstance() {
-        if (instance == null) {
-            instance = new Feature();
-        }
-        return instance;
+        int[] features = {
+            Template.generate(Template.S0_POS.hash,               s0.postag                      ),
+            Template.generate(Template.S1_POS.hash,               s1.postag                      ),
+            Template.generate(Template.B0_POS.hash,               b0.postag                      ),
+            Template.generate(Template.B1_POS.hash,               b1.postag                      ),
+            Template.generate(Template.B2_POS.hash,               b2.postag                      ),
+            Template.generate(Template.B3_POS.hash,               b3.postag                      ),
+            Template.generate(Template.S0_FORM.hash,              s0.form                        ),
+            Template.generate(Template.B0_FORM.hash,              b0.form                        ),
+            Template.generate(Template.B1_FORM.hash,              b1.form                        ),
+            Template.generate(Template.S0_POS_B0_POS.hash,        s0.postag, b0.postag           ),
+            Template.generate(Template.S1_POS_S0_POS_B0_POS.hash, s1.postag, s0.postag, b0.postag),
+            Template.generate(Template.S0_POS_B0_POS_B1_POS.hash, s0.postag, b0.postag, b1.postag),
+            Template.generate(Template.B0_POS_B1_POS_B2_POS.hash, b0.postag, b1.postag, b2.postag),
+            Template.generate(Template.B1_POS_B2_POS_B3_POS.hash, b1.postag, b2.postag, b3.postag)
+        };
+        return features;
     }
 
-    public static final class Index extends AbstractIntVO {
-        public Index(int value) {
-            super(value);
+    private enum Template {
+        // Unigrams
+        S0_POS("s0p"),
+        S1_POS("s1p"),
+        B0_POS("b0p"),
+        B1_POS("b1p"),
+        B2_POS("b2p"),
+        B3_POS("b3p"),
+        S0_FORM("s0f"),
+        B0_FORM("b0f"),
+        B1_FORM("b1f"),
+        // Bigrams
+        S0_POS_B0_POS("s0p:b0p"),
+        // Trigrams
+        S1_POS_S0_POS_B0_POS("s1p:s0p:b0p"),
+        S0_POS_B0_POS_B1_POS("s0p:b0p:b1p"),
+        B0_POS_B1_POS_B2_POS("b0p:b1p:b2p"),
+        B1_POS_B2_POS_B3_POS("b1p:b2p:b3p");
+
+        private final String label;
+        private final int hash;
+
+        private Template(String label) {
+            this.label = label;
+            this.hash = label.hashCode();
         }
-    }
 
-    /*
-    public static Index[] getIndexes(Sentence.ID sentenceId) {
-        return getInstance().registry.get(sentenceId);
-    }
-
-    public static Map<Index, Double> get(Sentence.ID sentenceId) {
-        Index[] indexes = getInstance().registry.get(sentenceId);
-        if (indexes == null || indexes.length == 0) {
-            return null;
+        private int create(int... attributes) {
+            int[] key = IntStream.concat(IntStream.of(hash), Arrays.stream(attributes)).toArray();
+            return generate(key);
         }
-        Map<Index, Double> values = new LinkedHashMap<>();
-        for (Index index : indexes) {
-            values.put(index, values.get(index));
+
+        private static int generate(int... key) {
+            int hash = HashUtils.oneAtATimeHash(key);
+            return Math.abs(hash) % SIZE;
         }
-        return values;
-    }
-    */
-
-    public static Index[] extract(final List<Token> stack, final List<Token> buffer) {
-        Map<String, Index> thisIndexes = getInstance().indexes;
-        String[] features = FeatureTemplate.generateAll(stack, buffer);
-        Index[] indexes = new Index[features.length];
-
-        for (int i = 0; i < features.length; i++) {
-            Index index = thisIndexes.get(features[i]);
-            if (index == null) {
-                thisIndexes.put(features[i], new Index(thisIndexes.size()));
-                index = thisIndexes.get(features[i]);
-            }
-            indexes[i] = index;
-        }
-        return indexes;
-    }
-
-    public static int getSize() {
-        return getInstance().indexes.size();
     }
 }

@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.parser;
 
+import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.Tuple;
@@ -13,8 +14,6 @@ import java.util.*;
  * @author Hiroki Teranishi
  */
 public class Parser {
-    private final int WEIGHT_SIZE = (int) Math.pow(2, 23);
-
     private Classifier classifier;
     protected Token[] tokens;
     protected LinkedList<Token> stack;
@@ -31,7 +30,7 @@ public class Parser {
 
     public Parser(int[][] weights) {
         if (weights == null) {
-            weights = new int[Action.SIZE][WEIGHT_SIZE];
+            weights = new int[Action.SIZE][Feature.SIZE];
         }
         this.weights = weights;
     }

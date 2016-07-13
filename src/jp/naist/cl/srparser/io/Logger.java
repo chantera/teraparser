@@ -1,6 +1,7 @@
 package jp.naist.cl.srparser.io;
 
 import jp.naist.cl.srparser.util.DateUtils;
+import jp.naist.cl.srparser.util.HashUtils;
 import jp.naist.cl.srparser.util.StringUtils;
 import jp.naist.cl.srparser.util.Tuple;
 
@@ -70,7 +71,7 @@ public class Logger {
 
     private Logger(Builder builder) {
         this.accessUnixTime = DateUtils.getTimeInMillis();
-        this.accessId = StringUtils.generateHexId();
+        this.accessId = HashUtils.generateHexId();
         this.accessTime = DateUtils.getDateTimeString(TIME_FORMAT, accessUnixTime);
         this.logLevel = builder.logLevel;
         this.verbose = builder.verbose;
