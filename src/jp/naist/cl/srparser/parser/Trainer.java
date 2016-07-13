@@ -44,6 +44,16 @@ public class Trainer extends Parser {
         }
     }
 
+    public void test(TrainCallback callback) {
+        Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
+        for (Sentence sentence : sentences) {
+            predArcSets.put(sentence.id, parse(sentence));
+        }
+        if (callback != null) {
+            callback.accept(goldArcSets, predArcSets);
+        }
+    }
+
     private Set<Arc> parseGold(Sentence sentence) {
         reset(sentence.tokens);
         while (!state.isTerminal()) {

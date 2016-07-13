@@ -13,10 +13,12 @@ public class Config {
     private final boolean verbose;
     private final Integer iteration;
     private final String trainingFile;
+    private final String developmentFile;
 
     public enum Key {
         ITERATION,
-        TRAINING_FILE;
+        TRAINING_FILE,
+        DEVELOPMENT_FILE;
     }
 
     private static <T> T get(Key key) {
@@ -27,6 +29,8 @@ public class Config {
             return (T) instance.iteration;
         } else if (key == Key.TRAINING_FILE) {
             return (T) instance.trainingFile;
+        } else if (key == Key.DEVELOPMENT_FILE) {
+            return (T) instance.developmentFile;
         }
         throw new IllegalArgumentException("Error: " + key + ": Config does not have such a key");
     }
@@ -44,6 +48,7 @@ public class Config {
         verbose = args.verbose;
         iteration = args.iteration;
         trainingFile = args.trainingFile;
+        developmentFile = args.developmentFile;
 
         new Logger.Builder()
                 .setLogLevel(logLevel)
@@ -70,7 +75,10 @@ public class Config {
             super.logLevel = Logger.LogLevel.DEBUG;
             super.verbose = true;
             super.iteration = 20;
-            super.trainingFile = "/Users/hiroki/Desktop/NLP/work/data/wsj_23.dev.conll";
+            super.trainingFile = "/Users/hiroki/Desktop/NLP/work/data/penn_conll/wsj_02.conll";
+            super.developmentFile = "/Users/hiroki/Desktop/NLP/work/data/wsj_23.dev.conll";
+            // super.trainingFile = "/Users/hiroki/Desktop/NLP/work/data/wsj_02-21.conll";
+            // super.developmentFile = "/Users/hiroki/Desktop/NLP/work/data/penn_conll/wsj_22.conll";
         }
     }
 
@@ -79,5 +87,6 @@ public class Config {
         private boolean verbose;
         private int iteration;
         private String trainingFile;
+        private String developmentFile;
     }
 }

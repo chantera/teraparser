@@ -66,10 +66,19 @@ public final class App {
         try {
             Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
             Trainer trainer = new Trainer(sentences);
+            Sentence[] devSentences = (new ConllReader()).read(Config.getString(Config.Key.DEVELOPMENT_FILE));
+            Trainer tester = new Trainer(devSentences);
             int iteration = Config.getInt(Config.Key.ITERATION);
             for (int i = 1; i <= iteration; i++) {
                 Logger.info("Iteration: %d", i);
                 trainer.train((gold, pred) -> {
+                    Logger.info(gold);
+                    Logger.info(pred);
+                    double uas = Evaluator.calcUAS(gold, pred);
+                    Logger.info("UAS: %1.6f", uas);
+                });
+                tester.setWeights(trainer.getWeights());
+                tester.test((gold, pred) -> {
                     Logger.info(gold);
                     Logger.info(pred);
                     double uas = Evaluator.calcUAS(gold, pred);
