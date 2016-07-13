@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Hiroki Teranishi
  */
 public enum Action {
-    LEFT {
+    LEFT(0) {
         @Override
         protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
             Token head = buffer.get(0);
@@ -29,7 +29,7 @@ public enum Action {
             return null;
         }
     },
-    RIGHT {
+    RIGHT(1) {
         @Override
         protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
             Token head = stack.get(stack.size() - 1);
@@ -46,7 +46,7 @@ public enum Action {
             return null;
         }
     },
-    SHIFT {
+    SHIFT(2) {
         @Override
         protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
             stack.add(buffer.remove(0));
@@ -58,7 +58,7 @@ public enum Action {
             return null;
         }
     },
-    REDUCE {
+    REDUCE(3) {
         @Override
         protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
             stack.remove(stack.size() - 1);
@@ -70,6 +70,13 @@ public enum Action {
             return null;
         }
     };
+
+    public final int index;
+    public static int SIZE = values().length;
+
+    Action(int index) {
+        this.index = index;
+    }
 
     protected abstract State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet);
 

@@ -1,14 +1,10 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.model.Feature;
-import jp.naist.cl.srparser.model.Feature.Index;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.stream.Stream;
 
 
 /**
@@ -17,7 +13,7 @@ import java.util.stream.Stream;
  * @author Hiroki Teranishi
  */
 public class Parser {
-    private final int WEIGHT_SIZE = 2 ^ 23;
+    private final int WEIGHT_SIZE = (int) Math.pow(2, 23);
 
     private Classifier classifier;
     protected Token[] tokens;
@@ -25,7 +21,7 @@ public class Parser {
     protected LinkedList<Token> buffer;
     protected Set<Arc> arcSet;
     protected LinkedList<Token> output;
-    private Map<Action, Map<Index, Double>> weights;
+    private int[][] weights;
 
     protected List<Tuple<State, Action>> transitions;
 
@@ -33,12 +29,9 @@ public class Parser {
         this(null);
     }
 
-    public Parser(Map<Action, Map<Index, Double>> weights) {
+    public Parser(int[][] weights) {
         if (weights == null) {
-            weights = new EnumMap<>(Action.class);
-            for (Action action : Action.values()) {
-                weights.put(action, new LinkedHashMap<>(WEIGHT_SIZE));
-            }
+            weights = new int[Action.SIZE][WEIGHT_SIZE];
         }
         this.weights = weights;
     }
@@ -51,11 +44,11 @@ public class Parser {
         return transitions;
     }
 
-    public Map<Action, Map<Index, Double>> getWeights() {
+    public int[][] getWeights() {
         return weights;
     }
 
-    public void setWeights(Map<Action, Map<Index, Double>> weights) {
+    public void setWeights(int[][] weights) {
         this.weights = weights;
     }
 

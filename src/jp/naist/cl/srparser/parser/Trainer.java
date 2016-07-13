@@ -78,7 +78,7 @@ public class Trainer extends Parser {
                 // Logger.trace(new DepTree(output));
                 arcSets.put(sentence.id, predictArcSet);
 
-                Map<Action, Map<Feature.Index, Double>> weights = parser.getWeights();
+                int[][] weights = parser.getWeights();
                 weights = Perceptron.update(weights, golds, predicts);
                 parser.setWeights(weights);
             }
