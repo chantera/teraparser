@@ -188,9 +188,9 @@ public class Parser {
         if (stack.size() == 0 || buffer.size() == 0) {
             throw new IllegalStateException("Transition.LEFT: stack and buffer must not be empty.");
         }
-        Token modifier = buffer.getFirst();
-        Token dependent = Token.clone(stack.removeLast(), modifier.id);
-        arcSet.add(new Arc(modifier.id, dependent.id));
+        Token head = buffer.getFirst();
+        Token dependent = Token.clone(stack.removeLast(), head.id);
+        arcSet.add(new Arc(head.id, dependent.id));
         output.add(dependent);
     }
 
@@ -198,10 +198,10 @@ public class Parser {
         if (stack.size() == 0 || buffer.size() == 0) {
             throw new IllegalStateException("Transition.RIGHT: stack and buffer must not be empty.");
         }
-        Token modifier = stack.getLast();
-        Token dependent = Token.clone(buffer.removeFirst(), modifier.id);
+        Token head = stack.getLast();
+        Token dependent = Token.clone(buffer.removeFirst(), head.id);
         stack.add(dependent);
-        arcSet.add(new Arc(modifier.id, dependent.id));
+        arcSet.add(new Arc(head.id, dependent.id));
         output.add(dependent);
     }
 
