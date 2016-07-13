@@ -107,11 +107,11 @@ public class Trainer extends Parser {
         State state = new State(stack, buffer, arcSet);
         while (buffer.size() > 0) {
             Action action = getGoldAction(state);
-            action.exec(this);
+            action.apply(stack, buffer, arcSet);
             transitions.add(new Tuple<>(state, action));
             state = new State(stack, buffer, arcSet);
         }
-        transitions.add(new Tuple<State, Action>(state, null));
+        transitions.add(new Tuple<>(state, null));
         return transitions;
     }
 }

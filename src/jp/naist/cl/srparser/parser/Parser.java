@@ -6,14 +6,9 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.Tuple;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 
 /**
@@ -22,6 +17,8 @@ import java.util.Set;
  * @author Hiroki Teranishi
  */
 public class Parser {
+    private final int WEIGHT_SIZE = 2 ^ 23;
+
     private Classifier classifier;
     protected Token[] tokens;
     protected LinkedList<Token> stack;
@@ -40,7 +37,7 @@ public class Parser {
         if (weights == null) {
             weights = new EnumMap<>(Action.class);
             for (Action action : Action.values()) {
-                weights.put(action, new LinkedHashMap<Index, Double>());
+                weights.put(action, new LinkedHashMap<>(WEIGHT_SIZE));
             }
         }
         this.weights = weights;
@@ -73,7 +70,7 @@ public class Parser {
         arcSet = new LinkedHashSet<>();
         output = new LinkedList<>();
         transitions = new LinkedList<>();
-        Action.SHIFT.exec(this);
+        Action.SHIFT.apply(stack, buffer, arcSet);
     }
 
     public Sentence parse(Sentence sentence) {
@@ -84,29 +81,15 @@ public class Parser {
         State state = new State(stack, buffer, arcSet);
         while (buffer.size() > 0) {
             Action action = getNextAction(state);
-            action.exec(this);
+            action.apply(stack, buffer, arcSet);
             transitions.add(new Tuple<>(state, action));
             state = new State(stack, buffer, arcSet);
         }
-        transitions.add(new Tuple<State, Action>(state, null));
+        transitions.add(new Tuple<>(state, null));
         return new Sentence(sentence.id.getValue(), output.toArray(new Token[output.size()]));
     }
 
     protected Action getNextAction(State state) {
-        /*
-        if (state.stack.size() == 0) {
-            // throw new IllegalStateException("Initial State: stack is empty.");
-            return Action.SHIFT;
-        } else if (state.buffer.size() == 0) {
-            throw new IllegalStateException("Terminal State: buffer is empty.");
-        }
-        List<Action> actions = new ArrayList<>();
-        if (!state.stack.getLast().isRoot()) {
-            actions.add(Action.LEFT);
-        }
-        actions.add(Action.RIGHT);
-        actions.add(Action.SHIFT);
-        */
         Set<Action> actions = getPossibleAction(state);
         if (actions.size() == 0) {
             throw new IllegalStateException("Any action is not permitted.");
@@ -117,13 +100,6 @@ public class Parser {
     }
 
     protected Action getGoldAction(State state) {
-        /*
-        if (state.stack.size() == 0) {
-            return Action.SHIFT;
-        } else if (state.buffer.size() == 0) {
-            throw new IllegalStateException("Terminal State: buffer is empty.");
-        }
-        */
         Set<Action> actions = getPossibleAction(state);
 
         Token sToken = state.stack.getLast();
@@ -149,144 +125,6 @@ public class Parser {
     }
 
     private Set<Action> getPossibleAction(State state) {
-        return getPossibleAction(state.stack, state.buffer, state.arcSet);
-    }
-
-    private Set<Action> getPossibleAction(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
-        Set<Action> actions = new LinkedHashSet<>();
-        if (buffer.size() == 0) {
-            return actions;
-        }
-        int stackSize = stack.size();
-        if (stackSize > 0) {
-            boolean canLeft = true;
-            boolean canReduce = false;
-            Token sLast = stack.getLast();
-            if (sLast.isRoot()) {
-                canLeft = false;
-            }
-            for (Arc arc : arcSet) {
-                if (sLast.id == arc.dependent) {
-                    canLeft = false;
-                    canReduce = true;
-                    break;
-                }
-            }
-            if (canLeft) {
-                actions.add(Action.LEFT);
-            }
-            actions.add(Action.RIGHT);
-            if (canReduce) {
-                actions.add(Action.REDUCE);
-            }
-        }
-        actions.add(Action.SHIFT);
-        return actions;
-    }
-
-    private void left() {
-        if (stack.size() == 0 || buffer.size() == 0) {
-            throw new IllegalStateException("Transition.LEFT: stack and buffer must not be empty.");
-        }
-        Token head = buffer.getFirst();
-        Token dependent = Token.clone(stack.removeLast(), head.id);
-        arcSet.add(new Arc(head.id, dependent.id));
-        output.add(dependent);
-    }
-
-    private void right() {
-        if (stack.size() == 0 || buffer.size() == 0) {
-            throw new IllegalStateException("Transition.RIGHT: stack and buffer must not be empty.");
-        }
-        Token head = stack.getLast();
-        Token dependent = Token.clone(buffer.removeFirst(), head.id);
-        stack.add(dependent);
-        arcSet.add(new Arc(head.id, dependent.id));
-        output.add(dependent);
-    }
-
-    private void shift() {
-        if (buffer.size() == 0) {
-            throw new IllegalStateException("Transition.SHIFT: buffer must not be empty.");
-        }
-        stack.add(buffer.removeFirst());
-    }
-
-    private void reduce() {
-        /*
-        if (stack.size() == 0 || buffer.size() == 0) {
-            throw new IllegalStateException("Transition.REDUCE: stack and buffer must not be empty.");
-        } else if () {
-
-        }
-        */
-        stack.removeLast();
-    }
-
-    private void extendWeightSize(int size) {
-        int weightSize = weights.get(Action.LEFT).size();
-        if (weightSize < size) {
-            for (Action action : Action.values()) {
-                Map<Index, Double> weight = weights.get(action);
-                for (int i = weightSize; i < size + 100; i++) {
-                    weight.put(new Index(i), 0.0);
-                }
-                weights.put(action, weight);
-            }
-        }
-    }
-
-    public class Arc extends Tuple<Integer, Integer> {
-        private final int head;
-        private final int dependent;
-
-        public Arc(Integer head, Integer dependent) {
-            super(head, dependent);
-            this.head = super.left;
-            this.dependent = super.right;
-        }
-    }
-
-    public class State {
-        public final LinkedList<Token> stack;
-        public final LinkedList<Token> buffer;
-        public final Set<Arc> arcSet;
-        public final Index[] features;
-
-        public State(final LinkedList<Token> stack, final LinkedList<Token> buffer, final Set<Arc> arcSet) {
-            this.stack = stack;
-            this.buffer = buffer;
-            this.arcSet = arcSet;
-            this.features = Feature.extract(stack, buffer);
-            extendWeightSize(Feature.getSize());
-        }
-    }
-
-    protected enum Action {
-        LEFT {
-            @Override
-            protected void exec(Parser parser) {
-                parser.left();
-            }
-        },
-        RIGHT {
-            @Override
-            protected void exec(Parser parser) {
-                parser.right();
-            }
-        },
-        SHIFT {
-            @Override
-            protected void exec(Parser parser) {
-                parser.shift();
-            }
-        },
-        REDUCE {
-            @Override
-            protected void exec(Parser parser) {
-                parser.reduce();
-            }
-        };
-        protected abstract void exec(Parser parser);
+        return Action.getActions(state.stack, state.buffer, state.arcSet);
     }
 }

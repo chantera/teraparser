@@ -11,5 +11,5 @@ import java.util.Map;
  * @author Hiroki Teranishi
  */
 public interface Classifier {
-    public Parser.Action classify(Feature.Index[] featureIndexes, Map<Parser.Action, Map<Feature.Index, Double>> weights, Collection<Parser.Action> options);
+    public Action classify(Feature.Index[] featureIndexes, Map<Action, Map<Feature.Index, Double>> weights, Collection<Action> options);
 }

@@ -1,9 +1,6 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Feature.Index;
-import jp.naist.cl.srparser.parser.Parser.Action;
-import jp.naist.cl.srparser.parser.Parser.State;
 import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.Collection;
@@ -23,7 +20,7 @@ public class Perceptron implements Classifier {
             double score = 0.0;
             Map<Index, Double> weight = weights.get(option);
             for (Index index : featureIndexes) {
-                score += weight.get(index);
+                score += weight.getOrDefault(index, 0.0);
             }
             if (score > bestScore) {
                 bestScore = score;
@@ -70,7 +67,7 @@ public class Perceptron implements Classifier {
 
     public static Map<Index, Double> updateWeight(Map<Index, Double> weight, Index[] featureIndexes, double value) {
         for (Index index : featureIndexes) {
-            weight.put(index, weight.get(index) + value);
+            weight.put(index, weight.getOrDefault(index, 0.0) + value);
         }
         return weight;
     }
