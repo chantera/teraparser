@@ -81,13 +81,16 @@ public final class App {
                     double uas = Evaluator.calcUAS(gold, pred);
                     Logger.info("UAS: %1.6f", uas);
                 });
-                tester.setWeights(trainer.getWeights());
-                tester.test((gold, pred) -> {
-                    Logger.info(gold);
-                    Logger.info(pred);
-                    double uas = Evaluator.calcUAS(gold, pred);
-                    Logger.info("UAS: %1.6f", uas);
-                });
+                if (i % 10 == 0) {
+                    Logger.info("===== test =====");
+                    tester.setWeights(trainer.getWeights());
+                    tester.test((gold, pred) -> {
+                        Logger.info(gold);
+                        Logger.info(pred);
+                        double uas = Evaluator.calcUAS(gold, pred);
+                        Logger.info("UAS: %1.6f", uas);
+                    });
+                }
                 Logger.info("================");
             }
         } catch (Exception e) {

@@ -15,14 +15,6 @@ import java.util.Set;
 public enum Action {
     LEFT(0) {
         @Override
-        protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
-            Token head = buffer.get(0);
-            Token dependent = stack.remove(stack.size() - 1);
-            arcSet.add(new Arc(head.id, dependent.id));
-            return null;
-        }
-
-        @Override
         protected State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
             Token head = buffer.getFirst();
             Token dependent = stack.removeLast();
@@ -31,14 +23,6 @@ public enum Action {
         }
     },
     RIGHT(1) {
-        @Override
-        protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
-            Token head = stack.get(stack.size() - 1);
-            Token dependent = buffer.remove(0);
-            arcSet.add(new Arc(head.id, dependent.id));
-            return null;
-        }
-
         @Override
         protected State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
             Token head = stack.getLast();
@@ -50,24 +34,12 @@ public enum Action {
     },
     SHIFT(2) {
         @Override
-        protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
-            stack.add(buffer.remove(0));
-            return null;
-        }
-
-        @Override
         protected State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
             stack.add(buffer.removeFirst());
             return null;
         }
     },
     REDUCE(3) {
-        @Override
-        protected State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
-            stack.remove(stack.size() - 1);
-            return null;
-        }
-
         @Override
         protected State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
             stack.removeLast();
@@ -82,41 +54,7 @@ public enum Action {
         this.index = index;
     }
 
-    protected abstract State apply(List<Token> stack, List<Token> buffer, Set<Arc> arcSet);
-
     protected abstract State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet);
-
-    protected static Set<Action> getActions(List<Token> stack, List<Token> buffer, Set<Arc> arcSet) {
-        Set<Action> actions = new LinkedHashSet<>();
-        if (buffer.size() == 0) {
-            return actions;
-        }
-        int stackSize = stack.size();
-        if (stackSize > 0) {
-            boolean canLeft = true;
-            boolean canReduce = false;
-            Token sLast = stack.get(stackSize - 1);
-            if (sLast.isRoot()) {
-                canLeft = false;
-            }
-            for (Arc arc : arcSet) {
-                if (sLast.id == arc.dependent) {
-                    canLeft = false;
-                    canReduce = true;
-                    break;
-                }
-            }
-            if (canLeft) {
-                actions.add(Action.LEFT);
-            }
-            actions.add(Action.RIGHT);
-            if (canReduce) {
-                actions.add(Action.REDUCE);
-            }
-        }
-        actions.add(Action.SHIFT);
-        return actions;
-    }
 
     protected static Set<Action> getActions(State state, Set<Arc> arcSet) {
         Set<Action> actions = new LinkedHashSet<>();
