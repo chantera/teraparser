@@ -23,10 +23,7 @@ public class Trainer extends Parser {
     public Trainer(Sentence[] sentences) {
         super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
         this.sentences = sentences;
-        int length = sentences.length;
-        int i = 0;
         for (Sentence sentence : sentences) {
-            Logger.info("Extracting gold data: %d / %d", ++i, length);
             goldArcSets.put(sentence.id, parseGold(sentence));
         }
         setWeights(new int[Action.SIZE][Feature.SIZE]);
@@ -38,7 +35,10 @@ public class Trainer extends Parser {
 
     public void train(TrainCallback callback) {
         Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
+        int length = sentences.length;
+        int i = 0;
         for (Sentence sentence : sentences) {
+            Logger.info("Training: %d / %d", ++i, length);
             predArcSets.put(sentence.id, parse(sentence));
             setWeights(Perceptron.update(weights, state));
         }
