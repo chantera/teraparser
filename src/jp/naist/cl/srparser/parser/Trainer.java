@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.parser;
 
+import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
@@ -22,7 +23,10 @@ public class Trainer extends Parser {
     public Trainer(Sentence[] sentences) {
         super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
         this.sentences = sentences;
+        int length = sentences.length;
+        int i = 0;
         for (Sentence sentence : sentences) {
+            Logger.info("Extracting gold data: %d / %d", ++i, length);
             goldArcSets.put(sentence.id, parseGold(sentence));
             goldState.put(sentence.id, state);
         }
@@ -57,35 +61,10 @@ public class Trainer extends Parser {
     private Set<Arc> parseGold(Sentence sentence) {
         reset(sentence.tokens);
         while (!state.isTerminal()) {
-            Action action = getGoldAction(state);
-            action.apply(stack, buffer, arcSet);
-            state = State.from(state, action).createNext(stack, buffer, arcSet);
+            state.goldAction.apply(stack, buffer, arcSet);
+            state = State.from(state, state.goldAction).createNext(stack, buffer, arcSet);
         }
         return arcSet;
-    }
-
-    private Action getGoldAction(State state) {
-        Set<Action> actions = state.nextActions;
-        Token sToken = state.stackTop;
-        Token bToken = state.bufferHead;
-        if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
-            return Action.LEFT;
-        } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
-            return Action.RIGHT;
-        } else if (actions.contains(Action.REDUCE)) {
-            Boolean valid = true;
-            for (Token token : buffer) {
-                // check if all dependents of sToken have already been attached
-                if (token.head == sToken.id && !arcSet.contains(new Arc(sToken.id, token.id))) {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid) {
-                return Action.REDUCE;
-            }
-        }
-        return Action.SHIFT;
     }
 
     public interface TrainCallback extends BiConsumer<Map<Sentence.ID, Set<Arc>>, Map<Sentence.ID, Set<Arc>>> {}

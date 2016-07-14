@@ -21,6 +21,7 @@ public class State {
     public final Set<Action> nextActions;
     public final State prevState;
     public final Action prevAction;
+    public final Action goldAction;
 
     public State(final List<Token> stack, final List<Token> buffer, final Set<Arc> arcSet) {
         this(stack, buffer, arcSet, null, null);
@@ -47,7 +48,8 @@ public class State {
             }
         }
         features = Feature.extract(stack, buffer);
-        nextActions = Action.getActions(stack, buffer, arcSet);
+        nextActions = Action.getActions(this, arcSet);
+        goldAction = Action.getGoldAction(this, buffer, arcSet);
     }
 
     public Boolean isInitial() {

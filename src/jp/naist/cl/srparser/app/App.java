@@ -64,9 +64,13 @@ public final class App {
 
     private void train() {
         try {
+            Logger.info("Reading training samples from %s ...", Config.getString(Config.Key.TRAINING_FILE));
             Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
+            Logger.info("training sample size %d", sentences.length);
             Trainer trainer = new Trainer(sentences);
+            Logger.info("Reading development samples from %s ...", Config.getString(Config.Key.DEVELOPMENT_FILE));
             Sentence[] devSentences = (new ConllReader()).read(Config.getString(Config.Key.DEVELOPMENT_FILE));
+            Logger.info("development sample size %d", sentences.length);
             Trainer tester = new Trainer(devSentences);
             int iteration = Config.getInt(Config.Key.ITERATION);
             for (int i = 1; i <= iteration; i++) {
