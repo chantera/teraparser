@@ -2,10 +2,7 @@ package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.model.Token;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -21,6 +18,23 @@ public enum Action {
             arcSet.add(new Arc(head.id, dependent.id));
             return null;
         }
+
+        /**
+         * Left
+         * (s|i, j|b, A) => (s, j|b, A+(j,l,i))
+         */
+        @Override
+        protected State apply(State state) {
+            ArrayDeque<Integer> stack = state.stack.clone();
+            Token head = state.getBufferHeadToken();
+            Token dependent = state.tokens[stack.pop()];
+            return new State(state, this, new Arc(head.id, dependent.id), stack, state.bufferHead);
+        }
+
+        // @Override
+        protected Boolean applicable(State state) {
+            return !state.isTerminal();
+        }
     },
     RIGHT(1) {
         @Override
@@ -31,6 +45,19 @@ public enum Action {
             arcSet.add(new Arc(head.id, dependent.id));
             return null;
         }
+
+        /**
+         * Right
+         * (s|i, j|b, A) => (s|ij, b, A+(i,l,j))
+         */
+        @Override
+        protected State apply(State state) {
+            ArrayDeque<Integer> stack = state.stack.clone();
+            Token head = state.getStackTopToken();
+            Token dependent = state.getBufferHeadToken();
+            stack.push(state.bufferHead);
+            return new State(state, this, new Arc(head.id, dependent.id), stack, state.bufferHead + 1);
+        }
     },
     SHIFT(2) {
         @Override
@@ -38,12 +65,34 @@ public enum Action {
             stack.add(buffer.removeFirst());
             return null;
         }
+
+        /**
+         * Shift
+         * (s, i|b, A) => (s|i, b, A)
+         */
+        @Override
+        protected State apply(State state) {
+            ArrayDeque<Integer> stack = state.stack.clone();
+            stack.push(state.bufferHead);
+            return new State(state, this, null, stack, state.bufferHead + 1);
+        }
     },
     REDUCE(3) {
         @Override
         protected State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet) {
             stack.removeLast();
             return null;
+        }
+
+        /**
+         * Reduce
+         * (s|i, b, A) => (s, b, A)
+         */
+        @Override
+        protected State apply(State state) {
+            ArrayDeque<Integer> stack = state.stack.clone();
+            stack.pop();
+            return new State(state, this, null, stack, state.bufferHead);
         }
     };
 
@@ -56,23 +105,34 @@ public enum Action {
 
     protected abstract State apply(LinkedList<Token> stack, LinkedList<Token> buffer, Set<Arc> arcSet);
 
-    protected static Set<Action> getActions(State state, Set<Arc> arcSet) {
-        Set<Action> actions = new LinkedHashSet<>();
-        if (state.bufferHead == null) {
+    protected abstract State apply(State state);
+
+    //protected abstract Boolean applicable(State state);
+
+    protected static Set<Action> getPossibleActions(State state) {
+        Set<Action> actions = new HashSet<>();
+        if (state.isTerminal()) {
             return actions;
         }
-        if (state.stackTop != null) {
+        Token stackTop = state.getStackTopToken();
+        if (state.stack.getFirst() != null) {
             boolean canLeft = true;
-            if (state.stackTop.isRoot()) {
+            if (stackTop.isRoot()) {
                 canLeft = false;
             }
-            for (Arc arc : arcSet) {
-                if (state.stackTop.id == arc.dependent) {
+            if (state.hasArc(stackTop.id)) {
+                canLeft = false;
+                actions.add(Action.REDUCE);
+            }
+            /*
+            for (Arc arc : state.getArcSet()) {
+                if (stackTop.id == arc.dependent) {
                     canLeft = false;
                     actions.add(Action.REDUCE);
                     break;
                 }
             }
+            */
             if (canLeft) {
                 actions.add(Action.LEFT);
             }
@@ -82,6 +142,7 @@ public enum Action {
         return actions;
     }
 
+    /*
     protected static Action getGoldAction(State state, List<Token> buffer, Set<Arc> arcSet) {
         Set<Action> actions = state.nextActions;
         Token sToken = state.stackTop;
@@ -95,6 +156,31 @@ public enum Action {
             for (Token token : buffer) {
                 // check if all dependents of sToken have already been attached
                 if (token.head == sToken.id && !arcSet.contains(new Arc(sToken.id, token.id))) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) {
+                return Action.REDUCE;
+            }
+        }
+        return Action.SHIFT;
+    }
+    */
+
+    protected static Action getGoldAction(State state) {
+        Set<Action> actions = state.possibleActions;
+        Token sToken = state.getStackTopToken();
+        Token bToken = state.getBufferHeadToken();
+        if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
+            return Action.LEFT;
+        } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
+            return Action.RIGHT;
+        } else if (actions.contains(Action.REDUCE)) {
+            Boolean valid = true;
+            for (int i = state.bufferHead; i < state.bufferSize; i++) {
+                // check if all dependents of sToken have already been attached
+                if (state.tokens[i].head == sToken.id) { // && !arcSet.contains(new Arc(sToken.id, token.id))) {
                     valid = false;
                     break;
                 }

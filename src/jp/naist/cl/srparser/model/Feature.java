@@ -1,8 +1,11 @@
 package jp.naist.cl.srparser.model;
 
+import jp.naist.cl.srparser.parser.State;
 import jp.naist.cl.srparser.util.HashUtils;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -40,6 +43,34 @@ public class Feature {
             Template.generate(Template.S0_POS_B0_POS_B1_POS.hash, s0.postag, b0.postag, b1.postag),
             Template.generate(Template.B0_POS_B1_POS_B2_POS.hash, b0.postag, b1.postag, b2.postag),
             Template.generate(Template.B1_POS_B2_POS_B3_POS.hash, b1.postag, b2.postag, b3.postag)
+        };
+        return features;
+    }
+
+    public static int[] extract(State state) {
+        Token pad = Token.createPad();
+        Token s0 = state.getStackTokenOrDefault(0, pad);
+        Token s1 = state.getStackTokenOrDefault(1, pad);
+        Token b0 = state.getBufferTokenOrDefault(0, pad);
+        Token b1 = state.getBufferTokenOrDefault(1, pad);
+        Token b2 = state.getBufferTokenOrDefault(2, pad);
+        Token b3 = state.getBufferTokenOrDefault(3, pad);
+
+        int[] features = {
+                Template.generate(Template.S0_POS.hash,               s0.postag                      ),
+                Template.generate(Template.S1_POS.hash,               s1.postag                      ),
+                Template.generate(Template.B0_POS.hash,               b0.postag                      ),
+                Template.generate(Template.B1_POS.hash,               b1.postag                      ),
+                Template.generate(Template.B2_POS.hash,               b2.postag                      ),
+                Template.generate(Template.B3_POS.hash,               b3.postag                      ),
+                Template.generate(Template.S0_FORM.hash,              s0.form                        ),
+                Template.generate(Template.B0_FORM.hash,              b0.form                        ),
+                Template.generate(Template.B1_FORM.hash,              b1.form                        ),
+                Template.generate(Template.S0_POS_B0_POS.hash,        s0.postag, b0.postag           ),
+                Template.generate(Template.S1_POS_S0_POS_B0_POS.hash, s1.postag, s0.postag, b0.postag),
+                Template.generate(Template.S0_POS_B0_POS_B1_POS.hash, s0.postag, b0.postag, b1.postag),
+                Template.generate(Template.B0_POS_B1_POS_B2_POS.hash, b0.postag, b1.postag, b2.postag),
+                Template.generate(Template.B1_POS_B2_POS_B3_POS.hash, b1.postag, b2.postag, b3.postag)
         };
         return features;
     }

@@ -17,7 +17,7 @@ public abstract class AbstractParser {
         setWeights(weights);
     }
 
-    public abstract Set<Arc> parse(Sentence sentence);
+    public abstract Arc[] parse(Sentence sentence);
 
     public void setClassifier(Classifier classifier) {
         this.classifier = classifier;

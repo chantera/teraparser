@@ -76,8 +76,8 @@ public final class App {
             for (int i = 1; i <= iteration; i++) {
                 Logger.info("Iteration: %d", i);
                 trainer.train((gold, pred) -> {
-                    Logger.info(gold);
-                    Logger.info(pred);
+                    // Logger.info(gold);
+                    // Logger.info(pred);
                     double uas = Evaluator.calcUAS(gold, pred);
                     Logger.info("UAS: %1.6f", uas);
                 });
@@ -85,8 +85,8 @@ public final class App {
                     Logger.info("===== test =====");
                     tester.setWeights(trainer.getWeights());
                     tester.test((gold, pred) -> {
-                        Logger.info(gold);
-                        Logger.info(pred);
+                        // Logger.info(gold);
+                        // Logger.info(pred);
                         double uas = Evaluator.calcUAS(gold, pred);
                         Logger.info("UAS: %1.6f", uas);
                     });

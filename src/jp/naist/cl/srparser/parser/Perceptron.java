@@ -27,10 +27,20 @@ public class Perceptron implements Classifier {
     }
 
     public static int[][] update(int[][] weights, State state) {
+        /*
         while (!state.isInitial()) {
             State prevState = state.prevState;
             if (state.prevAction != prevState.goldAction) {
                 increase(weights[prevState.goldAction.index], prevState.features);
+                decrease(weights[state.prevAction.index], prevState.features);
+            }
+            state = prevState;
+        }
+        */
+        State prevState;
+        while ((prevState = state.prevState) != null) {
+            if (state.prevAction != Action.getGoldAction(prevState)) {
+                increase(weights[Action.getGoldAction(prevState).index], prevState.features);
                 decrease(weights[state.prevAction.index], prevState.features);
             }
             state = prevState;

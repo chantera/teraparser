@@ -37,7 +37,7 @@ public class Token implements Cloneable {
         return index;
     }
 
-    private static String getAttribute(int index) {
+    public static String getAttribute(int index) {
         Tuple<Attribute, String> attribute = attributeRegistry.get(index);
         if (attribute == null) {
             return null;

@@ -14,15 +14,27 @@ import java.util.Set;
  */
 public class Evaluator {
 
-    public static double calcUAS(Map<Sentence.ID, Set<Arc>> goldArcSets, Map<Sentence.ID, Set<Arc>> predictArcSets) {
+    public static double calcUAS(Map<Sentence.ID, Arc[]> goldArcSets, Map<Sentence.ID, Arc[]> predictArcSets) {
         double count = 0;
         double collect = 0;
-        for (Map.Entry<Sentence.ID, Set<Arc>> entry : goldArcSets.entrySet()) {
-            Set<Arc> goldSet = new LinkedHashSet<>(entry.getValue());
-            Set<Arc> predictSet = predictArcSets.get(entry.getKey());
-            count += goldSet.size();
-            goldSet.retainAll(predictSet);
-            collect += goldSet.size();
+        for (Map.Entry<Sentence.ID, Arc[]> entry : goldArcSets.entrySet()) {
+            Arc[] goldSet = entry.getValue();
+            Arc[] predictSet = predictArcSets.get(entry.getKey());
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(entry.getKey());
+            // i = 0 is null since <ROOT> has no arc.
+            for (int i = 1; i < goldSet.length; i++) {
+                stringBuilder.append("\ngold=").append(goldSet[i]);
+                stringBuilder.append("\npredict=").append(predictSet[i]);
+                count++;
+                if (goldSet[i].equals(predictSet[i])) {
+                    collect++;
+                }
+                System.out.println(stringBuilder.toString());
+            }
+            // count += goldSet.length - 1;
+            // goldSet.retainAll(predictSet);
+            // collect += goldSet.size();
         }
         return collect / count;
     }

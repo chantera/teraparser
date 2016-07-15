@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
  */
 public class Trainer extends Parser {
     private Sentence[] sentences;
-    private Map<Sentence.ID, Set<Arc>> goldArcSets = new LinkedHashMap<>();
+    private Map<Sentence.ID, Arc[]> goldArcSets = new LinkedHashMap<>();
 
     public Trainer(Sentence[] sentences) {
         super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
@@ -37,8 +37,12 @@ public class Trainer extends Parser {
     }
 
     public void train(TrainCallback callback) {
-        Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
+        Map<Sentence.ID, Arc[]> predArcSets = new LinkedHashMap<>();
+        int i = 0;
         for (Sentence sentence : sentences) {
+            if (++i % 100 == 0) {
+                System.out.println(i);
+            }
             predArcSets.put(sentence.id, parse(sentence));
             setWeights(Perceptron.update(weights, state));
         }
@@ -48,7 +52,7 @@ public class Trainer extends Parser {
     }
 
     public void test(TrainCallback callback) {
-        Map<Sentence.ID, Set<Arc>> predArcSets = new LinkedHashMap<>();
+        Map<Sentence.ID, Arc[]> predArcSets = new LinkedHashMap<>();
         for (Sentence sentence : sentences) {
             predArcSets.put(sentence.id, parse(sentence));
         }
@@ -57,15 +61,16 @@ public class Trainer extends Parser {
         }
     }
 
-    private Set<Arc> parseGold(Sentence sentence) {
-        Set<Arc> goldArcSet = new LinkedHashSet<>();
+    private Arc[] parseGold(Sentence sentence) {
+        Arc[] goldArcs = new Arc[sentence.tokens.length];
+        int i = 0;
         for (Token token : sentence.tokens) {
             if (!token.isRoot()) {
-                goldArcSet.add(new Arc(token.head, token.id));
+                goldArcs[++i] = new Arc(token.head, token.id);
             }
         }
-        return goldArcSet;
+        return goldArcs;
     }
 
-    public interface TrainCallback extends BiConsumer<Map<Sentence.ID, Set<Arc>>, Map<Sentence.ID, Set<Arc>>> {}
+    public interface TrainCallback extends BiConsumer<Map<Sentence.ID, Arc[]>, Map<Sentence.ID, Arc[]>> {}
 }
