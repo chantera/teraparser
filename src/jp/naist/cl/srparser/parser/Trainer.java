@@ -41,7 +41,7 @@ public class Trainer extends Parser {
         int i = 0;
         for (Sentence sentence : sentences) {
             if (++i % 100 == 0) {
-                System.out.println(i);
+                Logger.info("training: %d of %d ...", i, sentences.length);
             }
             predArcSets.put(sentence.id, parse(sentence));
             setWeights(Perceptron.update(weights, state));

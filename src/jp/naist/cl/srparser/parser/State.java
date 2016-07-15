@@ -101,8 +101,21 @@ public class State {
         return defaultToken;
     }
 
-    public boolean hasArc(int dependent) {
+    public boolean hasHeadArc(int head) {
+        for (Arc arc : arcs) {
+            if (arc.head == head) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasDependentArc(int dependent) {
         return arcs[dependent] != null;
+    }
+
+    public boolean hasArc(int head, int dependent) {
+        return (arcs[dependent] != null) && (arcs[dependent].head == head);
     }
 
     public Token getBufferHeadToken() {

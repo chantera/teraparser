@@ -39,8 +39,8 @@ public class Perceptron implements Classifier {
         */
         State prevState;
         while ((prevState = state.prevState) != null) {
-            if (state.prevAction != Action.getGoldAction(prevState)) {
-                increase(weights[Action.getGoldAction(prevState).index], prevState.features);
+            if (state.prevAction != Oracle.get(prevState)) {
+                increase(weights[Oracle.get(prevState).index], prevState.features);
                 decrease(weights[state.prevAction.index], prevState.features);
             }
             state = prevState;

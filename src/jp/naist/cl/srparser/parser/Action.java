@@ -120,7 +120,7 @@ public enum Action {
             if (stackTop.isRoot()) {
                 canLeft = false;
             }
-            if (state.hasArc(stackTop.id)) {
+            if (state.hasDependentArc(stackTop.id)) {
                 canLeft = false;
                 actions.add(Action.REDUCE);
             }
@@ -168,27 +168,54 @@ public enum Action {
     }
     */
 
-    protected static Action getGoldAction(State state) {
-        Set<Action> actions = state.possibleActions;
-        Token sToken = state.getStackTopToken();
-        Token bToken = state.getBufferHeadToken();
-        if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
-            return Action.LEFT;
-        } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
-            return Action.RIGHT;
-        } else if (actions.contains(Action.REDUCE)) {
-            Boolean valid = true;
-            for (int i = state.bufferHead; i < state.bufferSize; i++) {
-                // check if all dependents of sToken have already been attached
-                if (state.tokens[i].head == sToken.id) { // && !arcSet.contains(new Arc(sToken.id, token.id))) {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid) {
-                return Action.REDUCE;
-            }
-        }
-        return Action.SHIFT;
-    }
+    /**
+     * Standard oracle for arc-eager dependency parsing
+     *
+     * Goldberg, Y., & Nivre, J. (2012).
+     * A Dynamic Oracle for Arc-Eager Dependency Parsing.
+     * Proceedings of the 24th International Conference on Computational Linguistics (COLING), 2(December), 959–976.
+     *
+     * ================ Algorithm ================
+     * 1: if c = (σ|i, j|β,A) and (j, l, i) ∈ A_gold then
+     * 2:     t ← LEFT-ARC_l
+     * 3: else if c = (σ|i, j|β,A) and (i, l, j) ∈ A_gold then
+     * 4:     t ← RIGHT-ARC_l
+     * 5: else if c = (σ|i, j|β,A) and ∃k[k < i ∧ ∃l[(k, l, j) ∈ A_gold ∨ (j, l, k) ∈ A_gold]] then
+     * 6:     t ← REDUCE
+     * 7: else
+     * 8:     t ← SHIFT
+     * 9: return t
+     * -------------------------------------------
+     */
+    // protected static Action getStaticOracle(State state) {
+    //     Set<Action> actions = state.possibleActions;
+    //     Token sToken = state.getStackTopToken();
+    //     Token bToken = state.getBufferHeadToken();
+    //     if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
+    //         return Action.LEFT;
+    //     } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
+    //         return Action.RIGHT;
+    //     } else if (actions.contains(Action.REDUCE)) {
+    //         for (int i = 0; i < state.stack.getFirst(); i++) {
+    //             if (state.hasArc(i, bToken.id) || state.hasArc(bToken.id, i)) {
+    //                 return Action.REDUCE;
+    //             }
+    //         }
+    //         /*
+    //         Boolean valid = true;
+    //         for (int i = state.bufferHead; i < state.bufferSize; i++) {
+    //             // check if all dependents of sToken have already been attached
+    //             if (state.tokens[i].head == sToken.id) { // && !arcSet.contains(new Arc(sToken.id, token.id))) {
+    //                 valid = false;
+    //                 break;
+    //             }
+    //         }
+    //         if (valid) {
+    //             return Action.REDUCE;
+    //         }
+    //         */
+    //     } else {
+    //         return Action.SHIFT;
+    //     }
+    // }
 }

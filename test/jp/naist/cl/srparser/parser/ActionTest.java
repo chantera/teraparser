@@ -94,7 +94,7 @@ public class ActionTest {
         System.out.println(state);
         assertTrue(Token.getAttribute(state.getStackTopToken().form).equals("But"));
         assertTrue(Token.getAttribute(state.getBufferHeadToken().form).equals("the"));
-        assertTrue(state.hasArc(2));
+        assertTrue(state.hasArc(3, 2));
 
         state = Action.SHIFT.apply(state);
         state = Action.SHIFT.apply(state);
@@ -111,7 +111,7 @@ public class ActionTest {
         assertTrue(Token.getAttribute(state.getStackToken(1).form).equals("the"));
         assertTrue(Token.getAttribute(state.getStackTopToken().form).equals("York"));
         assertTrue(Token.getAttribute(state.getBufferHeadToken().form).equals("Stock"));
-        assertTrue(state.hasArc(5));
+        assertTrue(state.hasArc(3, 5));
     }
 
 }
