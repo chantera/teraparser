@@ -1,9 +1,9 @@
 package jp.naist.cl.srparser.model;
 
+import com.google.common.collect.HashBiMap;
 import jp.naist.cl.srparser.util.Tuple;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
 
 
 /**
@@ -12,7 +12,7 @@ import java.util.List;
  * @author Hiroki Teranishi
  */
 public class Token implements Cloneable {
-    private static List<Tuple<Attribute, String>> attributeRegistry = new LinkedList<>();
+    private static HashBiMap<Integer, Tuple<Attribute, String>> attributeRegistry = HashBiMap.create();
 
     public final int id;
     public final int form;
@@ -27,11 +27,11 @@ public class Token implements Cloneable {
 
     private static int registerAttribute(Attribute name, String value) {
         Tuple<Attribute, String> attribute = new Tuple<>(name, value);
-        int index = attributeRegistry.indexOf(attribute);
+        int index = attributeRegistry.inverse().getOrDefault(attribute, -1);
         if (index == -1) {
             synchronized (Token.class) {
                 index = attributeRegistry.size();
-                attributeRegistry.add(attribute);
+                attributeRegistry.put(index, attribute);
             }
         }
         return index;
