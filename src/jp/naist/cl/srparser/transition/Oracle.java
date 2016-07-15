@@ -1,14 +1,13 @@
-package jp.naist.cl.srparser.parser;
+package jp.naist.cl.srparser.transition;
 
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
 /**
- * jp.naist.cl.srparser.parser
+ * jp.naist.cl.srparser.transition
  *
  * @author Hiroki Teranishi
  */
@@ -32,24 +31,6 @@ public class Oracle {
         }
         return state;
     }
-
-    /*
-    public Action[] getActions(Sentence sentence) {
-        Action[] actions = oracleRegistry.getOrDefault(sentence.id, null);
-        if (actions == null) {
-            ArrayList<Action> oracleActions = new ArrayList<>();
-            State state = new State(sentence);
-            while (!state.isTerminal()) {
-                Action action = algorithm.getAction(state);
-                state = action.apply(state);
-                oracleActions.add(action);
-            }
-            actions = oracleActions.toArray(new Action[oracleActions.size()]);
-            oracleRegistry.put(sentence.id, actions);
-        }
-        return actions;
-    }
-    */
 
     public enum Algorithm {
         /**

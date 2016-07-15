@@ -1,6 +1,6 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.model.Feature;
+import jp.naist.cl.srparser.transition.Action;
 
 import java.util.Collection;
 

@@ -3,9 +3,6 @@ package jp.naist.cl.srparser.model;
 import com.google.common.collect.HashBiMap;
 import jp.naist.cl.srparser.util.Tuple;
 
-import java.util.HashMap;
-
-
 /**
  * jp.naist.cl.srparser.model
  *

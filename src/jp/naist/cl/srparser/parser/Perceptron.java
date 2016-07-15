@@ -1,6 +1,7 @@
 package jp.naist.cl.srparser.parser;
 
-import jp.naist.cl.srparser.util.Tuple;
+import jp.naist.cl.srparser.transition.Action;
+import jp.naist.cl.srparser.transition.State;
 
 import java.util.Collection;
 
@@ -10,6 +11,7 @@ import java.util.Collection;
  * @author Hiroki Teranishi
  */
 public class Perceptron implements Classifier {
+
     public Action classify(int[] featureIndexes, int[][] weights, Collection<Action> actions) {
         double bestScore = -1.0;
         Action bestAction = Action.SHIFT;
@@ -26,54 +28,20 @@ public class Perceptron implements Classifier {
         return bestAction;
     }
 
-    public static int[][] update(int[][] weights, State oracle, State predict) {
-        /*
-        while (!state.isInitial()) {
-            State prevState = state.prevState;
-            if (state.prevAction != prevState.goldAction) {
-                increase(weights[prevState.goldAction.index], prevState.features);
-                decrease(weights[state.prevAction.index], prevState.features);
-            }
-            state = prevState;
-        }
-        */
+    static int[][] update(int[][] weights, State oracle, State predict) {
         State prevState;
         while ((prevState = oracle.prevState) != null) {
-            increase(weights[oracle.prevAction.index], prevState.features);
+            updateWeight(weights[oracle.prevAction.index], prevState.features, 1);
             oracle = prevState;
         }
         while ((prevState = predict.prevState) != null) {
-            decrease(weights[predict.prevAction.index], prevState.features);
+            updateWeight(weights[predict.prevAction.index], prevState.features, -1);
             predict = prevState;
         }
         return weights;
     }
 
-    /*
-    public static int[][] update(int[][] weights, Action[] oracleActions, Action[] predictActions) {
-        for ()
-
-        State prevState;
-        while ((prevState = state.prevState) != null) {
-            if (state.prevAction != Oracle.get(prevState)) {
-                increase(weights[Oracle.get(prevState).index], prevState.features);
-                decrease(weights[state.prevAction.index], prevState.features);
-            }
-            state = prevState;
-        }
-        return weights;
-    }
-    */
-
-    public static void decrease(int[] weight, int[] featureIndexes) {
-        updateWeight(weight, featureIndexes, -1);
-    }
-
-    public static void increase(int[] weight, int[] featureIndexes) {
-        updateWeight(weight, featureIndexes, 1);
-    }
-
-    public static void updateWeight(int[] weight, int[] featureIndexes, int value) {
+    private static void updateWeight(int[] weight, int[] featureIndexes, int value) {
         for (int feature : featureIndexes) {
             weight[feature] += value;
         }

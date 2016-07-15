@@ -1,4 +1,4 @@
-package jp.naist.cl.srparser.parser;
+package jp.naist.cl.srparser.transition;
 
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 /**
- * jp.naist.cl.srparser.parser
+ * jp.naist.cl.srparser.transition
  *
  * @author Hiroki Teranishi
  */

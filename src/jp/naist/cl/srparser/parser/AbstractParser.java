@@ -1,8 +1,7 @@
 package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.model.Sentence;
-
-import java.util.Set;
+import jp.naist.cl.srparser.transition.State;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -10,14 +9,14 @@ import java.util.Set;
  * @author Hiroki Teranishi
  */
 public abstract class AbstractParser {
-    protected Classifier classifier;
-    protected int[][] weights;
+    Classifier classifier;
+    int[][] weights;
 
     public AbstractParser(int[][] weights) {
         setWeights(weights);
     }
 
-    public abstract Arc[] parse(Sentence sentence);
+    public abstract State parse(Sentence sentence);
 
     public void setClassifier(Classifier classifier) {
         this.classifier = classifier;

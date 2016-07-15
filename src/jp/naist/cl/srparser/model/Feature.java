@@ -1,11 +1,9 @@
 package jp.naist.cl.srparser.model;
 
-import jp.naist.cl.srparser.parser.State;
+import jp.naist.cl.srparser.transition.State;
 import jp.naist.cl.srparser.util.HashUtils;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.List;
 import java.util.stream.IntStream;
 

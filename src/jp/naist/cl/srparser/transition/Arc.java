@@ -1,9 +1,9 @@
-package jp.naist.cl.srparser.parser;
+package jp.naist.cl.srparser.transition;
 
 import jp.naist.cl.srparser.util.Tuple;
 
 /**
- * jp.naist.cl.srparser.parser
+ * jp.naist.cl.srparser.transition
  *
  * @author Hiroki Teranishi
  */

@@ -1,11 +1,9 @@
 package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.model.Sentence;
-import jp.naist.cl.srparser.parser.Arc;
+import jp.naist.cl.srparser.transition.Arc;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * jp.naist.cl.srparser.app
