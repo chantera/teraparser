@@ -48,7 +48,7 @@ public final class App {
 
     private void run() {
         try {
-            Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
+            Sentence[] sentences = (new ConllReader(Config.getString(Config.Key.TRAINING_FILE))).read();
             int[][] weights = new int[Action.SIZE][Feature.SIZE];
             Parser parser = new Parser(weights, new Perceptron());
             for (Sentence sentence : sentences) {
@@ -65,11 +65,11 @@ public final class App {
     private void train() {
         try {
             Logger.info("Reading training samples from %s ...", Config.getString(Config.Key.TRAINING_FILE));
-            Sentence[] sentences = (new ConllReader()).read(Config.getString(Config.Key.TRAINING_FILE));
+            Sentence[] sentences = new ConllReader(Config.getString(Config.Key.TRAINING_FILE)).read();
             Logger.info("training sample size %d", sentences.length);
             Trainer trainer = new Trainer(sentences);
             Logger.info("Reading development samples from %s ...", Config.getString(Config.Key.DEVELOPMENT_FILE));
-            Sentence[] devSentences = (new ConllReader()).read(Config.getString(Config.Key.DEVELOPMENT_FILE));
+            Sentence[] devSentences = new ConllReader(Config.getString(Config.Key.DEVELOPMENT_FILE)).read();
             Logger.info("development sample size %d", sentences.length);
             Trainer tester = new Trainer(devSentences);
             int iteration = Config.getInt(Config.Key.ITERATION);

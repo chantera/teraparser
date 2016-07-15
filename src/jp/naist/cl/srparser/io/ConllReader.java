@@ -3,8 +3,8 @@ package jp.naist.cl.srparser.io;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * jp.naist.cl.srparser.io
@@ -13,34 +13,34 @@ import java.util.List;
  */
 public class ConllReader extends Reader {
     private static final String DELIMITER = "\t";
-    private static final String SEPARATOR = "";
-    private boolean readingSentence;
-    private List<Token> readingTokens;
-    private int sentenceCount = 0;
+
+    public ConllReader(String filepath) throws FileNotFoundException {
+        super(filepath);
+    }
 
     @Override
-    public Sentence parse(String line) {
-        if (isBOF) {
-            readingSentence = false;
-            readingTokens = new ArrayList<>();
-            readingTokens.add(Token.createRoot());
-        }
-        line = line.trim();
-        if (readingSentence && (line.equals(SEPARATOR) || isEOF)) {
-            Sentence sentence = null;
-            if (readingTokens.size() > 0) {
-                sentenceCount++;
-                sentence = new Sentence(sentenceCount, readingTokens.toArray(new Token[readingTokens.size()]));
-                readingTokens = new ArrayList<>();
-                readingTokens.add(Token.createRoot());
+    public Sentence[] read() throws Exception {
+        ArrayList<Sentence> sentences = new ArrayList<>();
+        ArrayList<Token> tokens = new ArrayList<>();
+        tokens.add(Token.createRoot());
+
+        String line;
+        int sentenceCount = 0;
+        while ((line = fileReader.readLine()) != null) {
+            line = line.trim();
+            if (line.length() == 0 ) {
+                if (tokens.size() > 1) {
+                    sentences.add(new Sentence(++sentenceCount, tokens.toArray(new Token[tokens.size()])));
+                    tokens = new ArrayList<>();
+                    tokens.add(Token.createRoot());
+                }
+            } else {
+                tokens.add(new Token(line.split(DELIMITER)));
             }
-            readingSentence = false;
-            return sentence;
-        } else {
-            readingSentence = true;
         }
-        String[] attributes = line.split(DELIMITER);
-        readingTokens.add(new Token(attributes));
-        return null;
+        if (tokens.size() > 1) {
+            sentences.add(new Sentence(++sentenceCount, tokens.toArray(new Token[tokens.size()])));
+        }
+        return sentences.toArray(new Sentence[sentences.size()]);
     }
 }
