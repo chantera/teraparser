@@ -5,10 +5,9 @@ import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -17,19 +16,30 @@ import java.util.function.BiConsumer;
  * @author Hiroki Teranishi
  */
 public class Trainer extends Parser {
-    private Sentence[] sentences;
-    private Map<Sentence.ID, Arc[]> goldArcSets = new LinkedHashMap<>();
+    private static final int REPORT_PERIOD = 100;
 
-    public Trainer(Sentence[] sentences) {
+    private Sentence[] sentences;
+    private Oracle oracle;
+    private HashMap<Sentence.ID, Arc[]> goldArcSets = new HashMap<>();
+
+    public Trainer(Sentence[] sentences, Oracle oracle) {
         super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
-        this.sentences = sentences;
+        loadGolds(sentences, oracle);
+        setWeights(new int[Action.SIZE][Feature.SIZE]);
+    }
+
+    private void loadGolds(Sentence[] sentences, Oracle oracle) {
         int length = sentences.length;
         int i = 0;
         for (Sentence sentence : sentences) {
-            Logger.info("Extracting gold data: %d / %d", ++i, length);
+            if (++i % REPORT_PERIOD == 0) {
+                Logger.info("Extracting gold data: %d / %d", i, length);
+            }
+            // oracle.getState(sentence); // making cache
             goldArcSets.put(sentence.id, parseGold(sentence));
         }
-        setWeights(new int[Action.SIZE][Feature.SIZE]);
+        this.sentences = sentences;
+        this.oracle = oracle;
     }
 
     public void train() {
@@ -40,11 +50,26 @@ public class Trainer extends Parser {
         Map<Sentence.ID, Arc[]> predArcSets = new LinkedHashMap<>();
         int i = 0;
         for (Sentence sentence : sentences) {
-            if (++i % 100 == 0) {
+            if (++i % REPORT_PERIOD == 0) {
                 Logger.info("training: %d of %d ...", i, sentences.length);
             }
-            predArcSets.put(sentence.id, parse(sentence));
-            setWeights(Perceptron.update(weights, state));
+            //Action[] oracleActions = oracle.getActions(sentence);
+            //List<Action> predictActions = new ArrayList<>();
+            State state = new State(sentence);
+            while (!state.isTerminal()) {
+                Action action = getNextAction(state);
+                state = action.apply(state);
+                //predictActions.add(action);
+            }
+            Arc[] goldArcs = goldArcSets.get(sentence.id);
+            Arc[] predictArcs = state.arcs;
+            for (i = 0; i < predictArcs.length; i++) {
+                if (predictArcs[i] != goldArcs[i]) {
+                    setWeights(Perceptron.update(weights, oracle.getState(sentence), state));
+                    break;
+                }
+            }
+            predArcSets.put(sentence.id, state.arcs);
         }
         if (callback != null) {
             callback.accept(goldArcSets, predArcSets);

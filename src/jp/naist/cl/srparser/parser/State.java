@@ -134,6 +134,15 @@ public class State {
         }
     }
 
+    public Action[] getActions() {
+        Action[] actions = new Action[step];
+        State state = this;
+        do {
+            actions[step - 1] = state.prevAction;
+        } while ((state = state.prevState) != null);
+        return actions;
+    }
+
     /*
     public Set<Arc> getArcSet() {
         Set<Arc> arcSet = new TreeSet<Arc>((Arc a1, Arc a2) -> a1.dependent - a2.dependent);

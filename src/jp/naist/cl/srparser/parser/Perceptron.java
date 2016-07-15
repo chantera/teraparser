@@ -26,7 +26,7 @@ public class Perceptron implements Classifier {
         return bestAction;
     }
 
-    public static int[][] update(int[][] weights, State state) {
+    public static int[][] update(int[][] weights, State oracle, State predict) {
         /*
         while (!state.isInitial()) {
             State prevState = state.prevState;
@@ -38,6 +38,22 @@ public class Perceptron implements Classifier {
         }
         */
         State prevState;
+        while ((prevState = oracle.prevState) != null) {
+            increase(weights[oracle.prevAction.index], prevState.features);
+            oracle = prevState;
+        }
+        while ((prevState = predict.prevState) != null) {
+            decrease(weights[predict.prevAction.index], prevState.features);
+            predict = prevState;
+        }
+        return weights;
+    }
+
+    /*
+    public static int[][] update(int[][] weights, Action[] oracleActions, Action[] predictActions) {
+        for ()
+
+        State prevState;
         while ((prevState = state.prevState) != null) {
             if (state.prevAction != Oracle.get(prevState)) {
                 increase(weights[Oracle.get(prevState).index], prevState.features);
@@ -47,6 +63,7 @@ public class Perceptron implements Classifier {
         }
         return weights;
     }
+    */
 
     public static void decrease(int[] weight, int[] featureIndexes) {
         updateWeight(weight, featureIndexes, -1);

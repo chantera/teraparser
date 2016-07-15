@@ -6,6 +6,7 @@ import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.DepTree;
 import jp.naist.cl.srparser.parser.Action;
+import jp.naist.cl.srparser.parser.Oracle;
 import jp.naist.cl.srparser.parser.Parser;
 import jp.naist.cl.srparser.parser.Perceptron;
 import jp.naist.cl.srparser.parser.Trainer;
@@ -67,11 +68,11 @@ public final class App {
             Logger.info("Reading training samples from %s ...", Config.getString(Config.Key.TRAINING_FILE));
             Sentence[] sentences = new ConllReader(Config.getString(Config.Key.TRAINING_FILE)).read();
             Logger.info("training sample size %d", sentences.length);
-            Trainer trainer = new Trainer(sentences);
+            Trainer trainer = new Trainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
             Logger.info("Reading development samples from %s ...", Config.getString(Config.Key.DEVELOPMENT_FILE));
             Sentence[] devSentences = new ConllReader(Config.getString(Config.Key.DEVELOPMENT_FILE)).read();
             Logger.info("development sample size %d", sentences.length);
-            Trainer tester = new Trainer(devSentences);
+            Trainer tester = new Trainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
             int iteration = Config.getInt(Config.Key.ITERATION);
             for (int i = 1; i <= iteration; i++) {
                 Logger.info("Iteration: %d", i);
