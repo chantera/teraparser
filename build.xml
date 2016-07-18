@@ -192,6 +192,7 @@
       <zipfileset dir="${shiftreduceparser.output.dir}"/>
       <manifest>
         <attribute name="Main-Class" value="jp.naist.cl.srparser.Main" />
+        <attribute name="Class-Path" value="../../../libs/guava-19.0.jar" />
       </manifest>
     </jar>
     <copy file="${temp.jar.path.ShiftReduceParser.jar}" tofile="${artifact.temp.output.shiftreduceparser:jar}/ShiftReduceParser.jar"/>
