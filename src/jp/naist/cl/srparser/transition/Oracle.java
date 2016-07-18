@@ -58,13 +58,13 @@ public class Oracle {
                 Set<Action> actions = state.possibleActions;
                 Token sToken = state.getStackTopToken();
                 Token bToken = state.getBufferHeadToken();
-                if (actions.contains(Action.LEFT) && sToken.head == bToken.id) {
+                if (sToken.head == bToken.id) {
                     return Action.LEFT;
-                } else if (actions.contains(Action.RIGHT) && bToken.head == sToken.id) {
+                } else if (bToken.head == sToken.id) {
                     return Action.RIGHT;
-                } else if (actions.contains(Action.REDUCE)) {
+                } else {
                     for (int i = 0; i < state.stack.getFirst(); i++) {
-                        if (state.hasArc(i, bToken.id) || state.hasArc(bToken.id, i)) {
+                        if (state.tokens[i].head == bToken.id || bToken.head == state.tokens[i].id) {
                             return Action.REDUCE;
                         }
                     }

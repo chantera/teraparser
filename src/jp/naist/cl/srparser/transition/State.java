@@ -134,8 +134,8 @@ public class State {
         Action[] actions = new Action[step];
         State state = this;
         do {
-            actions[step - 1] = state.prevAction;
-        } while ((state = state.prevState) != null);
+            actions[state.step - 1] = state.prevAction;
+        } while ((state = state.prevState) != null && !state.isInitial());
         return actions;
     }
 

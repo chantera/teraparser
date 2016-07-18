@@ -114,4 +114,27 @@ public class ActionTest {
         assertTrue(state.hasArc(3, 5));
     }
 
+    @Test
+    public void oracleTest() {
+        State state = new Oracle(Oracle.Algorithm.STATIC).getState(sentence);
+        System.out.println(state);
+        Action[] actions = state.getActions();
+        Arrays.stream(actions).forEach(action -> System.out.println(action));
+        Arc[] goldArcs = new Arc[sentence.tokens.length];
+        int i = 0;
+        for (Token token : sentence.tokens) {
+            if (!token.isRoot()) {
+                goldArcs[++i] = new Arc(token.head, token.id);
+            }
+        }
+        Arc[] arcs = state.arcs;
+        boolean equal = true;
+        for (i = 1; i < arcs.length; i++) {
+            if (!goldArcs[i].equals(arcs[i])) {
+                equal = false;
+            }
+            System.out.println(goldArcs[i] + " : " + arcs[i]);
+        }
+        assertTrue(equal);
+    }
 }
