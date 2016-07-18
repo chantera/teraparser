@@ -55,7 +55,6 @@ public class Oracle {
         STATIC {
             @Override
             protected Action getAction(State state) {
-                Set<Action> actions = state.possibleActions;
                 Token sToken = state.getStackTopToken();
                 Token bToken = state.getBufferHeadToken();
                 if (sToken.head == bToken.id) {

@@ -89,13 +89,6 @@ public enum Action {
                 canLeft = false;
                 actions.add(Action.REDUCE);
             }
-            for (Arc arc : state.arcs) {
-                if (arc != null && stackTop.id == arc.dependent) {
-                    canLeft = false;
-                    actions.add(Action.REDUCE);
-                    break;
-                }
-            }
             if (canLeft) {
                 actions.add(Action.LEFT);
             }

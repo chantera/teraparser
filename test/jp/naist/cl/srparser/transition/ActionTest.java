@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.transition;
 
+import jp.naist.cl.srparser.io.ConllReader;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import org.junit.After;
@@ -115,25 +116,30 @@ public class ActionTest {
     }
 
     @Test
-    public void oracleTest() {
-        State state = new Oracle(Oracle.Algorithm.STATIC).getState(sentence);
-        System.out.println(state);
-        Action[] actions = state.getActions();
-        Arrays.stream(actions).forEach(action -> System.out.println(action));
-        Arc[] goldArcs = new Arc[sentence.tokens.length];
-        int i = 0;
-        for (Token token : sentence.tokens) {
-            if (!token.isRoot()) {
-                goldArcs[++i] = new Arc(token.head, token.id);
-            }
-        }
-        Arc[] arcs = state.arcs;
+    public void oracleTest() throws Exception {
+        Sentence[] sentences = new ConllReader("/Users/hiroki/Desktop/NLP/data/penn_conll/wsj_02.conll").read();
         boolean equal = true;
-        for (i = 1; i < arcs.length; i++) {
-            if (!goldArcs[i].equals(arcs[i])) {
-                equal = false;
+        sentenceLoop:
+        for (Sentence sentence : sentences) {
+            System.out.println(sentence);
+            State state = new Oracle(Oracle.Algorithm.STATIC).getState(sentence);
+            // System.out.println(state);
+            // Arrays.stream(state.getActions()).forEach(action -> System.out.println(action));
+            Arc[] goldArcs = new Arc[sentence.tokens.length];
+            int i = 0;
+            for (Token token : sentence.tokens) {
+                if (!token.isRoot()) {
+                    goldArcs[++i] = new Arc(token.head, token.id);
+                }
             }
-            System.out.println(goldArcs[i] + " : " + arcs[i]);
+            Arc[] arcs = state.arcs;
+            for (i = 1; i < arcs.length; i++) {
+                if (!goldArcs[i].equals(arcs[i])) {
+                    equal = false;
+                    break sentenceLoop;
+                }
+                System.out.println(goldArcs[i] + " : " + arcs[i]);
+            }
         }
         assertTrue(equal);
     }

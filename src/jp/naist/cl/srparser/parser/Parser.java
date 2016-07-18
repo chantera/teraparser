@@ -1,9 +1,7 @@
 package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.model.Sentence;
-import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.transition.Action;
-import jp.naist.cl.srparser.transition.Arc;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.Set;
