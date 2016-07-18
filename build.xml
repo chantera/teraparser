@@ -59,6 +59,10 @@
   
   <!-- Project Libraries -->
   
+  <path id="library.guava-19.0.classpath">
+    <pathelement location="${basedir}/libs/guava-19.0.jar"/>
+  </path>
+  
   <!-- Modules -->
   
   
@@ -77,19 +81,28 @@
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
-  <path id="shiftreduceparser.module.production.classpath"/>
+  <path id="shiftreduceparser.module.production.classpath">
+    <path refid="library.guava-19.0.classpath"/>
+  </path>
   
   <path id="shiftreduceparser.runtime.production.module.classpath">
     <pathelement location="${shiftreduceparser.output.dir}"/>
+    <path refid="library.guava-19.0.classpath"/>
   </path>
   
   <path id="shiftreduceparser.module.classpath">
     <pathelement location="${shiftreduceparser.output.dir}"/>
+    <pathelement location="${basedir}/libs/hamcrest-core-1.3.jar"/>
+    <pathelement location="${basedir}/libs/junit-4.12.jar"/>
+    <path refid="library.guava-19.0.classpath"/>
   </path>
   
   <path id="shiftreduceparser.runtime.module.classpath">
     <pathelement location="${shiftreduceparser.testoutput.dir}"/>
     <pathelement location="${shiftreduceparser.output.dir}"/>
+    <pathelement location="${basedir}/libs/hamcrest-core-1.3.jar"/>
+    <pathelement location="${basedir}/libs/junit-4.12.jar"/>
+    <path refid="library.guava-19.0.classpath"/>
   </path>
   
   
@@ -104,6 +117,12 @@
   <path id="shiftreduceparser.module.sourcepath">
     <dirset dir="${module.shiftreduceparser.basedir}">
       <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="shiftreduceparser.module.test.sourcepath">
+    <dirset dir="${module.shiftreduceparser.basedir}">
+      <include name="test"/>
     </dirset>
   </path>
   
@@ -128,7 +147,23 @@
     </copy>
   </target>
   
-  <target name="compile.module.shiftreduceparser.tests" depends="compile.module.shiftreduceparser.production" description="compile module ShiftReduceParser; test classes" unless="skip.tests"/>
+  <target name="compile.module.shiftreduceparser.tests" depends="compile.module.shiftreduceparser.production" description="compile module ShiftReduceParser; test classes" unless="skip.tests">
+    <mkdir dir="${shiftreduceparser.testoutput.dir}"/>
+    <javac destdir="${shiftreduceparser.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.shiftreduceparser}"/>
+      <bootclasspath refid="shiftreduceparser.module.bootclasspath"/>
+      <classpath refid="shiftreduceparser.module.classpath"/>
+      <src refid="shiftreduceparser.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.shiftreduceparser"/>
+    </javac>
+    
+    <copy todir="${shiftreduceparser.testoutput.dir}">
+      <fileset dir="${module.shiftreduceparser.basedir}/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
   
   <target name="clean.module.shiftreduceparser" description="cleanup module">
     <delete dir="${shiftreduceparser.output.dir}"/>
