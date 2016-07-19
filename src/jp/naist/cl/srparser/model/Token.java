@@ -137,6 +137,10 @@ public class Token implements Cloneable {
         return new Token(attributes);
     }
 
+    public boolean isPad() {
+        return this.id == -10;
+    }
+
     @Override
     public String toString() {
         return getAttribute(form);

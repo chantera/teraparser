@@ -16,4 +16,12 @@ public class Arc extends Tuple<Integer, Integer> {
         this.head = super.left;
         this.dependent = super.right;
     }
+
+    public boolean isLeft() {
+        return dependent < head;
+    }
+
+    public boolean isRight() {
+        return head < dependent;
+    }
 }

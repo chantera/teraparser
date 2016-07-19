@@ -5,6 +5,7 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Set;
 
 
@@ -19,6 +20,8 @@ public class State {
     final ArrayDeque<Integer> stack;
     final int bufferHead;
     public final Arc[] arcs;
+    final int[] leftmost;
+    final int[] rightmost;
     public final int[] features;
     public final Set<Action> possibleActions;
     public final State prevState;
@@ -33,7 +36,11 @@ public class State {
         this.stack           = new ArrayDeque<>();
         this.stack.push(0);
         this.bufferHead      = 1;
-        this.arcs            = new Arc[tokens.length];
+        this.arcs            = new Arc[tokens.length]; // index: dependent, value: head
+        this.leftmost        = new int[tokens.length]; // index: head, value: leftmost dependent
+        this.rightmost       = new int[tokens.length]; // index: head, value: rightmost dependent
+        Arrays.fill(this.leftmost, Integer.MAX_VALUE);
+        Arrays.fill(this.rightmost, -1);
         this.features        = Feature.extract(this);
         this.possibleActions = Action.getPossibleActions(this);
         this.prevState       = null;
@@ -48,8 +55,23 @@ public class State {
         if (prevArc != null) {
             this.arcs        = prevState.arcs.clone(); // shallow copy, which does not make copies of elements.
             this.arcs[prevArc.dependent] = prevArc;
+            // update leftmost and rightmost.
+            if (prevArc.isLeft() && prevArc.dependent < prevState.leftmost[prevArc.head]) {
+                this.leftmost  = prevState.leftmost.clone();
+                this.leftmost[prevArc.head] = prevArc.dependent;
+                this.rightmost = prevState.rightmost;
+            } else if (prevArc.isRight() && prevArc.dependent > prevState.rightmost[prevArc.head]) {
+                this.rightmost = prevState.rightmost.clone();
+                this.rightmost[prevArc.head] = prevArc.dependent;
+                this.leftmost  = prevState.leftmost;
+            } else {
+                this.leftmost  = prevState.leftmost;
+                this.rightmost = prevState.rightmost;
+            }
         } else {
             this.arcs        = prevState.arcs;         // reference
+            this.leftmost    = prevState.leftmost;
+            this.rightmost   = prevState.rightmost;
         }
         this.features        = Feature.extract(this);
         this.possibleActions = Action.getPossibleActions(this);
@@ -63,6 +85,10 @@ public class State {
 
     public Boolean isTerminal() {
         return bufferHead == tokens.length;
+    }
+
+    public Token getToken(int index) {
+        return tokens[index];
     }
 
     public Token getStackTopToken() {
@@ -113,6 +139,30 @@ public class State {
         }
     }
 
+    public Token getLeftmostToken(int index) {
+        return getLeftmostTokenOrDefault(index, null);
+    }
+
+    public Token getLeftmostTokenOrDefault(int index, Token defaultToken) {
+        try {
+            return tokens[leftmost[index]];
+        } catch (IndexOutOfBoundsException e) {
+            return defaultToken;
+        }
+    }
+
+    public Token getRightmostToken(int index) {
+        return getRightmostTokenOrDefault(index, null);
+    }
+
+    public Token getRightmostTokenOrDefault(int index, Token defaultToken) {
+        try {
+            return tokens[rightmost[index]];
+        } catch (IndexOutOfBoundsException e) {
+            return defaultToken;
+        }
+    }
+
     public boolean hasArc(int head, int dependent) {
         return (arcs[dependent] != null) && (arcs[dependent].head == head);
     }
@@ -128,15 +178,6 @@ public class State {
 
     public boolean hasDependentArc(int dependent) {
         return arcs[dependent] != null;
-    }
-
-    public Action[] getActions() {
-        Action[] actions = new Action[step];
-        State state = this;
-        do {
-            actions[state.step - 1] = state.prevAction;
-        } while ((state = state.prevState) != null && !state.isInitial());
-        return actions;
     }
 
     @Override
