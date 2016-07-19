@@ -49,8 +49,8 @@ public final class App {
     private void run() {
         try {
             Sentence[] sentences = (new ConllReader(Config.getString(Config.Key.TRAINING_FILE))).read();
-            int[][] weights = new int[Action.SIZE][Feature.SIZE];
-            Parser parser = new Parser(weights, new Perceptron());
+            float[][] weights = new float[Action.SIZE][Feature.SIZE];
+            Parser parser = new Parser(new Perceptron(weights));
             for (Sentence sentence : sentences) {
                 Logger.trace(sentence.toString());
                 parser.parse(sentence);

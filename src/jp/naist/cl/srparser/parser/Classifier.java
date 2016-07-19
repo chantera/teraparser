@@ -10,5 +10,7 @@ import java.util.Collection;
  * @author Hiroki Teranishi
  */
 public interface Classifier {
-    public Action classify(int[] featureIndexes, int[][] weights, Collection<Action> actions);
+    public float[][] getWeights();
+    public void setWeights(float[][] weights);
+    public Action classify(int[] featureIndexes, Collection<Action> actions);
 }

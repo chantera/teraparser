@@ -27,9 +27,8 @@ public class Trainer extends Parser {
     private HashMap<Sentence.ID, Arc[]> goldArcMap = new HashMap<>();
 
     public Trainer(Sentence[] sentences, Oracle oracle) {
-        super(new int[Action.SIZE][Feature.SIZE], new Perceptron());
+        super(new Perceptron(new float[Action.SIZE][Feature.SIZE]));
         loadGolds(sentences, oracle);
-        setWeights(new int[Action.SIZE][Feature.SIZE]);
     }
 
     private void loadGolds(Sentence[] sentences, Oracle oracle) {
@@ -58,6 +57,7 @@ public class Trainer extends Parser {
             }
             predArcMap.put(sentence.id, trainEach(sentence).arcs);
         }
+        classifier.incrementIteration();
         if (callback != null) {
             callback.accept(goldArcMap, predArcMap);
         }
@@ -69,11 +69,19 @@ public class Trainer extends Parser {
         Arc[] predictArcs = state.arcs;
         for (int i = 0; i < predictArcs.length; i++) {
             if (predictArcs[i] != goldArcs[i]) {
-                setWeights(Perceptron.update(weights, oracle.getState(sentence), state));
+                classifier.update(oracle.getState(sentence), state);
                 break;
             }
         }
         return state;
+    }
+
+    public float[][] getWeights() {
+        return classifier.getAveragedWeights();
+    }
+
+    public void setWeights(float[][] weights) {
+        classifier.setWeights(weights);
     }
 
     public void test(TrainCallback callback) {

@@ -12,14 +12,13 @@ import java.util.Set;
  *
  * @author Hiroki Teranishi
  */
-public class Parser extends AbstractParser {
+public class Parser {
+    Perceptron classifier;
 
-    public Parser(int[][] weights, Classifier classifier) {
-        super(weights);
-        setClassifier(classifier);
+    public Parser(Perceptron classifier) {
+        this.classifier = classifier;
     }
 
-    @Override
     public State parse(Sentence sentence) {
         State state = new State(sentence);
         while (!state.isTerminal()) {
@@ -36,6 +35,6 @@ public class Parser extends AbstractParser {
         } else if (actions.size() == 1) {
             return (Action) actions.iterator();
         }
-        return classifier.classify(state.features, weights, actions);
+        return classifier.classify(state.features, actions);
     }
 }

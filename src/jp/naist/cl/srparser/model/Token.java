@@ -97,6 +97,10 @@ public class Token implements Cloneable {
         return new Token(head, this);
     }
 
+    private static String preprocessForm(String form) {
+        return form.toLowerCase().replaceAll("\\d", "0");
+    }
+
     public static Token clone(Token token, int head) {
         return token.clone(head);
     }
