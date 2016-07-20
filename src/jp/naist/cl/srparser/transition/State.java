@@ -6,6 +6,7 @@ import jp.naist.cl.srparser.model.Token;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 
 
@@ -178,6 +179,37 @@ public class State {
 
     public boolean hasDependentArc(int dependent) {
         return arcs[dependent] != null;
+    }
+
+    /**
+     * get iterator from the initial state of this.
+     */
+    public StateIterator getIterator() {
+        return new StateIterator(this);
+    }
+
+    public class StateIterator implements Iterator<State> {
+        private State[] states;
+        private int index;
+
+        private StateIterator(State state) {
+            states = new State[state.step + 1];
+            do {
+                states[state.step] = state;
+                state = state.prevState;
+            } while (state != null);
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < states.length;
+        }
+
+        @Override
+        public State next() {
+            return states[index++];
+        }
     }
 
     @Override

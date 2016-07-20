@@ -64,6 +64,7 @@ public class Trainer extends Parser {
     }
 
     private State trainEach(Sentence sentence) {
+        /*
         State state = parse(sentence);
         Arc[] goldArcs = goldArcMap.get(sentence.id);
         Arc[] predictArcs = state.arcs;
@@ -74,6 +75,19 @@ public class Trainer extends Parser {
             }
         }
         return state;
+        */
+        State.StateIterator iterator = oracle.getState(sentence).getIterator();
+        State oracle = iterator.next(); // initial state
+        while (iterator.hasNext()) {
+            Action predictAction = getNextAction(oracle);
+            int[] predictFeatures = oracle.features;
+            oracle = iterator.next();
+            Action oracleAction = oracle.prevAction;
+            if (!predictAction.equals(oracleAction)) {
+                classifier.update(oracleAction, predictAction, predictFeatures);
+            }
+        }
+        return parse(sentence);
     }
 
     public float[][] getWeights() {

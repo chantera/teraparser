@@ -4,6 +4,7 @@ import jp.naist.cl.srparser.transition.Action;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -63,6 +64,7 @@ public class Perceptron implements Classifier {
     }
 
     void update(State oracle, State predict) {
+        /*
         State prevState;
         while ((prevState = oracle.prevState) != null) {
             updateWeight(weights[oracle.prevAction.index], prevState.features, 1);
@@ -74,6 +76,28 @@ public class Perceptron implements Classifier {
             updateWeight(averagedWeights[predict.prevAction.index], prevState.features, -iteration);
             predict = prevState;
         }
+        */
+        State.StateIterator iterator = predict.getIterator();
+        predict = iterator.next(); // initial state
+        while (iterator.hasNext()) {
+            predict = iterator.next();
+            updateWeight(weights[predict.prevAction.index], predict.prevState.features, -1);
+            updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.features, -iteration);
+        }
+        iterator = oracle.getIterator();
+        oracle = iterator.next(); // initial state
+        while (iterator.hasNext()) {
+            oracle = iterator.next();
+            updateWeight(weights[oracle.prevAction.index], oracle.prevState.features, 1);
+            updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.features, iteration);
+        }
+    }
+
+    void update(Action oracleAction, Action predictAction, int[] features) {
+        updateWeight(weights[oracleAction.index], features, 1);
+        updateWeight(averagedWeights[oracleAction.index], features, iteration);
+        updateWeight(weights[predictAction.index], features, -1);
+        updateWeight(averagedWeights[predictAction.index], features, -iteration);
     }
 
     private void updateWeight(float[] weight, int[] featureIndexes, float value) {

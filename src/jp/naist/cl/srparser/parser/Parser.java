@@ -28,7 +28,7 @@ public class Parser {
         return state;
     }
 
-    private Action getNextAction(State state) {
+    protected Action getNextAction(State state) {
         Set<Action> actions = state.possibleActions;
         if (actions.size() == 0) {
             throw new IllegalStateException("Any action is not permitted.");
