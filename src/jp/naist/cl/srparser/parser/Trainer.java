@@ -57,7 +57,6 @@ public class Trainer extends Parser {
             }
             predArcMap.put(sentence.id, trainEach(sentence).arcs);
         }
-        classifier.incrementIteration();
         if (callback != null) {
             callback.accept(goldArcMap, predArcMap);
         }
@@ -73,6 +72,7 @@ public class Trainer extends Parser {
                 classifier.update(oracle.getState(sentence), state);
                 break;
             }
+            return classifier.getAveragedWeights();
         }
         return state;
         */
@@ -86,6 +86,7 @@ public class Trainer extends Parser {
             if (!predictAction.equals(oracleAction)) {
                 classifier.update(oracleAction, predictAction, predictFeatures);
             }
+            classifier.incrementCount();
         }
         return parse(sentence);
     }

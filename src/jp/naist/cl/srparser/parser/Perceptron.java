@@ -15,7 +15,7 @@ public class Perceptron implements Classifier {
     private float[][] weights;
     private float[][] averagedWeights;
 
-    private int iteration;
+    private int count;
 
     public Perceptron(float[][] weights) {
         setWeights(weights);
@@ -30,21 +30,21 @@ public class Perceptron implements Classifier {
     public void setWeights(float[][] weights) {
         this.weights = weights;
         this.averagedWeights = weights.clone();
-        this.iteration = 1;
+        this.count = 1;
     }
 
     public float[][] getAveragedWeights() {
         float[][] result = new float[weights.length][weights[0].length];
         for (int i = 0; i < weights.length; i++) {
             for (int j = 0; j < weights[i].length; j++) {
-                result[i][j] = weights[i][j] - averagedWeights[i][j] / iteration;
+                result[i][j] = weights[i][j] - averagedWeights[i][j] / count;
             }
         }
         return result;
     }
 
-    public void incrementIteration() {
-        iteration++;
+    public void incrementCount() {
+        count++;
     }
 
     public Action classify(int[] featureIndexes, Collection<Action> actions) {
@@ -82,22 +82,22 @@ public class Perceptron implements Classifier {
         while (iterator.hasNext()) {
             predict = iterator.next();
             updateWeight(weights[predict.prevAction.index], predict.prevState.features, -1);
-            updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.features, -iteration);
+            updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.features, -count);
         }
         iterator = oracle.getIterator();
         oracle = iterator.next(); // initial state
         while (iterator.hasNext()) {
             oracle = iterator.next();
             updateWeight(weights[oracle.prevAction.index], oracle.prevState.features, 1);
-            updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.features, iteration);
+            updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.features, count);
         }
     }
 
     void update(Action oracleAction, Action predictAction, int[] features) {
         updateWeight(weights[oracleAction.index], features, 1);
-        updateWeight(averagedWeights[oracleAction.index], features, iteration);
+        updateWeight(averagedWeights[oracleAction.index], features, count);
         updateWeight(weights[predictAction.index], features, -1);
-        updateWeight(averagedWeights[predictAction.index], features, -iteration);
+        updateWeight(averagedWeights[predictAction.index], features, -count);
     }
 
     private void updateWeight(float[] weight, int[] featureIndexes, float value) {
