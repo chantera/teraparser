@@ -143,4 +143,19 @@ public class ActionTest {
         }
         assertTrue(equal);
     }
+
+    @Test
+    public void stateTest() {
+        State state = new Oracle(Oracle.Algorithm.STATIC).getState(sentence);
+        Token leftmost = state.getLeftmostToken(7);
+        assertTrue(leftmost.id == 3);
+        leftmost = state.getLeftmostToken(26);
+        assertTrue(leftmost == null);
+        Token rightmost = state.getRightmostToken(26);
+        assertTrue(rightmost.id == 29);
+        leftmost = state.getLeftmostToken(33);
+        assertTrue(leftmost.id == 1);
+        rightmost = state.getRightmostToken(33);
+        assertTrue(rightmost.id == 40);
+    }
 }

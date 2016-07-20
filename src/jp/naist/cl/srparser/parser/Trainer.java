@@ -67,8 +67,8 @@ public class Trainer extends Parser {
         State state = parse(sentence);
         Arc[] goldArcs = goldArcMap.get(sentence.id);
         Arc[] predictArcs = state.arcs;
-        for (int i = 0; i < predictArcs.length; i++) {
-            if (predictArcs[i] != goldArcs[i]) {
+        for (int i = 1; i < goldArcs.length; i++) { // i = 0 is a root-dependent arc (none)
+            if (!goldArcs[i].equals(predictArcs[i])) {
                 classifier.update(oracle.getState(sentence), state);
                 break;
             }

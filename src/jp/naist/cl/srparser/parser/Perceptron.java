@@ -47,8 +47,8 @@ public class Perceptron implements Classifier {
     }
 
     public Action classify(int[] featureIndexes, Collection<Action> actions) {
-        double bestScore = -1.0;
-        Action bestAction = Action.SHIFT;
+        double bestScore = Integer.MIN_VALUE;
+        Action bestAction = null;
         for (Action action : actions) {
             double score = 0.0;
             for (int feature : featureIndexes) {
