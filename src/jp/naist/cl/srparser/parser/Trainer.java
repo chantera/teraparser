@@ -19,7 +19,7 @@ import java.util.function.BiConsumer;
  *
  * @author Hiroki Teranishi
  */
-public class Trainer extends Parser {
+public class Trainer extends BeamSearchParser {
     private static final int REPORT_PERIOD = 100;
 
     private Sentence[] sentences;
@@ -27,7 +27,7 @@ public class Trainer extends Parser {
     private HashMap<Sentence.ID, Arc[]> goldArcMap = new HashMap<>();
 
     public Trainer(Sentence[] sentences, Oracle oracle) {
-        super(new Perceptron(new float[Action.SIZE][Feature.SIZE]));
+        super(new Perceptron(new float[Action.SIZE][Feature.SIZE]), 16);
         loadGolds(sentences, oracle);
     }
 
@@ -63,7 +63,6 @@ public class Trainer extends Parser {
     }
 
     private State trainEach(Sentence sentence) {
-        /*
         State state = parse(sentence);
         Arc[] goldArcs = goldArcMap.get(sentence.id);
         Arc[] predictArcs = state.arcs;
@@ -75,7 +74,7 @@ public class Trainer extends Parser {
         }
         classifier.incrementCount();
         return state;
-        */
+        /*
         State.StateIterator iterator = oracle.getState(sentence).getIterator();
         State oracle = iterator.next(); // initial state
         while (iterator.hasNext()) {
@@ -89,6 +88,7 @@ public class Trainer extends Parser {
             classifier.incrementCount();
         }
         return parse(sentence);
+        */
     }
 
     public float[][] getWeights() {
