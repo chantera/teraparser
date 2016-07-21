@@ -4,14 +4,14 @@ import jp.naist.cl.srparser.transition.Action;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Set;
 
 /**
  * jp.naist.cl.srparser.parser
  *
  * @author Hiroki Teranishi
  */
-public class Perceptron implements Classifier {
+public class Perceptron {
     private float[][] weights;
     private float[][] averagedWeights;
 
@@ -21,12 +21,10 @@ public class Perceptron implements Classifier {
         setWeights(weights);
     }
 
-    @Override
     public float[][] getWeights() {
         return weights;
     }
 
-    @Override
     public void setWeights(float[][] weights) {
         this.weights = weights;
         this.averagedWeights = weights.clone();
@@ -47,14 +45,29 @@ public class Perceptron implements Classifier {
         count++;
     }
 
+    public double getScore(int[] featureIndexes, Action action) {
+        double score = 0.0;
+        for (int feature : featureIndexes) {
+            score += weights[action.index][feature];
+        }
+        return score;
+    }
+
+    public Action getNextAction(State state) {
+        Set<Action> actions = state.possibleActions;
+        if (actions.size() == 0) {
+            throw new IllegalStateException("Any action is not permitted.");
+        } else if (actions.size() == 1) {
+            return (Action) actions.iterator();
+        }
+        return classify(state.features, actions);
+    }
+
     public Action classify(int[] featureIndexes, Collection<Action> actions) {
         double bestScore = Double.NEGATIVE_INFINITY;
         Action bestAction = null;
         for (Action action : actions) {
-            double score = 0.0;
-            for (int feature : featureIndexes) {
-                score += weights[action.index][feature];
-            }
+            double score = getScore(featureIndexes, action);
             if (score > bestScore) {
                 bestScore = score;
                 bestAction = action;
@@ -63,20 +76,7 @@ public class Perceptron implements Classifier {
         return bestAction;
     }
 
-    void update(State oracle, State predict) {
-        /*
-        State prevState;
-        while ((prevState = oracle.prevState) != null) {
-            updateWeight(weights[oracle.prevAction.index], prevState.features, 1);
-            updateWeight(averagedWeights[oracle.prevAction.index], prevState.features, iteration);
-            oracle = prevState;
-        }
-        while ((prevState = predict.prevState) != null) {
-            updateWeight(weights[predict.prevAction.index], prevState.features, -1);
-            updateWeight(averagedWeights[predict.prevAction.index], prevState.features, -iteration);
-            predict = prevState;
-        }
-        */
+    public void update(State oracle, State predict) {
         State.StateIterator iterator = predict.getIterator();
         predict = iterator.next(); // initial state
         while (iterator.hasNext()) {
@@ -93,7 +93,7 @@ public class Perceptron implements Classifier {
         }
     }
 
-    void update(Action oracleAction, Action predictAction, int[] features) {
+    public void update(Action oracleAction, Action predictAction, int[] features) {
         updateWeight(weights[oracleAction.index], features, 1);
         updateWeight(averagedWeights[oracleAction.index], features, count);
         updateWeight(weights[predictAction.index], features, -1);

@@ -72,14 +72,14 @@ public class Trainer extends Parser {
                 classifier.update(oracle.getState(sentence), state);
                 break;
             }
-            return classifier.getAveragedWeights();
         }
+        classifier.incrementCount();
         return state;
         */
         State.StateIterator iterator = oracle.getState(sentence).getIterator();
         State oracle = iterator.next(); // initial state
         while (iterator.hasNext()) {
-            Action predictAction = getNextAction(oracle);
+            Action predictAction = classifier.getNextAction(oracle);
             int[] predictFeatures = oracle.features;
             oracle = iterator.next();
             Action oracleAction = oracle.prevAction;
