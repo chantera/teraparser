@@ -5,7 +5,6 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.transition.Arc;
 import jp.naist.cl.srparser.transition.Oracle;
-import jp.naist.cl.srparser.transition.State;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,30 +46,31 @@ public abstract class Trainer {
         int i = 0;
         for (Sentence sentence : sentences) {
             if (++i % REPORT_PERIOD == 0) {
-                Logger.info("Extracting gold data: %d / %d", i, length);
+                Logger.info("Extracting Gold data: %d / %d", i, length);
             }
             goldArcMap.put(sentence.id, extractGoldArcs(sentence));
         }
     }
 
-    public void train() {
-        train(null);
+    public int getTrainingSize() {
+        return sentences.length;
     }
 
-    public void train(TrainCallback callback) {
-        HashMap<Sentence.ID, Arc[]> predArcMap = new HashMap<>();
+    public void train() {
+        Logger.info("trainer start training");
         int i = 0;
         for (Sentence sentence : sentences) {
             if (++i % REPORT_PERIOD == 0) {
-                Logger.info("training: %d of %d ...", i, sentences.length);
+                Logger.info("training: %d / %d ...", i, sentences.length);
             }
             trainEach(sentence);
-            State predict = parser.parse(sentence);
-            predArcMap.put(sentence.id, predict.arcs);
         }
-        if (callback != null) {
-            callback.accept(goldArcMap, predArcMap);
-        }
+        Logger.info("trainer finished training");
+    }
+
+    public void train(Callback callback) {
+        train();
+        test(callback);
     }
 
     abstract void trainEach(Sentence sentence);
@@ -83,7 +83,7 @@ public abstract class Trainer {
         classifier.setWeights(weights);
     }
 
-    public void test(TrainCallback callback) {
+    public void test(Callback callback) {
         HashMap<Sentence.ID, Arc[]> predArcMap = new HashMap<>();
         for (Sentence sentence : sentences) {
             predArcMap.put(sentence.id, parser.parse(sentence).arcs);
@@ -104,5 +104,5 @@ public abstract class Trainer {
         return goldArcs;
     }
 
-    public interface TrainCallback extends BiConsumer<Map<Sentence.ID, Arc[]>, Map<Sentence.ID, Arc[]>> {}
+    public interface Callback extends BiConsumer<Map<Sentence.ID, Arc[]>, Map<Sentence.ID, Arc[]>> {}
 }
