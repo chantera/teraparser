@@ -2,13 +2,11 @@ package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.io.ConllReader;
 import jp.naist.cl.srparser.io.Logger;
-import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
-import jp.naist.cl.srparser.transition.Action;
-import jp.naist.cl.srparser.transition.Oracle;
-import jp.naist.cl.srparser.parser.Parser;
-import jp.naist.cl.srparser.parser.Perceptron;
+import jp.naist.cl.srparser.parser.LocallyLearningTrainer;
+import jp.naist.cl.srparser.parser.StructuredLearningTrainer;
 import jp.naist.cl.srparser.parser.Trainer;
+import jp.naist.cl.srparser.transition.Oracle;
 
 /**
  * jp.naist.cl.srparser.app
@@ -47,6 +45,7 @@ public final class App {
     }
 
     private void run() {
+        /*
         try {
             Sentence[] sentences = (new ConllReader(Config.getString(Config.Key.TRAINING_FILE))).read();
             float[][] weights = new float[Action.SIZE][Feature.SIZE];
@@ -60,6 +59,7 @@ public final class App {
         } catch (Exception e) {
             Logger.error(e);
         }
+        */
     }
 
     private void train() {
@@ -67,11 +67,15 @@ public final class App {
             Logger.info("Reading training samples from %s ...", Config.getString(Config.Key.TRAINING_FILE));
             Sentence[] sentences = new ConllReader(Config.getString(Config.Key.TRAINING_FILE)).read();
             Logger.info("training sample size %d", sentences.length);
-            Trainer trainer = new Trainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+            // Trainer trainer = new Trainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+            // Trainer trainer = new LocallyLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+            Trainer trainer = new StructuredLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC), 8);
             Logger.info("Reading development samples from %s ...", Config.getString(Config.Key.DEVELOPMENT_FILE));
             Sentence[] devSentences = new ConllReader(Config.getString(Config.Key.DEVELOPMENT_FILE)).read();
             Logger.info("development sample size %d", sentences.length);
-            Trainer tester = new Trainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
+            // Trainer tester = new Trainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
+            // Trainer tester = new LocallyLearningTrainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
+            Trainer tester = new StructuredLearningTrainer(devSentences, new Oracle(Oracle.Algorithm.STATIC), 8);
             int iteration = Config.getInt(Config.Key.ITERATION);
             for (int i = 1; i <= iteration; i++) {
                 Logger.info("Iteration: %d", i);

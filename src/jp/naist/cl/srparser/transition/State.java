@@ -213,6 +213,27 @@ public class State {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof State) {
+            final State other = (State) obj;
+            if (step != other.step || bufferHead != other.bufferHead) {
+                return false;
+            }
+            if (prevAction != null && !prevAction.equals(other.prevAction)) {
+                return false;
+            }
+            if (prevState != null && !prevState.equals(other.prevState)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("step=").append(step);

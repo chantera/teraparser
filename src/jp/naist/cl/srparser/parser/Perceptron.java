@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.parser;
 
+import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.transition.Action;
 import jp.naist.cl.srparser.transition.State;
 
@@ -16,6 +17,10 @@ public class Perceptron {
     private float[][] averagedWeights;
 
     private int count;
+
+    public Perceptron() {
+        this(new float[Action.SIZE][Feature.SIZE]);
+    }
 
     public Perceptron(float[][] weights) {
         setWeights(weights);
