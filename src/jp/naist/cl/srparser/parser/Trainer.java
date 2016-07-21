@@ -9,9 +9,7 @@ import jp.naist.cl.srparser.transition.Arc;
 import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 /**
@@ -27,7 +25,7 @@ public class Trainer extends BeamSearchParser {
     private HashMap<Sentence.ID, Arc[]> goldArcMap = new HashMap<>();
 
     public Trainer(Sentence[] sentences, Oracle oracle) {
-        super(new Perceptron(new float[Action.SIZE][Feature.SIZE]), 16);
+        super(new Perceptron(new float[Action.SIZE][Feature.SIZE]), 4);
         loadGolds(sentences, oracle);
     }
 
@@ -63,6 +61,7 @@ public class Trainer extends BeamSearchParser {
     }
 
     private State trainEach(Sentence sentence) {
+        /*
         State state = parse(sentence);
         Arc[] goldArcs = goldArcMap.get(sentence.id);
         Arc[] predictArcs = state.arcs;
@@ -72,8 +71,51 @@ public class Trainer extends BeamSearchParser {
                 break;
             }
         }
+        */
+        int beamWidth = 4;
+        /*
+        if (beamWidth == 1) {
+            return super.parse(sentence);
+        }
+        */
+
+        State.StateIterator iterator = oracle.getState(sentence).getIterator();
+        State oracleState = iterator.next();
+        BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+
+        boolean terminate = false;
+        while (!terminate) {
+            if (!iterator.hasNext()) {
+                classifier.update(oracleState, beam[0].getState());
+                break;
+            }
+            oracleState = iterator.next();
+            Action oracleAction = oracleState.prevAction;
+            ArrayList<BeamItem> newbeam = new ArrayList<>();
+            for (BeamItem item : beam) {
+                State state = item.getState();
+                if (state.isTerminal()) {
+                    newbeam.add(item);
+                    continue;
+                }
+                for (Action action : state.possibleActions) {
+                    double score = item.getScore() + classifier.getScore(state.features, action);
+                    newbeam.add(new BeamItem(action.apply(state), score));
+                }
+            }
+            beam = newbeam.stream().sorted().limit(beamWidth).toArray(BeamItem[]::new);
+            boolean oracleInBeam = Arrays.stream(beam).anyMatch(item -> item.getState().prevAction.equals(oracleAction));;
+            if (!oracleInBeam) {
+                // System.err.println("early update.");
+                classifier.update(oracleState, beam[0].getState());
+                // classifier.update(oracle.getState(sentence), beam[0].getState());
+                break;
+            }
+            terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
+        }
+        // return beam[0].getState();
         classifier.incrementCount();
-        return state;
+        return parse(sentence);
         /*
         State.StateIterator iterator = oracle.getState(sentence).getIterator();
         State oracle = iterator.next(); // initial state

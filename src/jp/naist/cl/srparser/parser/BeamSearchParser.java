@@ -48,7 +48,7 @@ public class BeamSearchParser extends Parser {
         return beam[0].getState();
     }
 
-    private class BeamItem extends Tuple<State, Double> implements Comparable {
+    protected class BeamItem extends Tuple<State, Double> implements Comparable {
         public BeamItem(State left, Double right) {
             super(left, right);
         }
