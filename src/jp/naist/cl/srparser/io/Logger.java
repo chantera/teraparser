@@ -62,7 +62,7 @@ public class Logger {
         }
     }
 
-    public static Logger getInstence() {
+    public static Logger getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Logger must be built once.");
         }
@@ -83,8 +83,10 @@ public class Logger {
     }
 
     public static void terminate() {
-        instance.stop();
-        instance = null;
+        if (instance != null) {
+            instance.stop();
+            instance = null;
+        }
     }
 
     @Override
@@ -146,7 +148,7 @@ public class Logger {
     }
 
     public static void log(LogLevel logLevel, String message) {
-        getInstence().printFormattedLog(logLevel, message);
+        getInstance().printFormattedLog(logLevel, message);
     }
 
     public static void log(LogLevel logLevel, Object object) {
@@ -155,8 +157,8 @@ public class Logger {
             PrintWriter pw = new PrintWriter(sw);
             ((Exception) object).printStackTrace(pw);
             pw.flush();
-            getInstence().printFormattedLog(logLevel, object.toString());
-            getInstence().printLog(logLevel, sw.toString());
+            getInstance().printFormattedLog(logLevel, object.toString());
+            getInstance().printLog(logLevel, sw.toString());
         } else {
             log(logLevel, object.toString());
         }

@@ -23,14 +23,45 @@ public final class App {
     }
 
     public static void execute(String[] args) {
+        try {
+            Config.initialize(args);
+            execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void execute() {
         App app = getInstance();
         try {
-            // app.run();
-            app.train();
+            switch (Config.getMode()) {
+                case PARSE:
+                    app.parse();
+                    break;
+                case TRAIN:
+                    app.train();
+                    break;
+                case HELP:
+                default:
+                    app.help();
+                    break;
+            }
         } catch (Exception e) {
             Logger.error(e);
         } finally {
             app.finalize();
+        }
+    }
+
+    enum Mode {
+        HELP("help"),
+        PARSE("parse"),
+        TRAIN("train");
+
+        final String label;
+
+        Mode(String label) {
+            this.label = label;
         }
     }
 
@@ -43,11 +74,19 @@ public final class App {
 
     private void initialize() {
         // Config.initialize(new Config.CmdLineArgs(args));
-        Config.initialize(new Config.DebugArgs());
+        // Config.initialize(new Config.DebugArgs());
+        new Logger.Builder()
+                .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
+                .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
+                .build();
         Logger.info("[OS INFO] " + SystemUtils.getOSInfo());
     }
 
-    private void run() {
+    private void help() {
+        Config.showHelp();
+    }
+
+    private void parse() {
         /*
         try {
             Sentence[] sentences = (new ConllReader(Config.getString(Config.Key.TRAINING_FILE))).read();
@@ -67,21 +106,10 @@ public final class App {
 
     private void train() {
         try {
-            // Trainer trainer = new Trainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
-            // Trainer trainer = new LocallyLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
-            // Trainer trainer = new StructuredLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC), 8);
-            // Logger.info("Reading development samples from %s ...", Config.getString(Config.Key.DEVELOPMENT_FILE));
-            // Sentence[] devSentences = new ConllReader(Config.getString(Config.Key.DEVELOPMENT_FILE)).read();
-            // Logger.info("development sample size %d", sentences.length);
-            // Trainer tester = new Trainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
-            // Trainer tester = new LocallyLearningTrainer(devSentences, new Oracle(Oracle.Algorithm.STATIC));
-            // Trainer tester = new StructuredLearningTrainer(devSentences, new Oracle(Oracle.Algorithm.STATIC), 8);
-
-            Trainer trainer = loadTrainer(Config.Key.TRAINING_FILE);
-            Trainer tester  = loadTrainer(Config.Key.DEVELOPMENT_FILE);
-
-            int iteration = Config.getInt(Config.Key.ITERATION);
-            int testPeriod = 5;
+            int iteration    = Config.getInt(Config.Key.ITERATION);
+            Trainer trainer  = loadTrainer(Config.Key.TRAINING_FILE);
+            Trainer tester   = loadTrainer(Config.Key.DEVELOPMENT_FILE);
+            int testPeriod   = 5;
             int trainingSize = trainer.getTrainingSize();
 
             Logger.info("---- TRAINING START  ----\n");
@@ -95,7 +123,6 @@ public final class App {
                 Logger.info("Execution Time:\t\t%1.4f seconds", (double) elapsedTime / 1000);
                 Logger.info("Per Sentence:\t\t%f milliseconds", (double) elapsedTime / trainingSize);
                 Logger.info("Memory Usage:\t\t%.2fM of %.2fM", SystemUtils.getUsedMemoryMB(), SystemUtils.getTotalMemoryMB());
-
                 trainer.test((gold, pred) -> {
                     Logger.info("Training UAS:\t\t%1.6f", Evaluator.calcUAS(gold, pred));
                 });
@@ -108,8 +135,6 @@ public final class App {
                 Logger.info("//----------------------------\n");
             }
             Logger.info("---- TRAINING FINISHED ----");
-
-
         } catch (Exception e) {
             Logger.error(e);
         }
