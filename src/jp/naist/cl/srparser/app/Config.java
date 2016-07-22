@@ -3,7 +3,10 @@ package jp.naist.cl.srparser.app;
 import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.util.CmdLineArgs;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * jp.naist.cl.srparser.app
@@ -16,6 +19,7 @@ public class Config {
     private HashMap<Key, Object> values = new HashMap<>();
 
     enum Key {
+        CONFIG_FILE      ("config",    null,                 false, ""),
         ITERATION        ("iteration", 20,                   false, ""),
         TRAINING_FILE    ("trainfile", "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
@@ -35,14 +39,18 @@ public class Config {
         }
     }
 
-    public static void initialize(String[] args) {
+    public static void initialize(String[] args) throws Exception {
         if (instance == null) {
             instance = new Config(args);
         }
     }
 
-    private Config(String args[]) {
-        CmdLineArgs cmdArgs = new CmdLineArgs(args);
+    private Config(String args[]) throws Exception {
+        mode = load(new CmdLineArgs(args));
+    }
+
+    private App.Mode load(CmdLineArgs cmdArgs) throws IOException {
+        App.Mode mode;
         String command = cmdArgs.getParamOrDefalut(0, "");
         if (command.equals(App.Mode.PARSE.label)) {
             mode = App.Mode.PARSE;
@@ -54,15 +62,18 @@ public class Config {
             showHelp();
             System.exit(0); // would not proceed to App.execute()
         }
-        processCommandLineArgs(cmdArgs);
-    }
-
-    private void processCommandLineArgs(CmdLineArgs cmdArgs) {
-        putInt     (Key.ITERATION,        cmdArgs);
-        putString  (Key.TRAINING_FILE,    cmdArgs);
-        putString  (Key.DEVELOPMENT_FILE, cmdArgs);
-        putLogLevel(Key.LOGLEVEL,         cmdArgs);
-        putBoolean (Key.VERBOSE,          cmdArgs);
+        Properties properties = new Properties();
+        if (cmdArgs.hasOption(Key.CONFIG_FILE.name)) {
+            properties.load(new FileReader(cmdArgs.getOption(Key.CONFIG_FILE.name)));
+        }
+        properties.putAll(cmdArgs.getOptions());
+        putInt     (Key.ITERATION,        properties);
+        putString  (Key.TRAINING_FILE,    properties);
+        putString  (Key.DEVELOPMENT_FILE, properties);
+        putLogLevel(Key.LOGLEVEL,         properties);
+        putBoolean (Key.VERBOSE,          properties);
+        System.out.println(properties);
+        return mode;
     }
 
     private void putObject(Key key, Object value) {
@@ -73,24 +84,18 @@ public class Config {
         values.put(key, value);
     }
 
-    private void putString(Key key, CmdLineArgs cmdArgs) {
-        String value;
-        if (cmdArgs.hasOption(key.name)) {
-            value = cmdArgs.getOption(key.name);
-        } else {
-            value = key.defaultValue != null ? key.defaultValue.toString() : null;
-        }
-        putString(key, value);
+    private void putString(Key key, Properties properties) {
+        putString(key, properties.getProperty(key.name, (String) key.defaultValue));
     }
 
     private void putInt(Key key, int value) {
         values.put(key, value);
     }
 
-    private void putInt(Key key, CmdLineArgs cmdArgs) {
+    private void putInt(Key key, Properties properties) {
         int value;
-        if (cmdArgs.hasOption(key.name)) {
-            value = Integer.parseInt(cmdArgs.getOption(key.name));
+        if (properties.containsKey(key.name)) {
+            value = Integer.parseInt(properties.getProperty(key.name));
         } else {
             value = (int) key.defaultValue;
         }
@@ -101,13 +106,25 @@ public class Config {
         values.put(key, value);
     }
 
-    private void putBoolean(Key key, CmdLineArgs cmdArgs) {
-        putBoolean(key, cmdArgs.hasOption(key.name) || (boolean) key.defaultValue);
+    private void putBoolean(Key key, Properties properties) {
+        boolean value;
+        if (properties.containsKey(key.name)) {
+            String propValue = properties.getProperty(key.name);
+            if (propValue == null) {
+                value = true;
+            } else {
+                propValue = propValue.toLowerCase();
+                value = propValue.equals("false") || propValue.equals("0");
+            }
+        } else {
+            value = (boolean) key.defaultValue;
+        }
+        putBoolean(key, value);
     }
 
-    private void putLogLevel(Key key, CmdLineArgs cmdArgs) {
+    private void putLogLevel(Key key, Properties properties) {
         Logger.LogLevel loglevel;
-        String label = cmdArgs.getOptionOrDefault(key.name, null);
+        String label = properties.getProperty(key.name, null);
         if (label == null) {
             loglevel = (Logger.LogLevel) key.defaultValue;
         } else if (label.equals(Logger.LogLevel.OFF.getLabel())) {
@@ -127,7 +144,7 @@ public class Config {
         } else if (label.equals(Logger.LogLevel.ALL.getLabel())) {
             loglevel = Logger.LogLevel.ALL;
         } else {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid Log Level");
         }
         putObject(key, loglevel);
     }
@@ -151,8 +168,7 @@ public class Config {
 
     static String getString(Key key) {
         checkInitialized();
-        Object value = instance.values.get(key);
-        return value != null ? value.toString() : null;
+        return (String) instance.values.get(key);
     }
 
     static int getInt(Key key) {
@@ -165,78 +181,10 @@ public class Config {
         return (boolean) instance.values.get(key);
     }
 
-    // private void loadConfigFile(String filepath) {}
-
-    /*
-    private static <T> T get(Key key) {
-        if (instance == null) {
-            throw new IllegalStateException("Configuration must be initialiezed.");
-        }
-        if (key == Key.ITERATION) {
-            return (T) instance.iteration;
-        } else if (key == Key.TRAINING_FILE) {
-            return (T) instance.trainingFile;
-        } else if (key == Key.DEVELOPMENT_FILE) {
-            return (T) instance.developmentFile;
-        }
-        throw new IllegalArgumentException("Error: " + key + ": Config does not have such a key");
+    static boolean isSet(Key key) {
+        checkInitialized();
+        return instance.values.get(key) != null;
     }
-
-    static int getInt(Key key) {
-        return Config.get(key);
-    }
-
-    static String getString(Key key) {
-        return Config.get(key);
-    }
-    */
-
-    /*
-    private Config(Args args) {
-        logLevel = args.logLevel;
-        verbose = args.verbose;
-        iteration = args.iteration;
-        trainingFile = args.trainingFile;
-        developmentFile = args.developmentFile;
-
-        new Logger.Builder()
-                .setLogLevel(logLevel)
-                .setVerbose(verbose)
-                .build();
-    }
-    */
-
-    /*
-    protected static class CmdLineArgs extends Args {
-
-        protected CmdLineArgs(String[] args) {
-
-        }
-    }
-
-    protected static class DebugArgs extends Args {
-
-        protected DebugArgs() {
-            super.logLevel = Logger.LogLevel.DEBUG;
-            super.verbose = true;
-            super.iteration = 20;
-            // super.trainingFile = "/Users/hiroki/Desktop/NLP/data/wsj_02.half.conll";
-            super.trainingFile = "/Users/hiroki/Desktop/NLP/data/penn_conll/wsj_02.conll";
-            // super.trainingFile = "/Users/hiroki/Desktop/NLP/data/wsj_23.dev.conll";
-            super.developmentFile = "/Users/hiroki/Desktop/NLP/data/wsj_23.dev.conll";
-            // super.trainingFile = "/Users/hiroki/Desktop/NLP/work/data/wsj_02-21.conll";
-            // super.developmentFile = "/Users/hiroki/Desktop/NLP/work/data/penn_conll/wsj_22.conll";
-        }
-    }
-
-    private abstract static class Args {
-        private Logger.LogLevel logLevel;
-        private boolean verbose;
-        private int iteration;
-        private String trainingFile;
-        private String developmentFile;
-    }
-    */
 
     static void dump() {
     }

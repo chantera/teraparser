@@ -3,6 +3,7 @@ package jp.naist.cl.srparser.util;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,6 +74,10 @@ public class CmdLineArgs {
 
     public boolean hasOption(String key) {
         return options.containsKey(key);
+    }
+
+    public Map<String, String> getOptions() {
+        return (Map<String, String>) options.clone();
     }
 
     public String getOption(String key) {

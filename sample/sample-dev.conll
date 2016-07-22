@@ -1,0 +1,14 @@
+1	No	_	RB	RB	_	4	VMOD	_	_
+2	,	_	,	,	_	4	P	_	_
+3	it	_	PR	PRP	_	4	SUB	_	_
+4	was	_	VB	VBD	_	0	ROOT	_	_
+5	n't	_	RB	RB	_	4	VMOD	_	_
+6	Black	_	NN	NNP	_	7	NMOD	_	_
+7	Monday	_	NN	NNP	_	4	PRD	_	_
+8	.	_	.	.	_	4	P	_	_
+
+1	The	_	DT	DT	_	2	NMOD	_	_
+2	bank	_	NN	NN	_	3	SUB	_	_
+3	acquiesced	_	VB	VBD	_	0	ROOT	_	_
+4	.	_	.	.	_	3	P	_	_
+
