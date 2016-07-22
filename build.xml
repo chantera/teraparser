@@ -2,7 +2,6 @@
 <project name="shiftreduceparser" default="all">
   
   
-  <property file="build.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
   <!-- 
   <property name="skip.tests" value="true"/>
@@ -76,6 +75,8 @@
   
   <property name="shiftreduceparser.output.dir" value="${module.shiftreduceparser.basedir}/out/production/ShiftReduceParser"/>
   <property name="shiftreduceparser.testoutput.dir" value="${module.shiftreduceparser.basedir}/out/test/ShiftReduceParser"/>
+  <property name="shiftreduceparser.config.dir" value="${module.shiftreduceparser.basedir}/config"/>
+  <property name="shiftreduceparser.log.dir" value="${module.shiftreduceparser.basedir}/logs"/>
   
   <path id="shiftreduceparser.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
@@ -131,6 +132,8 @@
   
   <target name="compile.module.shiftreduceparser.production" description="Compile module ShiftReduceParser; production classes">
     <mkdir dir="${shiftreduceparser.output.dir}"/>
+    <mkdir dir="${shiftreduceparser.config.dir}"/>
+    <mkdir dir="${shiftreduceparser.log.dir}"/>
     <javac destdir="${shiftreduceparser.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.shiftreduceparser}"/>
       <bootclasspath refid="shiftreduceparser.module.bootclasspath"/>

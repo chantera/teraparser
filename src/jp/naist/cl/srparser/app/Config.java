@@ -72,7 +72,7 @@ public class Config {
         putString  (Key.DEVELOPMENT_FILE, properties);
         putLogLevel(Key.LOGLEVEL,         properties);
         putBoolean (Key.VERBOSE,          properties);
-        System.out.println(properties);
+        // System.out.println(properties);
         return mode;
     }
 
@@ -114,7 +114,7 @@ public class Config {
                 value = true;
             } else {
                 propValue = propValue.toLowerCase();
-                value = propValue.equals("false") || propValue.equals("0");
+                value = !(propValue.equals("false") || propValue.equals("0"));
             }
         } else {
             value = (boolean) key.defaultValue;
