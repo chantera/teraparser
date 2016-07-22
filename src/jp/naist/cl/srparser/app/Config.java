@@ -24,6 +24,7 @@ public class Config {
         TRAINING_FILE    ("trainfile", "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
         VERBOSE          ("verbose",   true,                 false, ""),
+        LOGDIR           ("logdir",    "logs",               false, ""),
         LOGLEVEL         ("loglevel",  Logger.LogLevel.INFO, false, "");
 
         String name;
@@ -70,6 +71,7 @@ public class Config {
         putInt     (Key.ITERATION,        properties);
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
+        putString  (Key.LOGDIR,           properties);
         putLogLevel(Key.LOGLEVEL,         properties);
         putBoolean (Key.VERBOSE,          properties);
         // System.out.println(properties);

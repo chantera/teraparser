@@ -2,11 +2,15 @@ package jp.naist.cl.srparser.io;
 
 import jp.naist.cl.srparser.util.DateUtils;
 import jp.naist.cl.srparser.util.HashUtils;
-import jp.naist.cl.srparser.util.StringUtils;
 import jp.naist.cl.srparser.util.Tuple;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 
 /**
  * jp.naist.cl.srparser.io
@@ -17,6 +21,8 @@ public class Logger {
     public final static String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     public final static String DEFAULT_LOG_FORMAT = "%(time)\t%(accessid)\t[%(level)]\t%(message)";
     public final static String DEFAULT_FILE_FORMAT = "yyyy-MM-dd";
+    private final static String FILE_EXT = ".log";
+    private final static String NEW_LINE = System.getProperty("line.separator");
     private static Logger instance = null;
     private final long accessUnixTime;
     private final String accessId;
@@ -26,6 +32,8 @@ public class Logger {
     private final String dir;
     private final String logFormat;
     private final String fileFormat;
+    private boolean outToFile = false;
+    private Writer writer;
 
     public enum LogLevel {
         OFF(    Tuple.create(0b0000_0000_0000_0000_0000_0000, "off"   )),
@@ -69,7 +77,7 @@ public class Logger {
         return instance;
     }
 
-    private Logger(Builder builder) {
+    private Logger(Builder builder) throws IOException {
         this.accessUnixTime = DateUtils.getTimeInMillis();
         this.accessId = HashUtils.generateHexId();
         this.accessTime = DateUtils.getDateTimeString(TIME_FORMAT, accessUnixTime);
@@ -98,13 +106,34 @@ public class Logger {
         }
     }
 
-    private void start() {
+    private void start() throws IOException {
+        if (dir != null) {
+            setWriter();
+        }
         log(LogLevel.INFO, "LOG Start with ACCESSID=%s ACCESSTIME=%s", accessId, accessTime);
     }
 
     private void stop() {
         double processTime = (double) (DateUtils.getTimeInMillis() - accessUnixTime) / 1000;
-        log(LogLevel.INFO, "LOG End with ACCESSID=%s ACCESSTIME=%s PROCESSTIME=[%3.6f]", accessId, accessTime, processTime);
+        log(LogLevel.INFO, "LOG End with ACCESSID=%s ACCESSTIME=%s PROCESSTIME=[%3.6f]" + NEW_LINE, accessId, accessTime, processTime);
+        if (writer != null) {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void setWriter() throws FileNotFoundException {
+        String filename = DateUtils.getCurrentDateTimeString(DEFAULT_FILE_FORMAT);
+        String base = dir;
+        if (!base.endsWith("/")) {
+            base += "/";
+        }
+        String filepath = base + filename + FILE_EXT;
+        writer = new OutputStreamWriter(new FileOutputStream(filepath, true));
+        outToFile = true;
     }
 
     private String buildLogOutput(LogLevel loglevel, String message) {
@@ -126,9 +155,14 @@ public class Logger {
     }
 
     private void printLog(LogLevel logLevel, String message) {
-        if (this.logLevel.isPriorTo(logLevel)) {
-            // @TODO implement
-            // System.out.println("[TODO: this should be written in a log file.]");
+        if (this.logLevel.isPriorTo(logLevel) && outToFile) {
+            try {
+                writer.write(message + NEW_LINE);
+            } catch (IOException e) {
+                System.err.println("Error: Logger.printLog(): could not write to log file.");
+                System.err.println("logdir=" + dir + ", writer=" + writer);
+                e.printStackTrace();
+            }
         }
         if (verbose) {
             if (LogLevel.NOTICE.isPriorTo(logLevel)) {
@@ -167,11 +201,11 @@ public class Logger {
     public static class Builder {
         private LogLevel logLevel = LogLevel.WARNING;
         private Boolean verbose = false;
-        private String dir = "";
+        private String dir = null;
         private String logFormat = DEFAULT_LOG_FORMAT;
         private String fileFormat = DEFAULT_FILE_FORMAT;
 
-        public Logger build() {
+        public Logger build() throws IOException {
             return new Logger(this);
         }
 

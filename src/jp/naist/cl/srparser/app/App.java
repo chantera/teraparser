@@ -18,9 +18,7 @@ import jp.naist.cl.srparser.util.SystemUtils;
 public final class App {
     private static App instance = null;
 
-    private App() {
-        initialize();
-    }
+    private App() {}
 
     public static void execute(String[] args) {
         try {
@@ -34,6 +32,7 @@ public final class App {
     private static void execute() {
         App app = getInstance();
         try {
+            app.initialize();
             switch (Config.getMode()) {
                 case PARSE:
                     app.parse();
@@ -72,10 +71,9 @@ public final class App {
         return instance;
     }
 
-    private void initialize() {
-        // Config.initialize(new Config.CmdLineArgs(args));
-        // Config.initialize(new Config.DebugArgs());
+    private void initialize() throws Exception {
         new Logger.Builder()
+                .setOutputDir(Config.getString(Config.Key.LOGDIR))
                 .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
                 .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
                 .build();
@@ -112,7 +110,7 @@ public final class App {
             int testPeriod   = 5;
             int trainingSize = trainer.getTrainingSize();
 
-            Logger.info("---- TRAINING START  ----\n");
+            Logger.info("---- TRAINING START  ----");
             for (int i = 1; i <= iteration; i++) {
                 Logger.info("----8<----8<----8<---- ITERATION: %d / %d ----8<----8<----<<", i, iteration);
                 long start = DateUtils.getTimeInMillis();
@@ -132,7 +130,7 @@ public final class App {
                         Logger.info("Development UAS:\t%1.6f", Evaluator.calcUAS(gold, pred));
                     });
                 }
-                Logger.info("//----------------------------\n");
+                Logger.info("//----------------------------");
             }
             Logger.info("---- TRAINING FINISHED ----");
         } catch (Exception e) {
