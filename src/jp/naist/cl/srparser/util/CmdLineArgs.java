@@ -48,10 +48,11 @@ public class CmdLineArgs {
             }
             if (m.groupCount() == 3) {
                 name = names.removeLast();
-                options.put(name, m.group(3));
+                String value = m.group(3);
+                options.put(name, value != null ? value : "");
             }
             for (String n : names) {
-                options.put(n, options.getOrDefault(n, null));
+                options.put(n, options.getOrDefault(n, ""));
             }
         }
     }

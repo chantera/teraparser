@@ -78,6 +78,7 @@ public final class App {
                 .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
                 .build();
         Logger.info("[OS INFO] " + SystemUtils.getOSInfo());
+        Logger.info("[settings] " + Config.getDump());
     }
 
     private void help() {
@@ -158,8 +159,13 @@ public final class App {
         Logger.info("%s Sample size: %d", label, sentences.length);
         Logger.info("Initializeing Trainer ...");
 
-        // Trainer trainer = new StructuredLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC), 8);
-        Trainer trainer = new LocallyLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+        Trainer trainer;
+        if (Config.getBoolean(Config.Key.TRAIN_LOCALLY)) {
+            trainer = new LocallyLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+        } else {
+            int beamWidth = Config.getInt(Config.Key.BEAM_WIDth);
+            trainer = new StructuredLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC), beamWidth);
+        }
         return trainer;
     }
 

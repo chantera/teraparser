@@ -6,7 +6,9 @@ import jp.naist.cl.srparser.util.CmdLineArgs;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.StringJoiner;
 
 /**
  * jp.naist.cl.srparser.app
@@ -23,6 +25,8 @@ public class Config {
         ITERATION        ("iteration", 20,                   false, ""),
         TRAINING_FILE    ("trainfile", "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
+        TRAIN_LOCALLY    ("locally",   false,                false, ""),
+        BEAM_WIDth       ("beamwidth", 16,                   false, ""),
         VERBOSE          ("verbose",   true,                 false, ""),
         LOGDIR           ("logdir",    "logs",               false, ""),
         LOGLEVEL         ("loglevel",  Logger.LogLevel.INFO, false, "");
@@ -71,6 +75,8 @@ public class Config {
         putInt     (Key.ITERATION,        properties);
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
+        putBoolean (Key.TRAIN_LOCALLY,    properties);
+        putInt     (Key.BEAM_WIDth,       properties);
         putString  (Key.LOGDIR,           properties);
         putLogLevel(Key.LOGLEVEL,         properties);
         putBoolean (Key.VERBOSE,          properties);
@@ -188,7 +194,13 @@ public class Config {
         return instance.values.get(key) != null;
     }
 
-    static void dump() {
+    static String getDump() {
+        checkInitialized();
+        StringJoiner joiner = new StringJoiner(", ");
+        for (Map.Entry<Key, Object> e : instance.values.entrySet()) {
+            joiner.add(e.getKey().name + "=" + e.getValue());
+        }
+        return "{" + joiner.toString() + "}";
     }
 
     static void showHelp() {

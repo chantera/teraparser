@@ -68,6 +68,11 @@ public class Logger {
         public boolean isPriorTo(int value) {
             return this.value >= value;
         }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     public static Logger getInstance() {
