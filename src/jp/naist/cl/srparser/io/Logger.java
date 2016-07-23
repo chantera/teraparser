@@ -1,7 +1,9 @@
 package jp.naist.cl.srparser.io;
 
 import jp.naist.cl.srparser.util.DateUtils;
+import jp.naist.cl.srparser.util.FileUtils;
 import jp.naist.cl.srparser.util.HashUtils;
+import jp.naist.cl.srparser.util.StringUtils;
 import jp.naist.cl.srparser.util.Tuple;
 
 import java.io.FileNotFoundException;
@@ -22,7 +24,6 @@ public class Logger {
     public final static String DEFAULT_LOG_FORMAT = "%(time)\t%(accessid)\t[%(level)]\t%(message)";
     public final static String DEFAULT_FILE_FORMAT = "yyyy-MM-dd";
     private final static String FILE_EXT = ".log";
-    private final static String NEW_LINE = System.getProperty("line.separator");
     private static Logger instance = null;
     private final long accessUnixTime;
     private final String accessId;
@@ -120,7 +121,7 @@ public class Logger {
 
     private void stop() {
         double processTime = (double) (DateUtils.getTimeInMillis() - accessUnixTime) / 1000;
-        log(LogLevel.INFO, "LOG End with ACCESSID=%s ACCESSTIME=%s PROCESSTIME=[%3.6f]" + NEW_LINE, accessId, accessTime, processTime);
+        log(LogLevel.INFO, "LOG End with ACCESSID=%s ACCESSTIME=%s PROCESSTIME=[%3.6f]" + StringUtils.NEW_LINE, accessId, accessTime, processTime);
         if (writer != null) {
             try {
                 writer.close();
@@ -133,8 +134,8 @@ public class Logger {
     private void setWriter() throws FileNotFoundException {
         String filename = DateUtils.getCurrentDateTimeString(DEFAULT_FILE_FORMAT);
         String base = dir;
-        if (!base.endsWith("/")) {
-            base += "/";
+        if (!base.endsWith(FileUtils.SEPALATOR)) {
+            base += FileUtils.SEPALATOR;
         }
         String filepath = base + filename + FILE_EXT;
         writer = new OutputStreamWriter(new FileOutputStream(filepath, true));
@@ -162,7 +163,7 @@ public class Logger {
     private void printLog(LogLevel logLevel, String message) {
         if (this.logLevel.isPriorTo(logLevel) && outToFile) {
             try {
-                writer.write(message + NEW_LINE);
+                writer.write(message + StringUtils.NEW_LINE);
             } catch (IOException e) {
                 System.err.println("Error: Logger.printLog(): could not write to log file.");
                 System.err.println("logdir=" + dir + ", writer=" + writer);

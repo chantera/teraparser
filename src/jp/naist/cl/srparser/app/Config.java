@@ -2,11 +2,16 @@ package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.util.CmdLineArgs;
+import jp.naist.cl.srparser.util.DateUtils;
+import jp.naist.cl.srparser.util.FileUtils;
+import jp.naist.cl.srparser.util.StringUtils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
@@ -17,22 +22,26 @@ import java.util.StringJoiner;
  * @author Hiroki Teranishi
  */
 public class Config {
+    private final static String CONFIG_FILE_EXT = ".properties";
+    private final static String DEFAULT_CONFIG_DIR = "." + FileUtils.SEPALATOR + "config";
+    private final static String DEFAULT_NEW_CONFIG_FILENAME_FORMAT = "yyyy-MM-dd";
     private static Config instance = null;
     private final App.Mode mode;
-    private HashMap<Key, Object> values = new HashMap<>();
+    private LinkedHashMap<Key, Object> values = new LinkedHashMap<>();
 
     enum Key {
-        CONFIG_FILE      ("config",    null,                 false, ""),
-        ITERATION        ("iteration", 20,                   false, ""),
-        TRAINING_FILE    ("trainfile", "",                   true,  ""),
-        DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
-        TEST_FILE        ("testfile",  "",                   false, ""),
-        TRAIN_LOCALLY    ("locally",   false,                false, ""),
-        BEAM_WIDTH       ("beamwidth", 16,                   false, ""),
-        EARLY_UPDATE     ("early",     false,                false, ""),
-        VERBOSE          ("verbose",   true,                 false, ""),
-        LOGDIR           ("logdir",    "logs",               false, ""),
-        LOGLEVEL         ("loglevel",  Logger.LogLevel.INFO, false, "");
+        CONFIG_FILE      ("config",     null,                 false, ""),
+        SAVE_CONFIG      ("saveconfig", null,                 false, ""),
+        ITERATION        ("iteration",  20,                   false, ""),
+        TRAINING_FILE    ("trainfile",  "",                   true,  ""),
+        DEVELOPMENT_FILE ("devfile",    "",                   false, ""),
+        TEST_FILE        ("testfile",   "",                   false, ""),
+        TRAIN_LOCALLY    ("locally",    false,                false, ""),
+        BEAM_WIDTH       ("beamwidth",  16,                   false, ""),
+        EARLY_UPDATE     ("early",      false,                false, ""),
+        VERBOSE          ("verbose",    true,                 false, ""),
+        LOGDIR           ("logdir",     "logs",               false, ""),
+        LOGLEVEL         ("loglevel",   Logger.LogLevel.INFO, false, "");
 
         String name;
         Object defaultValue;
@@ -85,6 +94,21 @@ public class Config {
                 return App.Mode.NONE; // this stop reading args anymore.
             }
             putString(Key.CONFIG_FILE, configFilepath);
+        }
+        // Key.SAVE_CONFIG can be specified only by args
+        if (cmdArgs.hasOption(Key.SAVE_CONFIG.name)) {
+            String newConfigFilePath = cmdArgs.getOption(Key.SAVE_CONFIG.name);
+            if (newConfigFilePath.equals("")) {
+                newConfigFilePath = DEFAULT_CONFIG_DIR + FileUtils.SEPALATOR
+                        + DateUtils.getCurrentDateTimeString(DEFAULT_NEW_CONFIG_FILENAME_FORMAT) + CONFIG_FILE_EXT;
+            } else if (!newConfigFilePath.endsWith(CONFIG_FILE_EXT)) {
+                newConfigFilePath += CONFIG_FILE_EXT;
+            }
+            if (FileUtils.isWritable(newConfigFilePath)) {
+                System.err.println("new config file " + newConfigFilePath + " is not writable.");
+                return App.Mode.NONE; // this stop reading args anymore.
+            }
+            putString(Key.SAVE_CONFIG, newConfigFilePath);
         }
         properties.putAll(cmdArgs.getOptions()); // override values by command line args
         putInt     (Key.ITERATION,        properties);
@@ -227,6 +251,33 @@ public class Config {
             joiner.add(e.getKey().name + "=" + e.getValue());
         }
         return "{" + joiner.toString() + "}";
+    }
+
+    static void save() throws IOException {
+        save(getString(Key.SAVE_CONFIG));
+    }
+
+    static void save(String filepath) throws IOException {
+        checkInitialized();
+        StringJoiner joiner = new StringJoiner(StringUtils.NEW_LINE);
+        // @TODO: 7/23/16 insert header comment
+        joiner.add("# created at " + DateUtils.getCurrentDateTimeString("yyyy-MM-dd HH:mm:ss"));
+        if (isSet(Key.CONFIG_FILE)) {
+            joiner.add("# original config file: " + getString(Key.CONFIG_FILE));
+        }
+        for (Map.Entry<Key, Object> e : instance.values.entrySet()) {
+            Key key = e.getKey();
+            if (key.equals(Key.CONFIG_FILE) || key.equals(Key.SAVE_CONFIG)) {
+                continue;
+            }
+            joiner.add(key.name + "=" + e.getValue());
+        }
+        if (!filepath.endsWith(CONFIG_FILE_EXT)) {
+            filepath += CONFIG_FILE_EXT;
+        }
+        FileWriter fw = new FileWriter(filepath, false); // override if exists
+        fw.write(joiner.toString());
+        fw.close();
     }
 
     static void showHelp() {

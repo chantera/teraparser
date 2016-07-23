@@ -8,6 +8,8 @@ import java.util.UUID;
  * @author Hiroki Teranishi
  */
 public class StringUtils {
+    public final static String NEW_LINE = System.getProperty("line.separator");
+
     private StringUtils() {
         throw new AssertionError();
     }

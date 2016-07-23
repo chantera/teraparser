@@ -128,6 +128,11 @@ public final class App {
             if (!valid) {
                 return;
             }
+            if (Config.isSet(Config.Key.SAVE_CONFIG)) {
+                String newConfigFile = Config.getString(Config.Key.SAVE_CONFIG);
+                Logger.info("saving new config file to %s ...", newConfigFile);
+                Config.save(newConfigFile);
+            }
 
             Logger.info("---- SETTING UP ----");
             int iteration    = Config.getInt(Config.Key.ITERATION);
