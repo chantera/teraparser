@@ -31,11 +31,13 @@ public class Config {
     enum Key {
         CONFIG_FILE      ("config",     null,                 false, ""),
         SAVE_CONFIG      ("saveconfig", null,                 false, ""),
-        ITERATION        ("iteration",  20,                   false, ""),
+        INPUT            ("input",      "",                   true,  ""),
+        MODEL_INPUT      ("modelin",    "",                   true,  ""),
         TRAINING_FILE    ("trainfile",  "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",    "",                   false, ""),
         TEST_FILE        ("testfile",   "",                   false, ""),
-        WEIGHT_OUTPUT    ("wout",       "",                   false, ""),
+        MODEL_OUTPUT     ("modelout",   "",                   false, ""),
+        ITERATION        ("iteration",  20,                   false, ""),
         TRAIN_LOCALLY    ("locally",    false,                false, ""),
         BEAM_WIDTH       ("beamwidth",  16,                   false, ""),
         EARLY_UPDATE     ("early",      false,                false, ""),
@@ -111,11 +113,13 @@ public class Config {
             putString(Key.SAVE_CONFIG, newConfigFilePath);
         }
         properties.putAll(cmdArgs.getOptions()); // override values by command line args
-        putInt     (Key.ITERATION,        properties);
+        putString  (Key.INPUT,            properties);
+        putString  (Key.MODEL_INPUT,      properties);
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
         putString  (Key.TEST_FILE,        properties);
-        putString  (Key.WEIGHT_OUTPUT,    properties);
+        putString  (Key.MODEL_OUTPUT,     properties);
+        putInt     (Key.ITERATION,        properties);
         putBoolean (Key.TRAIN_LOCALLY,    properties);
         putInt     (Key.BEAM_WIDTH,       properties);
         putBoolean (Key.EARLY_UPDATE,     properties);

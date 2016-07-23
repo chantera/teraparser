@@ -2,8 +2,11 @@ package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.io.ConllReader;
 import jp.naist.cl.srparser.io.Logger;
+import jp.naist.cl.srparser.model.Model;
 import jp.naist.cl.srparser.model.Sentence;
+import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.parser.LocallyLearningTrainer;
+import jp.naist.cl.srparser.parser.Parser;
 import jp.naist.cl.srparser.parser.StructuredLearningTrainer;
 import jp.naist.cl.srparser.parser.Trainer;
 import jp.naist.cl.srparser.transition.Oracle;
@@ -101,21 +104,60 @@ public final class App {
     }
 
     private void parse() {
-        /*
         try {
-            Sentence[] sentences = (new ConllReader(Config.getString(Config.Key.TRAINING_FILE))).read();
-            float[][] weights = new float[Action.SIZE][Feature.SIZE];
-            Parser parser = new Parser(new Perceptron(weights));
-            for (Sentence sentence : sentences) {
-                Logger.trace(sentence.toString());
-                parser.parse(sentence);
-                // Logger.trace(new DepTree(sentence));
-                // Logger.trace(new DepTree(parsed));
+            if (Config.isSet(Config.Key.INPUT)) {
+                parseConll();
+            } else {
+                parseCli();
             }
         } catch (Exception e) {
             Logger.error(e);
         }
-        */
+    }
+
+    private void parseCli() {
+
+    }
+
+    private void parseConll() {
+        try {
+            // validate args
+            boolean valid = (
+                validateFile(Config.Key.INPUT,        true) &&
+                validateFile(Config.Key.MODEL_INPUT,  true)
+            );
+            if (!valid) {
+                return;
+            }
+            if (Config.isSet(Config.Key.SAVE_CONFIG)) {
+                String newConfigFile = Config.getString(Config.Key.SAVE_CONFIG);
+                Logger.info("saving new config file to %s ...", newConfigFile);
+                Config.save(newConfigFile);
+            }
+
+            Logger.info("---- SETTING UP ----");
+            Model model = (Model) FileUtils.readObject(Config.getString(Config.Key.MODEL_INPUT));
+            Token.setAttributeMap(model.getAttributeMap());
+            final Trainer tester = loadTrainer(Config.Key.INPUT);
+            int sentenceSize = tester.getTrainingSize();
+            tester.setWeights(model.getWeight());
+
+            Logger.info("---- PARSING START  ----");
+            long start = DateUtils.getTimeInMillis();
+            tester.test((gold, pred) -> {
+                long elapsedTime = DateUtils.getTimeInMillis() - start;
+                Logger.info("Sentence Size:\t\t%d", tester.getTrainingSize());
+                Logger.info("Execution Time:\t\t%1.4f seconds", (double) elapsedTime / 1000);
+                Logger.info("Per Sentence:\t\t%f milliseconds", (double) elapsedTime / sentenceSize);
+                Logger.info("Memory Usage:\t\t%.2fM of %.2fM", SystemUtils.getUsedMemoryMB(), SystemUtils.getTotalMemoryMB());
+                Logger.info("UAS:\t\t\t\t%1.6f", Evaluator.calcUAS(gold, pred));
+            });
+            Logger.info("---- PARSING FINISHED ----");
+
+            Logger.info("Parsing Finished Successfully.");
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 
     private void train() {
@@ -126,11 +168,11 @@ public final class App {
                 validateFile(Config.Key.DEVELOPMENT_FILE,  true) &&
                 validateFile(Config.Key.TEST_FILE,        false)
             );
-            if (!valid && Config.isSet(Config.Key.WEIGHT_OUTPUT)) {
-                String weightOutputFile = Config.getString(Config.Key.WEIGHT_OUTPUT);
-                if (!FileUtils.isWritable(weightOutputFile)) {
+            if (!valid && Config.isSet(Config.Key.MODEL_OUTPUT)) {
+                String modelOutputFile = Config.getString(Config.Key.MODEL_OUTPUT);
+                if (!FileUtils.isWritable(modelOutputFile)) {
                     valid = false;
-                    Logger.error("%s=%s is not writable.", Config.Key.WEIGHT_OUTPUT.name, weightOutputFile);
+                    Logger.error("%s=%s is not writable.", Config.Key.MODEL_OUTPUT.name, modelOutputFile);
                 }
             }
             if (!valid) {
@@ -183,13 +225,14 @@ public final class App {
                 Logger.info("---- TEST FINISHED ----");
             }
 
-            if (Config.isSet(Config.Key.WEIGHT_OUTPUT)) {
-                String weightOutputFile = Config.getString(Config.Key.WEIGHT_OUTPUT);
-                if (!weightOutputFile.endsWith(FileUtils.GZIP_EXT)) {
-                    weightOutputFile += FileUtils.GZIP_EXT;
+            if (Config.isSet(Config.Key.MODEL_OUTPUT)) {
+                String modelOutputFile = Config.getString(Config.Key.MODEL_OUTPUT);
+                if (!modelOutputFile.endsWith(FileUtils.GZIP_EXT)) {
+                    modelOutputFile += FileUtils.GZIP_EXT;
                 }
-                Logger.info("saving weight file to %s ...", weightOutputFile);
-                FileUtils.writeObject(weightOutputFile, trainer.getWeights(), true);
+                Logger.info("saving model to %s ...", modelOutputFile);
+                Model model = new Model(Token.getAttributeMap(), trainer.getWeights());
+                FileUtils.writeObject(modelOutputFile, model, true);
             }
 
             Logger.info("Training Finished Successfully.");
@@ -220,7 +263,13 @@ public final class App {
     private Trainer loadTrainer(Config.Key key) throws Exception {
         String filepath;
         String label;
+        String trainerLabel = "Trainer";
         switch (key) {
+            case INPUT:
+                filepath = Config.getString(key);
+                label = "PARSING";
+                trainerLabel = "Parser";
+                break;
             case TRAINING_FILE:
                 filepath = Config.getString(key);
                 label = "TRAINING";
@@ -239,7 +288,7 @@ public final class App {
         Logger.info("Reading %s Samples from %s ...", label, filepath);
         Sentence[] sentences = new ConllReader(filepath).read();
         Logger.info("%s Sample size: %d", label, sentences.length);
-        Logger.info("Initializeing Trainer ...");
+        Logger.info("Initializing %s ...", trainerLabel);
 
         Trainer trainer;
         Oracle oracle = new Oracle(Oracle.Algorithm.STATIC);

@@ -22,6 +22,14 @@ public class Token implements Cloneable {
     // public final int phead;
     // public final int pdeprel;
 
+    public static void setAttributeMap(HashBiMap<Integer, Tuple<Attribute, String>> attributeMap) {
+        attributeRegistry = attributeMap;
+    }
+
+    public static HashBiMap<Integer, Tuple<Attribute, String>> getAttributeMap() {
+        return attributeRegistry;
+    }
+
     private static int registerAttribute(Attribute name, String value) {
         Tuple<Attribute, String> attribute = new Tuple<>(name, value);
         int index = attributeRegistry.inverse().getOrDefault(attribute, -1);
