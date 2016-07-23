@@ -40,6 +40,8 @@ public final class App {
                 case TRAIN:
                     app.train();
                     break;
+                case NONE:
+                    break;
                 case HELP:
                 default:
                     app.help();
@@ -55,7 +57,8 @@ public final class App {
     enum Mode {
         HELP("help"),
         PARSE("parse"),
-        TRAIN("train");
+        TRAIN("train"),
+        NONE("");
 
         final String label;
 

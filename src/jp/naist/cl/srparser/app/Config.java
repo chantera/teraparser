@@ -3,6 +3,7 @@ package jp.naist.cl.srparser.app;
 import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.util.CmdLineArgs;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,34 +46,46 @@ public class Config {
         }
     }
 
-    public static void initialize(String[] args) throws Exception {
+    public static void initialize(String[] args) {
         if (instance == null) {
             instance = new Config(args);
         }
     }
 
-    private Config(String args[]) throws Exception {
+    private Config(String args[]) {
         mode = load(new CmdLineArgs(args));
     }
 
-    private App.Mode load(CmdLineArgs cmdArgs) throws IOException {
+    private App.Mode load(CmdLineArgs cmdArgs) {
         App.Mode mode;
         String command = cmdArgs.getParamOrDefalut(0, "");
         if (command.equals(App.Mode.PARSE.label)) {
             mode = App.Mode.PARSE;
         } else if (command.equals(App.Mode.TRAIN.label)) {
             mode = App.Mode.TRAIN;
+        } else if (command.equals(App.Mode.HELP.label)) {
+            return App.Mode.HELP; // this does not read any more args.
         } else {
-            mode = null;
             System.err.println("Invalid Command: " + command);
-            showHelp();
-            System.exit(0); // would not proceed to App.execute()
+            return App.Mode.HELP; // this does not read any more args.
         }
         Properties properties = new Properties();
+        // Key.CONFIG_FILE can be specified only by args
         if (cmdArgs.hasOption(Key.CONFIG_FILE.name)) {
-            properties.load(new FileReader(cmdArgs.getOption(Key.CONFIG_FILE.name)));
+            String configFilepath = cmdArgs.getOption(Key.CONFIG_FILE.name);
+            try {
+                properties.load(new FileReader(configFilepath));
+            } catch (FileNotFoundException e) {
+                System.err.println(Key.CONFIG_FILE.name + "=" + configFilepath + " Not Found.");
+                return App.Mode.NONE; // this stop reading args anymore.
+            } catch (IOException e) {
+                System.err.println("Cannot read " + Key.CONFIG_FILE.name + "=" + configFilepath + ".");
+                e.printStackTrace();
+                return App.Mode.NONE; // this stop reading args anymore.
+            }
+            putString(Key.CONFIG_FILE, configFilepath);
         }
-        properties.putAll(cmdArgs.getOptions());
+        properties.putAll(cmdArgs.getOptions()); // override values by command line args
         putInt     (Key.ITERATION,        properties);
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
@@ -121,7 +134,7 @@ public class Config {
         if (properties.containsKey(key.name)) {
             String propValue = properties.getProperty(key.name);
             if (propValue == null) {
-                value = true;
+                value = true; // this is because the key is specified but not explicitly disabled.
             } else {
                 propValue = propValue.toLowerCase();
                 value = !(propValue.equals("false") || propValue.equals("0"));
