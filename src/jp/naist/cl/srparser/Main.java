@@ -11,5 +11,6 @@ public class Main {
     // entry point
     public static void main(String[] args) {
         App.execute(args);
+        System.exit(0);
     }
 }

@@ -35,6 +35,7 @@ public class Config {
         TRAINING_FILE    ("trainfile",  "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",    "",                   false, ""),
         TEST_FILE        ("testfile",   "",                   false, ""),
+        WEIGHT_OUTPUT    ("wout",       "",                   false, ""),
         TRAIN_LOCALLY    ("locally",    false,                false, ""),
         BEAM_WIDTH       ("beamwidth",  16,                   false, ""),
         EARLY_UPDATE     ("early",      false,                false, ""),
@@ -114,6 +115,7 @@ public class Config {
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
         putString  (Key.TEST_FILE,        properties);
+        putString  (Key.WEIGHT_OUTPUT,    properties);
         putBoolean (Key.TRAIN_LOCALLY,    properties);
         putInt     (Key.BEAM_WIDTH,       properties);
         putBoolean (Key.EARLY_UPDATE,     properties);

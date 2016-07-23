@@ -8,6 +8,7 @@ import jp.naist.cl.srparser.parser.StructuredLearningTrainer;
 import jp.naist.cl.srparser.parser.Trainer;
 import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.util.DateUtils;
+import jp.naist.cl.srparser.util.FileUtils;
 import jp.naist.cl.srparser.util.SystemUtils;
 
 import java.io.File;
@@ -125,6 +126,13 @@ public final class App {
                 validateFile(Config.Key.DEVELOPMENT_FILE,  true) &&
                 validateFile(Config.Key.TEST_FILE,        false)
             );
+            if (!valid && Config.isSet(Config.Key.WEIGHT_OUTPUT)) {
+                String weightOutputFile = Config.getString(Config.Key.WEIGHT_OUTPUT);
+                if (!FileUtils.isWritable(weightOutputFile)) {
+                    valid = false;
+                    Logger.error("%s=%s is not writable.", Config.Key.WEIGHT_OUTPUT.name, weightOutputFile);
+                }
+            }
             if (!valid) {
                 return;
             }
@@ -174,6 +182,17 @@ public final class App {
                 });
                 Logger.info("---- TEST FINISHED ----");
             }
+
+            if (Config.isSet(Config.Key.WEIGHT_OUTPUT)) {
+                String weightOutputFile = Config.getString(Config.Key.WEIGHT_OUTPUT);
+                if (!weightOutputFile.endsWith(FileUtils.GZIP_EXT)) {
+                    weightOutputFile += FileUtils.GZIP_EXT;
+                }
+                Logger.info("saving weight file to %s ...", weightOutputFile);
+                FileUtils.writeObject(weightOutputFile, trainer.getWeights(), true);
+            }
+
+            Logger.info("Training Finished Successfully.");
         } catch (Exception e) {
             Logger.error(e);
         }
