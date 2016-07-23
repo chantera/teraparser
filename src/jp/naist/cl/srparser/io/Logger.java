@@ -252,6 +252,15 @@ public class Logger {
         log(LogLevel.ERROR, object);
     }
 
+    public static void error(Exception e) {
+        try {
+            log(LogLevel.ERROR, e);
+        } catch (Throwable t) {
+            e.printStackTrace(); // print original exception's stacktrace
+            throw t; // then re-throw the exception which occurred in log()
+        }
+    }
+
     public static void warning(String format, Object... args) {
         log(LogLevel.WARNING, format, args);
     }

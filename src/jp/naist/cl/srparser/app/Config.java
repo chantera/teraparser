@@ -221,5 +221,6 @@ public class Config {
     static void showHelp() {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage:\n");
+        System.out.println(sb.toString());
     }
 }

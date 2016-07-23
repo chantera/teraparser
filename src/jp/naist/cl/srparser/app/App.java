@@ -17,6 +17,8 @@ import jp.naist.cl.srparser.util.SystemUtils;
  */
 public final class App {
     private static App instance = null;
+    private Mode mode;
+    private boolean initialized = false;
 
     private App() {}
 
@@ -32,8 +34,8 @@ public final class App {
     private static void execute() {
         App app = getInstance();
         try {
-            app.initialize();
-            switch (Config.getMode()) {
+            app.initialize(Config.getMode());
+            switch (app.mode) {
                 case PARSE:
                     app.parse();
                     break;
@@ -74,14 +76,21 @@ public final class App {
         return instance;
     }
 
-    private void initialize() throws Exception {
-        new Logger.Builder()
-                .setOutputDir(Config.getString(Config.Key.LOGDIR))
-                .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
-                .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
-                .build();
-        Logger.info("[OS INFO] " + SystemUtils.getOSInfo());
-        Logger.info("[settings] " + Config.getDump());
+    private void initialize(Mode mode) throws Exception {
+        if (initialized) {
+            throw new Exception("app.initilize() can be called only once.");
+        }
+        if (!mode.equals(Mode.HELP) && !mode.equals(Mode.NONE)) {
+            new Logger.Builder()
+                    .setOutputDir(Config.getString(Config.Key.LOGDIR))
+                    .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
+                    .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
+                    .build();
+            Logger.info("[OS INFO] " + SystemUtils.getOSInfo());
+            Logger.info("[settings] " + Config.getDump());
+        }
+        this.mode = mode;
+        this.initialized = true;
     }
 
     private void help() {
