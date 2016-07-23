@@ -3,6 +3,7 @@ package jp.naist.cl.srparser.io;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -16,6 +17,10 @@ public class ConllReader extends Reader {
 
     public ConllReader(String filepath) throws FileNotFoundException {
         super(filepath);
+    }
+
+    public ConllReader(File file) throws FileNotFoundException {
+        super(file);
     }
 
     @Override

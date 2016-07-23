@@ -10,6 +10,8 @@ import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.util.DateUtils;
 import jp.naist.cl.srparser.util.SystemUtils;
 
+import java.io.File;
+
 /**
  * jp.naist.cl.srparser.app
  *
@@ -117,6 +119,17 @@ public final class App {
 
     private void train() {
         try {
+            // validate args
+            boolean valid = (
+                validateFile(Config.Key.TRAINING_FILE,     true) &&
+                validateFile(Config.Key.DEVELOPMENT_FILE,  true) &&
+                validateFile(Config.Key.TEST_FILE,        false)
+            );
+            if (!valid) {
+                return;
+            }
+
+            Logger.info("---- SETTING UP ----");
             int iteration    = Config.getInt(Config.Key.ITERATION);
             Trainer trainer  = loadTrainer(Config.Key.TRAINING_FILE);
             Trainer tester   = loadTrainer(Config.Key.DEVELOPMENT_FILE);
@@ -146,21 +159,54 @@ public final class App {
                 Logger.info("//----------------------------");
             }
             Logger.info("---- TRAINING FINISHED ----");
+
+            if (Config.isSet(Config.Key.TEST_FILE)) {
+                Logger.info("---- TEST STARTED ----");
+                tester = loadTrainer(Config.Key.TEST_FILE);
+                tester.setWeights(trainer.getWeights());
+                tester.test((gold, pred) -> {
+                    Logger.info("Test UAS:\t%1.6f", Evaluator.calcUAS(gold, pred));
+                });
+                Logger.info("---- TEST FINISHED ----");
+            }
         } catch (Exception e) {
             Logger.error(e);
         }
     }
 
-    private Trainer loadTrainer(Config.Key file) throws Exception {
+    private boolean validateFile(Config.Key key, boolean required) {
+        boolean valid = true;
+        if (Config.isSet(key)) {
+            String filepath = Config.getString(key);
+            File file = new File(Config.getString(key));
+            if (!file.exists()) {
+                valid = false;
+                Logger.error("%s=%s Not Found.", key.name, filepath);
+            } else if(!file.canRead()) {
+                valid = false;
+                Logger.error("%s=%s is not readable.", key.name, filepath);
+            }
+        } else if (required) {
+            valid = false;
+            Logger.error("argument %s is required.", key);
+        }
+        return valid;
+    }
+
+    private Trainer loadTrainer(Config.Key key) throws Exception {
         String filepath;
         String label;
-        switch (file) {
+        switch (key) {
             case TRAINING_FILE:
-                filepath = Config.getString(file);
+                filepath = Config.getString(key);
                 label = "TRAINING";
                 break;
             case DEVELOPMENT_FILE:
-                filepath = Config.getString(file);
+                filepath = Config.getString(key);
+                label = "DEVELOPMENT";
+                break;
+            case TEST_FILE:
+                filepath = Config.getString(key);
                 label = "DEVELOPMENT";
                 break;
             default:

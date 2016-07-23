@@ -26,6 +26,7 @@ public class Config {
         ITERATION        ("iteration", 20,                   false, ""),
         TRAINING_FILE    ("trainfile", "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
+        TEST_FILE        ("testfile",  "",                   false, ""),
         TRAIN_LOCALLY    ("locally",   false,                false, ""),
         BEAM_WIDTH       ("beamwidth", 16,                   false, ""),
         EARLY_UPDATE     ("early",     false,                false, ""),
@@ -89,6 +90,7 @@ public class Config {
         putInt     (Key.ITERATION,        properties);
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
+        putString  (Key.TEST_FILE,        properties);
         putBoolean (Key.TRAIN_LOCALLY,    properties);
         putInt     (Key.BEAM_WIDTH,       properties);
         putBoolean (Key.EARLY_UPDATE,     properties);
@@ -206,7 +208,16 @@ public class Config {
 
     static boolean isSet(Key key) {
         checkInitialized();
-        return instance.values.get(key) != null;
+        boolean isset;
+        Object value = instance.values.get(key);
+        if (value == null) {
+            isset = false;
+        } else if (value instanceof String) {
+            isset = !((String) value).equals("");
+        } else {
+            isset = true;
+        }
+        return isset;
     }
 
     static String getDump() {

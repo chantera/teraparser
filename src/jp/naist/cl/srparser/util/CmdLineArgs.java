@@ -46,13 +46,23 @@ public class CmdLineArgs {
             } else {
                 names = new ArrayDeque<>(Arrays.asList(name.split("")));
             }
-            if (m.groupCount() == 3) {
-                name = names.removeLast();
-                String value = m.group(3);
-                options.put(name, value != null ? value : "");
+            name = names.removeLast();
+            String value;
+            if (m.groupCount() == 3 && (value = m.group(3)) != null) {
+                options.put(name, value);
+            } else if (i + 1 < argc) {
+                String next = args[i + 1];
+                if (!next.startsWith("-")) {
+                    options.put(name, next);
+                    i++;
+                } else {
+                    options.put(name, "");
+                }
+            } else {
+                options.put(name, "");
             }
             for (String n : names) {
-                options.put(n, options.getOrDefault(n, ""));
+                options.put(n, "");
             }
         }
     }
