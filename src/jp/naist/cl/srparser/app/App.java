@@ -2,19 +2,30 @@ package jp.naist.cl.srparser.app;
 
 import jp.naist.cl.srparser.io.ConllReader;
 import jp.naist.cl.srparser.io.Logger;
+import jp.naist.cl.srparser.model.DepTree;
 import jp.naist.cl.srparser.model.Model;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
+import jp.naist.cl.srparser.parser.GreedyParser;
+import jp.naist.cl.srparser.parser.BeamSearchParser;
 import jp.naist.cl.srparser.parser.LocallyLearningTrainer;
 import jp.naist.cl.srparser.parser.Parser;
+import jp.naist.cl.srparser.parser.Perceptron;
 import jp.naist.cl.srparser.parser.StructuredLearningTrainer;
 import jp.naist.cl.srparser.parser.Trainer;
 import jp.naist.cl.srparser.transition.Oracle;
+import jp.naist.cl.srparser.transition.State;
 import jp.naist.cl.srparser.util.DateUtils;
 import jp.naist.cl.srparser.util.FileUtils;
 import jp.naist.cl.srparser.util.SystemUtils;
+import jp.naist.cl.srparser.util.Tuple;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * jp.naist.cl.srparser.app
@@ -116,7 +127,73 @@ public final class App {
     }
 
     private void parseCli() {
+        try {
+            // validate args
+            boolean valid = validateFile(Config.Key.MODEL_INPUT, true);
+            if (!valid) {
+                return;
+            }
+            if (Config.isSet(Config.Key.SAVE_CONFIG)) {
+                String newConfigFile = Config.getString(Config.Key.SAVE_CONFIG);
+                Logger.info("saving new config file to %s ...", newConfigFile);
+                Config.save(newConfigFile);
+            }
 
+            Logger.info("---- SETTING UP ----");
+            Model model = (Model) FileUtils.readObject(Config.getString(Config.Key.MODEL_INPUT));
+            Token.setAttributeMap(model.getAttributeMap());
+            Parser parser;
+            int beamWidth = Config.getInt(Config.Key.BEAM_WIDTH);
+            if (beamWidth == 1) {
+                parser = new GreedyParser(new Perceptron(model.getWeight()));
+            } else {
+                parser = new BeamSearchParser(new Perceptron(model.getWeight()), beamWidth);
+            }
+
+            Logger.info("---- PARSING START  ----");
+            Scanner scanner = new Scanner(System.in);
+            ArrayList<Tuple<Sentence, State>> history = new ArrayList<>();
+            while (true) {
+                System.out.println("Input a sentence. [or \"quit\" to close]");
+                String input = scanner.nextLine();
+                if (input.toLowerCase().equals("quit")) {
+                    break;
+                }
+                int index = history.size();
+                // @TODO: implement morphological parser.
+                List<Token> tokens = Arrays.stream(new String[]{
+                    "0	<ROOT>	_	ROOT	ROOT	_	-1	ROOT	_	_",
+                    "1	Pierre	_	NN	NNP	_	2	NMOD	_	_",
+                    "2	Vinken	_	NN	NNP	_	8	SUB	_	_",
+                    "3	,	_	,	,	_	2	P	_	_",
+                    "4	61	_	CD	CD	_	5	NMOD	_	_",
+                    "5	years	_	NN	NNS	_	6	AMOD	_	_",
+                    "6	old	_	JJ	JJ	_	2	NMOD	_	_",
+                    "7	,	_	,	,	_	2	P	_	_",
+                    "8	will	_	MD	MD	_	0	ROOT	_	_",
+                    "9	join	_	VB	VB	_	8	VC	_	_",
+                    "10	the	_	DT	DT	_	11	NMOD	_	_",
+                    "11	board	_	NN	NN	_	9	OBJ	_	_",
+                    "12	as	_	IN	IN	_	9	VMOD	_	_",
+                    "13	a	_	DT	DT	_	15	NMOD	_	_",
+                    "14	nonexecutive	_	JJ	JJ	_	15	NMOD	_	_",
+                    "15	director	_	NN	NN	_	12	PMOD	_	_",
+                    "16	Nov.	_	NN	NNP	_	9	VMOD	_	_",
+                    "17	29	_	CD	CD	_	16	NMOD	_	_",
+                    "18	.	_	.	.	_	8	P	_	_"
+                }).map(line -> new Token(line.split("\\t"))).collect(Collectors.toList());
+                Sentence sentence = new Sentence(index, tokens.toArray(new Token[tokens.size()]));
+                System.out.println(sentence);
+                State state = parser.parse(sentence);
+                System.out.println(new DepTree(sentence));
+                history.add(new Tuple<>(sentence, state));
+            }
+            Logger.info("---- PARSING FINISHED ----");
+
+            Logger.info("Parsing Finished Successfully.");
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 
     private void parseConll() {
@@ -280,7 +357,7 @@ public final class App {
                 break;
             case TEST_FILE:
                 filepath = Config.getString(key);
-                label = "DEVELOPMENT";
+                label = "TEST";
                 break;
             default:
                 throw new Exception("Invalide File Key");
