@@ -160,11 +160,13 @@ public final class App {
         Logger.info("Initializeing Trainer ...");
 
         Trainer trainer;
+        Oracle oracle = new Oracle(Oracle.Algorithm.STATIC);
         if (Config.getBoolean(Config.Key.TRAIN_LOCALLY)) {
-            trainer = new LocallyLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC));
+            trainer = new LocallyLearningTrainer(sentences, oracle);
         } else {
-            int beamWidth = Config.getInt(Config.Key.BEAM_WIDth);
-            trainer = new StructuredLearningTrainer(sentences, new Oracle(Oracle.Algorithm.STATIC), beamWidth);
+            int beamWidth = Config.getInt(Config.Key.BEAM_WIDTH);
+            boolean earlyUpate = Config.getBoolean(Config.Key.EARLY_UPDATE);
+            trainer = new StructuredLearningTrainer(sentences, oracle, beamWidth, earlyUpate);
         }
         return trainer;
     }

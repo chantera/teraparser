@@ -26,7 +26,8 @@ public class Config {
         TRAINING_FILE    ("trainfile", "",                   true,  ""),
         DEVELOPMENT_FILE ("devfile",   "",                   false, ""),
         TRAIN_LOCALLY    ("locally",   false,                false, ""),
-        BEAM_WIDth       ("beamwidth", 16,                   false, ""),
+        BEAM_WIDTH       ("beamwidth", 16,                   false, ""),
+        EARLY_UPDATE     ("early",     false,                false, ""),
         VERBOSE          ("verbose",   true,                 false, ""),
         LOGDIR           ("logdir",    "logs",               false, ""),
         LOGLEVEL         ("loglevel",  Logger.LogLevel.INFO, false, "");
@@ -76,7 +77,8 @@ public class Config {
         putString  (Key.TRAINING_FILE,    properties);
         putString  (Key.DEVELOPMENT_FILE, properties);
         putBoolean (Key.TRAIN_LOCALLY,    properties);
-        putInt     (Key.BEAM_WIDth,       properties);
+        putInt     (Key.BEAM_WIDTH,       properties);
+        putBoolean (Key.EARLY_UPDATE,     properties);
         putString  (Key.LOGDIR,           properties);
         putLogLevel(Key.LOGLEVEL,         properties);
         putBoolean (Key.VERBOSE,          properties);
