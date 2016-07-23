@@ -104,7 +104,7 @@ public class Config {
             } else if (!newConfigFilePath.endsWith(CONFIG_FILE_EXT)) {
                 newConfigFilePath += CONFIG_FILE_EXT;
             }
-            if (FileUtils.isWritable(newConfigFilePath)) {
+            if (!FileUtils.isWritable(newConfigFilePath)) {
                 System.err.println("new config file " + newConfigFilePath + " is not writable.");
                 return App.Mode.NONE; // this stop reading args anymore.
             }
