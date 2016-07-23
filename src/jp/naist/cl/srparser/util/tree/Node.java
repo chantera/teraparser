@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class Node<T> implements Component<T> {
     protected T data;
-    protected ArrayList<Component> children = new ArrayList<>();
+    protected ArrayList<Component<T>> children = new ArrayList<>();
 
     public Node(T data) {
         this.data = data;
@@ -25,19 +25,19 @@ public class Node<T> implements Component<T> {
         this.data = data;
     }
 
-    public void addChild(Component component) {
+    public void addChild(Component<T> component) {
         children.add(component);
     }
 
-    public Component getChild(int index) {
+    public Component<T> getChild(int index) {
         return children.get(index);
     }
 
-    public Component getLastChild() {
+    public Component<T> getLastChild() {
         return children.get(children.size() - 1);
     }
 
-    public Component removeLastChild() {
+    public Component<T> removeLastChild() {
         return children.remove(children.size() - 1);
     }
 

@@ -87,6 +87,7 @@ public class CmdLineArgs {
         return options.containsKey(key);
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, String> getOptions() {
         return (Map<String, String>) options.clone();
     }

@@ -59,4 +59,8 @@ public class StringUtils {
         }
         return buf.toString();
     }
+
+    public static String repeat(String str, int repeat) {
+        return new String(new char[repeat]).replace("\0", str);
+    }
 }

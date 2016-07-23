@@ -8,7 +8,7 @@ import jp.naist.cl.srparser.util.tree.Tree;
  *
  * @author Hiroki Teranishi
  */
-public class DepTree extends Tree {
+public class DepTree extends Tree<Token> {
 
     public DepTree(Sentence sentence) {
         super(buildNodes(sentence.tokens));
