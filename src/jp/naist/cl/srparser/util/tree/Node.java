@@ -41,6 +41,17 @@ public class Node<T> implements Component<T> {
         return children.remove(children.size() - 1);
     }
 
+    public int countDescendent() {
+        int count = 0;
+        for (Component<T> child : children) {
+            count++;
+            if (child instanceof Node) {
+                count += ((Node) child).countDescendent();
+            }
+        }
+        return countDescendent();
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

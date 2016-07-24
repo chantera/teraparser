@@ -116,11 +116,15 @@ public final class App {
 
     private void parse() {
         try {
+            // @TODO: implement
+            /*
             if (Config.isSet(Config.Key.INPUT)) {
                 parseConll();
             } else {
                 parseCli();
             }
+            */
+            parseConll();
         } catch (Exception e) {
             Logger.error(e);
         }
