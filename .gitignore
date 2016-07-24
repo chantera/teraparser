@@ -48,3 +48,6 @@ fabric.properties
 
 # Application log
 /logs/
+
+# Application model ouput
+*.gz
