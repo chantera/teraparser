@@ -381,7 +381,7 @@ public final class App {
         Logger.info("Initializing %s ...", trainerLabel);
 
         Trainer trainer;
-        Oracle oracle = new Oracle(Oracle.Algorithm.STATIC);
+        Oracle oracle = new Oracle(Oracle.Algorithm.STATIC, sentences.length);
         if (Config.getBoolean(Config.Key.TRAIN_LOCALLY)) {
             trainer = new LocallyLearningTrainer(sentences, oracle);
         } else {

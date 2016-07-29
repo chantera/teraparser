@@ -5,7 +5,7 @@ import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionService;
@@ -48,7 +48,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
 
     private void trainWithMaxViolation(Sentence sentence) {
         BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
-        Map<State, Double> scoreHistory = new HashMap<>();
+        Map<State, Double> scoreHistory = new IdentityHashMap<>(sentence.length * beamWidth * 2);
 
         // do beam-search storing score
         boolean terminate = false;

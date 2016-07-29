@@ -12,11 +12,17 @@ import java.util.Map;
  * @author Hiroki Teranishi
  */
 public class Oracle {
+    private static final int INITIAL_CAPACITY = 16;
     private final Algorithm algorithm;
-    private final Map<Sentence.ID, State> oracleRegistry = new HashMap<>();
+    private final Map<Sentence.ID, State> oracleRegistry;
 
     public Oracle(Algorithm algorithm) {
+        this(algorithm, INITIAL_CAPACITY);
+    }
+
+    public Oracle(Algorithm algorithm, int initialCapacity) {
         this.algorithm = algorithm;
+        oracleRegistry = new HashMap<>(initialCapacity * 4/3);
     }
 
     public State getState(Sentence sentence) {
