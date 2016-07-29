@@ -12,8 +12,8 @@ import java.util.Date;
  * @author Hiroki Teranishi
  */
 public class DateUtils {
-    private final static String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private final static Calendar calendar = Calendar.getInstance();
+    private static final String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final Calendar calendar = Calendar.getInstance();
 
     private DateUtils() {
         throw new AssertionError();

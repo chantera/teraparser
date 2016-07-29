@@ -19,8 +19,8 @@ import java.util.zip.GZIPOutputStream;
  * @author Hiroki Teranishi
  */
 public class FileUtils {
-    public final static String SEPALATOR = System.getProperty("file.separator");
-    public final static String GZIP_EXT = ".gz";
+    public static final String SEPALATOR = System.getProperty("file.separator");
+    public static final String GZIP_EXT = ".gz";
 
     private FileUtils() {
         throw new AssertionError();

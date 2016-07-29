@@ -21,9 +21,9 @@ import java.util.StringJoiner;
  * @author Hiroki Teranishi
  */
 public class Config {
-    private final static String CONFIG_FILE_EXT = ".properties";
-    private final static String DEFAULT_CONFIG_DIR = "." + FileUtils.SEPALATOR + "config";
-    private final static String DEFAULT_NEW_CONFIG_FILENAME_FORMAT = "yyyy-MM-dd";
+    private static final String CONFIG_FILE_EXT = ".properties";
+    private static final String DEFAULT_CONFIG_DIR = "." + FileUtils.SEPALATOR + "config";
+    private static final String DEFAULT_NEW_CONFIG_FILENAME_FORMAT = "yyyy-MM-dd";
     private static Config instance = null;
     private final App.Mode mode;
     private LinkedHashMap<Key, Object> values = new LinkedHashMap<>();
