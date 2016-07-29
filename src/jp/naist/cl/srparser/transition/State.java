@@ -16,7 +16,7 @@ import java.util.Set;
  * @author Hiroki Teranishi
  */
 public class State {
-    final int step;
+    public final int step;
     final Token[] tokens;
     final ArrayDeque<Integer> stack;
     final int bufferHead;

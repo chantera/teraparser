@@ -21,7 +21,8 @@ interface BeamSearchDecoder {
      */
     default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier) {
         ArrayList<BeamItem> newbeam = new ArrayList<>();
-        for (BeamItem item : beam) {
+        for (int i = 0; i < beam.length; i++) {
+            BeamItem item = beam[i];
             State state = item.getState();
             if (state.isTerminal()) {
                 newbeam.add(item);
@@ -29,7 +30,8 @@ interface BeamSearchDecoder {
             }
             for (Action action : state.possibleActions) {
                 double score = item.getScore() + classifier.getScore(state.features, action);
-                newbeam.add(new BeamItem(action.apply(state), score));
+                int priority = 2000 - i * 10 + action.index; // assign higher priority to the preceding item
+                newbeam.add(new BeamItem(action.apply(state), score, priority));
             }
         }
         return newbeam.stream().sorted().limit(beamWidth).toArray(BeamItem[]::new);
@@ -40,8 +42,8 @@ interface BeamSearchDecoder {
      */
     default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) throws Exception {
         ArrayList<BeamItem> newbeam = new ArrayList<>();
-        for (BeamItem item : beam) {
-            completionService.submit(new BeamTask(item, classifier));
+        for (int i = 0; i < beam.length; i++) {
+            completionService.submit(new BeamTask(beam[i], classifier, i));
         }
         for (int i = 0; i < beam.length; i++) {
             newbeam.addAll(completionService.take().get());
@@ -52,10 +54,12 @@ interface BeamSearchDecoder {
     class BeamTask implements Callable<List<BeamItem>> {
         private BeamItem item;
         private Perceptron classifier;
+        private int index;
 
-        BeamTask(BeamItem item, Perceptron classifier) {
+        BeamTask(BeamItem item, Perceptron classifier, int index) {
             this.item = item;
             this.classifier = classifier;
+            this.index = index;
         }
 
         @Override
@@ -68,15 +72,23 @@ interface BeamSearchDecoder {
             }
             for (Action action : state.possibleActions) {
                 double score = item.getScore() + classifier.getScore(state.features, action);
-                items.add(new BeamItem(action.apply(state), score));
+                int priority = 2000 - index * 10 + action.index; // assign higher priority to the preceding item
+                items.add(new BeamItem(action.apply(state), score, priority));
             }
             return items;
         }
     }
 
     class BeamItem extends Tuple<State, Double> implements Comparable {
+        private int priority;
+
         BeamItem(State state, Double score) {
+            this(state, score, 0);
+        }
+
+        BeamItem(State state, Double score, int priority) {
             super(state, score);
+            this.priority = priority;
         }
 
         State getState() {
@@ -89,7 +101,16 @@ interface BeamSearchDecoder {
 
         @Override
         public int compareTo(Object o) {
-            return ((BeamItem) o).right.compareTo(this.right);
+            BeamItem other = (BeamItem) o;
+            int diff = other.right.compareTo(this.right);
+            if (diff != 0) {
+                return diff;
+            }
+            diff = other.priority - this.priority;
+            if (diff != 0) {
+                return diff;
+            }
+            return diff;
         }
     }
 }

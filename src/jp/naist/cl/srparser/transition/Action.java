@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Hiroki Teranishi
  */
 public enum Action {
-    LEFT(0) {
+    LEFT(3) {
         /**
          * Left
          * (s|i, j|b, A) => (s, j|b, A+(j,l,i))
@@ -26,7 +26,7 @@ public enum Action {
             return new State(state, this, new Arc(head.id, dependent.id), stack, state.bufferHead);
         }
     },
-    RIGHT(1) {
+    RIGHT(2) {
         /**
          * Right
          * (s|i, j|b, A) => (s|ij, b, A+(i,l,j))
@@ -40,7 +40,7 @@ public enum Action {
             return new State(state, this, new Arc(head.id, dependent.id), stack, state.bufferHead + 1);
         }
     },
-    SHIFT(2) {
+    SHIFT(1) {
         /**
          * Shift
          * (s, i|b, A) => (s|i, b, A)
@@ -52,7 +52,7 @@ public enum Action {
             return new State(state, this, null, stack, state.bufferHead + 1);
         }
     },
-    REDUCE(3) {
+    REDUCE(0) {
         /**
          * Reduce
          * (s|i, b, A) => (s, b, A)
