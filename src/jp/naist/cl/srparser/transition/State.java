@@ -3,6 +3,7 @@ package jp.naist.cl.srparser.transition;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
+import jp.naist.cl.srparser.util.HashUtils;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -231,6 +232,26 @@ public class State {
             return true;
         }
         return false;
+    }
+
+    // Lazily initialized, cached hashCode
+    private volatile int hashCode;
+
+    @Override
+    public int hashCode() {
+        int result = hashCode;
+        if (result == 0) {
+            /*
+            result = new HashUtils.HashCodeBuilder()
+                    .append(step)
+                    .append(features)
+                    .append(prevAction.index)
+                    .toHashCode();
+            */
+            result = super.hashCode();
+            hashCode = result;
+        }
+        return result;
     }
 
     @Override
