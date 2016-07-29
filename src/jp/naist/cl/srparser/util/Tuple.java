@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Hiroki Teranishi
  */
 public class Tuple<L, R> implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3436252075895211268L;
 
     public final L left;
     public final R right;

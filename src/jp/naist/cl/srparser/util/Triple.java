@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Hiroki Teranishi
  */
 public class Triple<L, M, R> implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 6381934395925396386L;
 
     public final L left;
     public final M middle;

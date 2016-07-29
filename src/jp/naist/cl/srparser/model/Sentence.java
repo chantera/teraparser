@@ -1,6 +1,6 @@
 package jp.naist.cl.srparser.model;
 
-import jp.naist.cl.srparser.util.AbstractIntVO;
+import jp.naist.cl.srparser.util.IntValueObject;
 import jp.naist.cl.srparser.util.StringUtils;
 
 /**
@@ -19,7 +19,7 @@ public class Sentence {
         this.length = tokens.length;
     }
 
-    public final class ID extends AbstractIntVO {
+    public final class ID extends IntValueObject {
         private ID(int value) {
             super(value);
         }
