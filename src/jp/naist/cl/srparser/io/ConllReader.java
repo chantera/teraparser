@@ -6,6 +6,7 @@ import jp.naist.cl.srparser.model.Token;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * jp.naist.cl.srparser.io
@@ -25,8 +26,8 @@ public class ConllReader extends Reader {
 
     @Override
     public Sentence[] read() throws Exception {
-        ArrayList<Sentence> sentences = new ArrayList<>();
-        ArrayList<Token> tokens = new ArrayList<>();
+        List<Sentence> sentences = new ArrayList<>();
+        List<Token> tokens = new ArrayList<>();
         tokens.add(Token.createRoot());
 
         String line;

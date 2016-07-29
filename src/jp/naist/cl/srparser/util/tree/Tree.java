@@ -46,7 +46,7 @@ public class Tree<T> {
     }
 
     public String[] getTreeExpr(String indent) {
-        ArrayList<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
         pushTreeLine(lines, root, indent, 0);
         return lines.toArray(new String[lines.size()]);
     }

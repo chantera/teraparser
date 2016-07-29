@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +15,7 @@ import java.util.regex.Pattern;
  * @author Hiroki Teranishi
  */
 public class CmdLineArgs {
-    private final ArrayList<String> params = new ArrayList<>();
+    private final List<String> params = new ArrayList<>();
     private final LinkedHashMap<String, String> options = new LinkedHashMap<>();
     private final String[] args;
     private final int argc;

@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringJoiner;
@@ -26,7 +26,7 @@ public class Config {
     private static final String DEFAULT_NEW_CONFIG_FILENAME_FORMAT = "yyyy-MM-dd";
     private static Config instance = null;
     private final App.Mode mode;
-    private LinkedHashMap<Key, Object> values = new LinkedHashMap<>();
+    private Map<Key, Object> values = new EnumMap<>(Key.class);
 
     enum Key {
         CONFIG_FILE      ("config",     null,                 false, ""),

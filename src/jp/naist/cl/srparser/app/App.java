@@ -165,7 +165,7 @@ public final class App {
 
             Logger.info("---- PARSING START  ----");
             Scanner scanner = new Scanner(System.in);
-            ArrayList<Tuple<Sentence, State>> history = new ArrayList<>();
+            List<Tuple<Sentence, State>> history = new ArrayList<>();
             while (true) {
                 System.out.println("Input a sentence. [or \"quit\" to close]");
                 String input = scanner.nextLine();

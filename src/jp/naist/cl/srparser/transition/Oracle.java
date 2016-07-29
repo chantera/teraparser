@@ -4,7 +4,7 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * jp.naist.cl.srparser.transition
@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class Oracle {
     private final Algorithm algorithm;
-    private final HashMap<Sentence.ID, State> oracleRegistry = new HashMap<>();
+    private final Map<Sentence.ID, State> oracleRegistry = new HashMap<>();
 
     public Oracle(Algorithm algorithm) {
         this.algorithm = algorithm;

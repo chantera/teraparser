@@ -1,6 +1,6 @@
 package jp.naist.cl.srparser.model;
 
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.BiMap;
 import jp.naist.cl.srparser.util.Tuple;
 
 /**
@@ -8,13 +8,13 @@ import jp.naist.cl.srparser.util.Tuple;
  *
  * @author Hiroki Teranishi
  */
-public class Model extends Tuple<HashBiMap<Integer, Tuple<Token.Attribute, String>>, float[][]> {
+public class Model extends Tuple<BiMap<Integer, Tuple<Token.Attribute, String>>, float[][]> {
 
-    public Model(HashBiMap<Integer, Tuple<Token.Attribute, String>> attributeMap, float[][] weights) {
+    public Model(BiMap<Integer, Tuple<Token.Attribute, String>> attributeMap, float[][] weights) {
         super(attributeMap, weights);
     }
 
-    public HashBiMap<Integer, Tuple<Token.Attribute, String>> getAttributeMap() {
+    public BiMap<Integer, Tuple<Token.Attribute, String>> getAttributeMap() {
         return super.getLeft();
     }
 

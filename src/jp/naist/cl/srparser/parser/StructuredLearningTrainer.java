@@ -7,6 +7,7 @@ import jp.naist.cl.srparser.transition.State;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -47,7 +48,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
 
     private void trainWithMaxViolation(Sentence sentence) {
         BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
-        HashMap<State, Double> scoreHistory = new HashMap<>();
+        Map<State, Double> scoreHistory = new HashMap<>();
 
         // do beam-search storing score
         boolean terminate = false;

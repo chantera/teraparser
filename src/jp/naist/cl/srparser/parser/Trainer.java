@@ -23,7 +23,7 @@ public abstract class Trainer {
     Oracle oracle;
     private Parser parser;
 
-    private HashMap<Sentence.ID, Arc[]> goldArcMap = new HashMap<>();
+    private Map<Sentence.ID, Arc[]> goldArcMap = new HashMap<>();
 
     public Trainer(Parser parser, Oracle oracle) {
         this.parser = parser;
@@ -84,7 +84,7 @@ public abstract class Trainer {
     }
 
     public void test(Callback callback) {
-        HashMap<Sentence.ID, Arc[]> predArcMap = new HashMap<>();
+        Map<Sentence.ID, Arc[]> predArcMap = new HashMap<>();
         for (Sentence sentence : sentences) {
             predArcMap.put(sentence.id, parser.parse(sentence).arcs);
         }

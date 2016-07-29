@@ -20,7 +20,7 @@ interface BeamSearchDecoder {
      * beam-search with single thread
      */
     default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier) {
-        ArrayList<BeamItem> newbeam = new ArrayList<>();
+        List<BeamItem> newbeam = new ArrayList<>();
         for (int i = 0; i < beam.length; i++) {
             BeamItem item = beam[i];
             State state = item.getState();
@@ -41,7 +41,7 @@ interface BeamSearchDecoder {
      * beam-search with multi-thread
      */
     default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) throws Exception {
-        ArrayList<BeamItem> newbeam = new ArrayList<>();
+        List<BeamItem> newbeam = new ArrayList<>();
         for (int i = 0; i < beam.length; i++) {
             completionService.submit(new BeamTask(beam[i], classifier, i));
         }

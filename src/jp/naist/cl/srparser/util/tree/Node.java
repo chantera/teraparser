@@ -1,6 +1,7 @@
 package jp.naist.cl.srparser.util.tree;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * jp.naist.cl.srparser.util.tree
@@ -9,7 +10,7 @@ import java.util.ArrayList;
  */
 public class Node<T> implements Component<T> {
     protected T data;
-    protected ArrayList<Component<T>> children = new ArrayList<>();
+    protected List<Component<T>> children = new ArrayList<>();
 
     public Node(T data) {
         this.data = data;

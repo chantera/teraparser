@@ -3,7 +3,7 @@ package jp.naist.cl.srparser.transition;
 import jp.naist.cl.srparser.model.Token;
 
 import java.util.ArrayDeque;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 
@@ -75,7 +75,7 @@ public enum Action {
     public abstract State apply(State state);
 
     protected static Set<Action> getPossibleActions(State state) {
-        Set<Action> actions = new HashSet<>();
+        Set<Action> actions = EnumSet.noneOf(Action.class);
         if (state.isTerminal()) {
             return actions;
         }

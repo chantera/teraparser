@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.model;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import jp.naist.cl.srparser.util.Tuple;
 
@@ -9,7 +10,7 @@ import jp.naist.cl.srparser.util.Tuple;
  * @author Hiroki Teranishi
  */
 public class Token implements Cloneable {
-    private static HashBiMap<Integer, Tuple<Attribute, String>> attributeRegistry = HashBiMap.create();
+    private static BiMap<Integer, Tuple<Attribute, String>> attributeRegistry = HashBiMap.create();
 
     public final int id;
     public final int form;
@@ -22,11 +23,11 @@ public class Token implements Cloneable {
     // public final int phead;
     // public final int pdeprel;
 
-    public static void setAttributeMap(HashBiMap<Integer, Tuple<Attribute, String>> attributeMap) {
+    public static void setAttributeMap(BiMap<Integer, Tuple<Attribute, String>> attributeMap) {
         attributeRegistry = attributeMap;
     }
 
-    public static HashBiMap<Integer, Tuple<Attribute, String>> getAttributeMap() {
+    public static BiMap<Integer, Tuple<Attribute, String>> getAttributeMap() {
         return attributeRegistry;
     }
 
