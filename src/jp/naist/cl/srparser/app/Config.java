@@ -71,7 +71,7 @@ public class Config {
 
     private App.Mode load(CmdLineArgs cmdArgs) {
         App.Mode mode;
-        String command = cmdArgs.getParamOrDefalut(0, "");
+        String command = cmdArgs.getParamOrDefault(0, "");
         if (command.equals(App.Mode.PARSE.label)) {
             mode = App.Mode.PARSE;
         } else if (command.equals(App.Mode.TRAIN.label)) {
