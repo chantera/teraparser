@@ -64,7 +64,7 @@ public class Token implements Cloneable {
         // PDEPREL;
     }
 
-    public Token(String attributes[]) {
+    public Token(String[] attributes) {
         this.id      = Integer.parseInt(attributes[0]);
         this.form    = registerAttribute(Attribute.FORM,    attributes[1]);
         // this.lemma   = registerAttribute(Attribute.LEMMA,   attributes[2]);
