@@ -79,7 +79,7 @@ interface BeamSearchDecoder {
         }
     }
 
-    class BeamItem extends Tuple<State, Double> implements Comparable {
+    class BeamItem extends Tuple<State, Double> implements Comparable<BeamItem> {
         private int priority;
 
         BeamItem(State state, Double score) {
@@ -100,13 +100,12 @@ interface BeamSearchDecoder {
         }
 
         @Override
-        public int compareTo(Object o) {
-            BeamItem other = (BeamItem) o;
-            int diff = other.right.compareTo(this.right);
+        public int compareTo(BeamItem another) {
+            int diff = another.right.compareTo(this.right);
             if (diff != 0) {
                 return diff;
             }
-            diff = other.priority - this.priority;
+            diff = another.priority - this.priority;
             if (diff != 0) {
                 return diff;
             }

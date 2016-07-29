@@ -5,7 +5,7 @@ package jp.naist.cl.srparser.util;
  *
  * @author Hiroki Teranishi
  */
-public class IntValueObject {
+public class IntValueObject implements Comparable<IntValueObject> {
     protected final int value;
 
     protected IntValueObject(int value) {
@@ -26,6 +26,11 @@ public class IntValueObject {
             return this.value == other.value;
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(IntValueObject another) {
+        return this.value - another.value;
     }
 
     @Override
