@@ -38,6 +38,7 @@ public class Config {
         TEST_FILE        ("testfile",   "",                   false, ""),
         MODEL_OUTPUT     ("modelout",   "",                   false, ""),
         ITERATION        ("iteration",  20,                   false, ""),
+        N_THREADS        ("nthreads",   8,                    false, ""),
         TRAIN_LOCALLY    ("locally",    false,                false, ""),
         BEAM_WIDTH       ("beamwidth",  16,                   false, ""),
         EARLY_UPDATE     ("early",      false,                false, ""),
@@ -120,6 +121,7 @@ public class Config {
         putString  (Key.TEST_FILE,        properties);
         putString  (Key.MODEL_OUTPUT,     properties);
         putInt     (Key.ITERATION,        properties);
+        putInt     (Key.N_THREADS,        properties);
         putBoolean (Key.TRAIN_LOCALLY,    properties);
         putInt     (Key.BEAM_WIDTH,       properties);
         putBoolean (Key.EARLY_UPDATE,     properties);
@@ -272,7 +274,7 @@ public class Config {
         }
         for (Map.Entry<Key, Object> e : instance.values.entrySet()) {
             Key key = e.getKey();
-            if (key.equals(Key.CONFIG_FILE) || key.equals(Key.SAVE_CONFIG)) {
+            if (key == Key.CONFIG_FILE || key == Key.SAVE_CONFIG) {
                 continue;
             }
             joiner.add(key.name + "=" + e.getValue());

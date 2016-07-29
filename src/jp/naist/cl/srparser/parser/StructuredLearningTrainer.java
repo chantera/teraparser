@@ -6,6 +6,10 @@ import jp.naist.cl.srparser.transition.State;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 /**
@@ -14,16 +18,18 @@ import java.util.function.Consumer;
  * @author Hiroki Teranishi
  */
 public class StructuredLearningTrainer extends Trainer implements BeamSearchDecoder {
+    private CompletionService<List<BeamItem>> completionService;
     private final int beamWidth;
     private boolean earlyUpdate;
     private Consumer<Sentence> updateMethod;
 
-    public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, int beamWidth) {
-        this(sentences, oracle, beamWidth, false); // default: earlyUpdate = false
+    public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, ExecutorService executor, int beamWidth) {
+        this(sentences, oracle, executor, beamWidth, false); // default: earlyUpdate = false
     }
 
-    public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, int beamWidth, boolean earlyUpdate) {
-        super(new BeamSearchParser(new Perceptron(), beamWidth), oracle, sentences);
+    public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, ExecutorService executor, int beamWidth, boolean earlyUpdate) {
+        super(new BeamSearchParser(new Perceptron(), executor, beamWidth), oracle, sentences);
+        completionService = new ExecutorCompletionService<>(executor);
         this.beamWidth = beamWidth;
         this.earlyUpdate = earlyUpdate;
         if (earlyUpdate) {
@@ -46,7 +52,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
         // do beam-search storing score
         boolean terminate = false;
         while (!terminate) {
-            beam = getNextBeamItems(beam, beamWidth, classifier);
+            beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
             boolean allTerminal = true;
             for (BeamItem item : beam) {
                 scoreHistory.putIfAbsent(item.getState(), item.getScore());
@@ -93,7 +99,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
         boolean terminate = false;
         while (!terminate) {
             oracleState = iterator.next();
-            beam = getNextBeamItems(beam, beamWidth, classifier);
+            beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
             terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
 
             final State finalOracleState = oracleState; // make a variable final to use it in lambda
@@ -102,6 +108,15 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
                 classifier.update(oracleState, beam[0].getState()); // early update
                 break;
             }
+        }
+    }
+
+    @Override
+    public BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
+        try {
+            return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier, completionService);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

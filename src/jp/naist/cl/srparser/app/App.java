@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
  */
 public final class App {
     private static App instance = null;
+    private static ExecutorService executor = null;
     private Mode mode;
     private boolean initialized = false;
 
@@ -97,7 +100,13 @@ public final class App {
         if (initialized) {
             throw new Exception("app.initilize() can be called only once.");
         }
-        if (!mode.equals(Mode.HELP) && !mode.equals(Mode.NONE)) {
+        if (mode != Mode.HELP && mode != Mode.NONE) {
+            int nthreads = Config.getInt(Config.Key.N_THREADS);
+            if (nthreads > 1) {
+                executor = Executors.newFixedThreadPool(nthreads);
+            } else {
+                executor = Executors.newSingleThreadExecutor();
+            }
             new Logger.Builder()
                     .setOutputDir(Config.getString(Config.Key.LOGDIR))
                     .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
@@ -151,7 +160,7 @@ public final class App {
             if (beamWidth == 1) {
                 parser = new GreedyParser(new Perceptron(model.getWeight()));
             } else {
-                parser = new BeamSearchParser(new Perceptron(model.getWeight()), beamWidth);
+                parser = new BeamSearchParser(new Perceptron(model.getWeight()), executor, beamWidth);
             }
 
             Logger.info("---- PARSING START  ----");
@@ -378,7 +387,7 @@ public final class App {
         } else {
             int beamWidth = Config.getInt(Config.Key.BEAM_WIDTH);
             boolean earlyUpate = Config.getBoolean(Config.Key.EARLY_UPDATE);
-            trainer = new StructuredLearningTrainer(sentences, oracle, beamWidth, earlyUpate);
+            trainer = new StructuredLearningTrainer(sentences, oracle, executor, beamWidth, earlyUpate);
         }
         return trainer;
     }
@@ -386,6 +395,10 @@ public final class App {
     @Override
     protected void finalize() {
         try {
+            if (executor != null) {
+                executor.shutdownNow();
+                executor = null;
+            }
             Logger.terminate();
             instance = null;
         } finally {
