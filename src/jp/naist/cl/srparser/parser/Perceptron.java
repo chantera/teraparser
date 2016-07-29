@@ -82,19 +82,15 @@ public class Perceptron {
     }
 
     public void update(State oracle, State predict) {
-        State.StateIterator iterator = predict.getIterator();
-        predict = iterator.next(); // initial state
-        while (iterator.hasNext()) {
-            predict = iterator.next();
+        while (predict.prevState != null) {
             updateWeight(weights[predict.prevAction.index], predict.prevState.features, -1);
             updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.features, -count);
+            predict = predict.prevState;
         }
-        iterator = oracle.getIterator();
-        oracle = iterator.next(); // initial state
-        while (iterator.hasNext()) {
-            oracle = iterator.next();
+        while (oracle.prevState != null) {
             updateWeight(weights[oracle.prevAction.index], oracle.prevState.features, 1);
             updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.features, count);
+            oracle = oracle.prevState;
         }
     }
 

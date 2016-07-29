@@ -5,6 +5,7 @@ import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 /**
@@ -39,29 +40,48 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
     }
 
     private void trainWithMaxViolation(Sentence sentence) {
-        State.StateIterator iterator = oracle.getState(sentence).getIterator();
-        State oracleState = iterator.next(); // initial state
         BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+        HashMap<State, Double> scoreHistory = new HashMap<>();
 
-        double maxViolation = Double.NEGATIVE_INFINITY;
-        State maxViolateState = null;
+        // do beam-search storing score
         boolean terminate = false;
         while (!terminate) {
-            oracleState = iterator.next();
             beam = getNextBeamItems(beam, beamWidth, classifier);
+            boolean allTerminal = true;
+            for (BeamItem item : beam) {
+                scoreHistory.putIfAbsent(item.getState(), item.getScore());
+                allTerminal = allTerminal && item.getState().isTerminal();
+            }
+            terminate = allTerminal;
+        }
 
-            double oracleScore = classifier.getScore(oracleState.prevState.features, oracleState.prevAction);
-            double violation = beam[0].getScore() - oracleScore;
+        // find violation
+        State.StateIterator predStateIterator = beam[0].getState().getIterator();
+        State.StateIterator oracleStateIterator = oracle.getState(sentence).getIterator();
+        State predState = predStateIterator.next(); // initial state
+        State oracleState = oracleStateIterator.next(); // initial state
+
+        double oracleScore = 0.0;
+        double maxViolation = Double.NEGATIVE_INFINITY;
+        State maxViolateState = null;
+        State pairedOracleState = null;
+        while (predStateIterator.hasNext() && oracleStateIterator.hasNext()) {
+            predState = predStateIterator.next();
+            oracleState = oracleStateIterator.next();
+
+            oracleScore += classifier.getScore(oracleState.prevState.features, oracleState.prevAction);
+            double violation = scoreHistory.get(predState) - oracleScore;
             if (violation > maxViolation) {
                 maxViolation = violation;
-                maxViolateState = beam[0].getState();
+                maxViolateState = predState;
+                pairedOracleState = oracleState;
             }
-            terminate = !iterator.hasNext() || Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
         }
+
         if (maxViolateState == null) {
             throw new NullPointerException("maxViolateState is null.");
         } else if (!maxViolateState.equals(oracleState)) {
-            classifier.update(oracleState, maxViolateState);
+            classifier.update(pairedOracleState, maxViolateState);
         }
     }
 

@@ -30,8 +30,8 @@ interface BeamSearchDecoder {
     }
 
     class BeamItem extends Tuple<State, Double> implements Comparable {
-        BeamItem(State left, Double right) {
-            super(left, right);
+        BeamItem(State state, Double score) {
+            super(state, score);
         }
 
         State getState() {
