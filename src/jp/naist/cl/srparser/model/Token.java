@@ -25,6 +25,7 @@ public class Token implements Cloneable {
 
     public static void setAttributeMap(BiMap<Integer, Tuple<Attribute, String>> attributeMap) {
         attributeRegistry = attributeMap;
+        clearCache();
     }
 
     public static BiMap<Integer, Tuple<Attribute, String>> getAttributeMap() {
@@ -64,7 +65,7 @@ public class Token implements Cloneable {
         // PDEPREL;
     }
 
-    public Token(String[] attributes) {
+    public Token(String... attributes) {
         this.id      = Integer.parseInt(attributes[0]);
         this.form    = registerAttribute(Attribute.FORM,    attributes[1]);
         // this.lemma   = registerAttribute(Attribute.LEMMA,   attributes[2]);
@@ -134,24 +135,65 @@ public class Token implements Cloneable {
         return this.id == 0;
     }
 
+    private static Token pad;
+
     public static Token createPad() {
-        String[] attributes = {
-            "-10",    // ID
-            "<PAD>",  // FORM
-            "<PAD>",  // LEMMA
-            "NULL",   // CPOSTAG
-            "NULL",   // POSTAG
-            "",       // FEATS
-            "-11",    // HEAD
-            "NULL",   // DEPREL
-            "",       // PHEAD
-            ""        // PDEPREL
-        };
-        return new Token(attributes);
+        if (pad == null) {
+            pad = new Token(
+                "-10",    // ID
+                "<PAD>",  // FORM
+                "<PAD>",  // LEMMA
+                "NULL",   // CPOSTAG
+                "NULL",   // POSTAG
+                "",       // FEATS
+                "-11",    // HEAD
+                "NULL",   // DEPREL
+                "",       // PHEAD
+                ""        // PDEPREL
+            );
+        }
+        return pad;
     }
 
     public boolean isPad() {
         return this.id == -10;
+    }
+
+    private static void clearCache() {
+        pad = null;
+    }
+
+    private volatile int hashCode;
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Token) {
+            final Token other = (Token) obj;
+            return this.id == other.id &&
+                    this.form == other.form &&
+                    this.postag == other.postag &&
+                    this.head == other.head &&
+                    this.deprel == other.deprel;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = hashCode;
+        if (h == 0) {
+            h = 17;
+            h = 31 * h + id;
+            h = 31 * h + form;
+            h = 31 * h + postag;
+            h = 31 * h + head;
+            h = 31 * h + deprel;
+            hashCode = h;
+        }
+        return h;
     }
 
     @Override
