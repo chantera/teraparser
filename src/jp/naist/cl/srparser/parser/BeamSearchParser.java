@@ -34,7 +34,8 @@ public class BeamSearchParser extends GreedyParser implements BeamSearchDecoder 
         try {
             boolean terminate = false;
             while (!terminate) {
-                beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
+                // beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
+                beam = getNextBeamItems(beam, beamWidth, classifier); // does not use multi-threading beam-search
                 terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
             }
         } catch (Exception e) {

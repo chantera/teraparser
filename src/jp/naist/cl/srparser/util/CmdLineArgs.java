@@ -76,7 +76,7 @@ public class CmdLineArgs {
         return params.get(index);
     }
 
-    public String getParamOrDefalut(int index, String defaultValue) {
+    public String getParamOrDefault(int index, String defaultValue) {
         try {
             return params.get(index);
         } catch (IndexOutOfBoundsException e) {
