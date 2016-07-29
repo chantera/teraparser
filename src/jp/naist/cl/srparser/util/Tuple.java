@@ -42,10 +42,16 @@ public class Tuple<L, R> implements Serializable {
         return right;
     }
 
+    private volatile int hashCode;
+
     @Override
     public int hashCode() {
-        return (left == null ? 0 : left.hashCode()) ^
-                (right == null ? 0 : right.hashCode());
+        int h = hashCode;
+        if (h == 0) {
+            h = (left == null ? 0 : left.hashCode()) ^ (right == null ? 0 : right.hashCode());
+            hashCode = h;
+        }
+        return h;
     }
 
     @Override
