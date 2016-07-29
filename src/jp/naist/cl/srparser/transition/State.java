@@ -93,6 +93,10 @@ public class State {
         return tokens[index];
     }
 
+    public Token getTokenOrDefault(int index, Token defaultToken) {
+        return (index < tokens.length && index > -1) ? tokens[index] : defaultToken;
+    }
+
     public Token getStackTopToken() {
         return tokens[stack.getFirst()];
     }
@@ -134,35 +138,23 @@ public class State {
     }
 
     public Token getBufferTokenOrDefault(int position, Token defaultToken) {
-        try {
-            return tokens[bufferHead + position];
-        } catch (IndexOutOfBoundsException e) {
-            return defaultToken;
-        }
+        return getTokenOrDefault(bufferHead + position, defaultToken);
     }
 
     public Token getLeftmostToken(int index) {
-        return getLeftmostTokenOrDefault(index, null);
+        return tokens[leftmost[index]];
     }
 
     public Token getLeftmostTokenOrDefault(int index, Token defaultToken) {
-        try {
-            return tokens[leftmost[index]];
-        } catch (IndexOutOfBoundsException e) {
-            return defaultToken;
-        }
+        return index < leftmost.length ? getTokenOrDefault(leftmost[index], defaultToken) : defaultToken;
     }
 
     public Token getRightmostToken(int index) {
-        return getRightmostTokenOrDefault(index, null);
+        return tokens[rightmost[index]];
     }
 
     public Token getRightmostTokenOrDefault(int index, Token defaultToken) {
-        try {
-            return tokens[rightmost[index]];
-        } catch (IndexOutOfBoundsException e) {
-            return defaultToken;
-        }
+        return index < rightmost.length ? getTokenOrDefault(rightmost[index], defaultToken) : defaultToken;
     }
 
     public boolean hasArc(int head, int dependent) {
@@ -241,14 +233,11 @@ public class State {
     public int hashCode() {
         int result = hashCode;
         if (result == 0) {
-            /*
             result = new HashUtils.HashCodeBuilder()
                     .append(step)
                     .append(features)
                     .append(prevAction.index)
                     .toHashCode();
-            */
-            result = super.hashCode();
             hashCode = result;
         }
         return result;
