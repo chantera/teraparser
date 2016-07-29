@@ -101,7 +101,8 @@ public final class App {
             throw new Exception("app.initilize() can be called only once.");
         }
         if (mode != Mode.HELP && mode != Mode.NONE) {
-            int nthreads = Config.getInt(Config.Key.N_THREADS);
+            // int nthreads = Config.getInt(Config.Key.N_THREADS);
+            int nthreads = 1;
             if (nthreads > 1) {
                 executor = Executors.newFixedThreadPool(nthreads);
             } else {

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 
 /**
@@ -22,6 +23,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
     private CompletionService<List<BeamItem>> completionService;
     private final int beamWidth;
     private boolean earlyUpdate;
+    private final boolean useMultiThread;
     private Consumer<Sentence> updateMethod;
 
     public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, ExecutorService executor, int beamWidth) {
@@ -30,7 +32,10 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
 
     public StructuredLearningTrainer(Sentence[] sentences, Oracle oracle, ExecutorService executor, int beamWidth, boolean earlyUpdate) {
         super(new BeamSearchParser(new Perceptron(), executor, beamWidth), oracle, sentences);
-        completionService = new ExecutorCompletionService<>(executor);
+        useMultiThread = executor instanceof ThreadPoolExecutor && ((ThreadPoolExecutor) executor).getMaximumPoolSize() > 1;
+        if (useMultiThread) {
+            completionService = new ExecutorCompletionService<>(executor);
+        }
         this.beamWidth = beamWidth;
         this.earlyUpdate = earlyUpdate;
         if (earlyUpdate) {
@@ -114,10 +119,15 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
 
     @Override
     public BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
-        try {
-            return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier, completionService);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // try {
+        //     if (useMultiThread) {
+        //         return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier, completionService);
+        //     } else {
+        //         return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
+        //     }
+        // } catch (Exception e) {
+        //     throw new RuntimeException(e);
+        // }
+        return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
     }
 }
