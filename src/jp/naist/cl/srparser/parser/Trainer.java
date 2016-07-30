@@ -5,6 +5,7 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.transition.Arc;
 import jp.naist.cl.srparser.transition.Oracle;
+import jp.naist.cl.srparser.util.ProgressBar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +72,7 @@ public abstract class Trainer {
 
     public void train(Callback callback) {
         train();
-        test(callback);
+        test(callback, false);
     }
 
     abstract void trainEach(Sentence sentence);
@@ -84,10 +85,20 @@ public abstract class Trainer {
         classifier.setWeights(weights);
     }
 
-    public void test(Callback callback) {
+    public void test(Callback callback, boolean showProgress) {
         Map<Sentence.ID, Arc[]> predArcMap = new HashMap<>(sentences.length * 4/3);
-        for (Sentence sentence : sentences) {
-            predArcMap.put(sentence.id, parser.parse(sentence).arcs);
+        if (showProgress) {
+            int length = sentences.length;
+            int i = 0;
+            ProgressBar progressBar = new ProgressBar(System.out);
+            for (Sentence sentence : sentences) {
+                predArcMap.put(sentence.id, parser.parse(sentence).arcs);
+                progressBar.setProgress(++i, length);
+            }
+        } else {
+            for (Sentence sentence : sentences) {
+                predArcMap.put(sentence.id, parser.parse(sentence).arcs);
+            }
         }
         if (callback != null) {
             callback.accept(goldArcMap, predArcMap);
