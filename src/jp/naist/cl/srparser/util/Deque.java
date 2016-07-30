@@ -1,4 +1,4 @@
-package jp.naist.cl.srparser.transition;
+package jp.naist.cl.srparser.util;
 
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
@@ -6,11 +6,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * jp.naist.cl.srparser.transition
+ * Resizable-array implementation of Deque which works like java.util.ArrayDeque
+ *
+ * jp.naist.cl.srparser.util
  *
  * @author Hiroki Teranishi
  */
-public class Stack implements Iterable<Integer>, Cloneable {
+public class Deque implements Iterable<Integer>, Cloneable {
     private static final int MIN_INITIAL_CAPACITY = 8;
 
     private Integer[] elements;
@@ -61,11 +63,11 @@ public class Stack implements Iterable<Integer>, Cloneable {
         tail = n;
     }
 
-    public Stack() {
+    public Deque() {
         this(16);
     }
 
-    public Stack(int numElements) {
+    public Deque(int numElements) {
         allocateElements(numElements);
     }
 
@@ -150,10 +152,10 @@ public class Stack implements Iterable<Integer>, Cloneable {
     }
 
     public Iterator<Integer> iterator() {
-        return new StackIterator();
+        return new DequeIterator();
     }
 
-    private class StackIterator implements Iterator<Integer> {
+    private class DequeIterator implements Iterator<Integer> {
         /**
          * Index of element to be returned by subsequent call to next.
          */
@@ -191,9 +193,9 @@ public class Stack implements Iterable<Integer>, Cloneable {
         }
     }
 
-    public Stack clone() {
+    public Deque clone() {
         try {
-            Stack result = (Stack) super.clone();
+            Deque result = (Deque) super.clone();
             result.elements = Arrays.copyOf(elements, elements.length);
             return result;
         } catch (CloneNotSupportedException e) {

@@ -3,6 +3,7 @@ package jp.naist.cl.srparser.transition;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
+import jp.naist.cl.srparser.util.Deque;
 import jp.naist.cl.srparser.util.HashUtils;
 
 import java.util.Arrays;
@@ -18,7 +19,8 @@ import java.util.Set;
 public class State {
     public final int step;
     final Token[] tokens;
-    final Stack stack;
+    private final int tokenLength;
+    final Deque stack;
     final int bufferHead;
     public final Arc[] arcs;
     final int[] leftmost;
@@ -34,12 +36,13 @@ public class State {
     public State(Sentence sentence) {
         this.step            = 0;
         this.tokens          = sentence.tokens;
-        this.stack           = new Stack();
+        this.tokenLength     = tokens.length;
+        this.stack           = new Deque();
         this.stack.push(0);
         this.bufferHead      = 1;
-        this.arcs            = new Arc[tokens.length]; // index: dependent, value: head
-        this.leftmost        = new int[tokens.length]; // index: head, value: leftmost dependent
-        this.rightmost       = new int[tokens.length]; // index: head, value: rightmost dependent
+        this.arcs            = new Arc[tokenLength]; // index: dependent, value: head
+        this.leftmost        = new int[tokenLength]; // index: head, value: leftmost dependent
+        this.rightmost       = new int[tokenLength]; // index: head, value: rightmost dependent
         Arrays.fill(this.leftmost, Integer.MAX_VALUE);
         Arrays.fill(this.rightmost, -1);
         this.features        = Feature.extract(this);
@@ -48,9 +51,10 @@ public class State {
         this.prevAction      = null;
     }
 
-    State(State prevState, Action prevAction, Arc prevArc, Stack stack, int bufferHead) {
+    State(State prevState, Action prevAction, Arc prevArc, Deque stack, int bufferHead) {
         this.step            = prevState.step + 1;
         this.tokens          = prevState.tokens;
+        this.tokenLength     = tokens.length;
         this.stack           = stack;
         this.bufferHead      = bufferHead;
         if (prevArc != null) {
@@ -85,7 +89,7 @@ public class State {
     }
 
     public Boolean isTerminal() {
-        return bufferHead == tokens.length;
+        return bufferHead == tokenLength;
     }
 
     public Token getToken(int index) {
@@ -93,7 +97,7 @@ public class State {
     }
 
     public Token getTokenOrDefault(int index, Token defaultToken) {
-        return (index < tokens.length && index > -1) ? tokens[index] : defaultToken;
+        return (index < tokenLength && index > -1) ? tokens[index] : defaultToken;
     }
 
     public Token getStackTopToken() {
