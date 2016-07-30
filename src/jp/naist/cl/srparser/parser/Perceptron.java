@@ -59,7 +59,7 @@ public class Perceptron {
     }
 
     public Action getNextAction(State state) {
-        Set<Action> actions = state.possibleActions;
+        Set<Action> actions = state.getPossibleActions();
         if (actions.size() == 0) {
             throw new IllegalStateException("Any action is not permitted.");
         } else if (actions.size() == 1) {

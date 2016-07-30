@@ -32,7 +32,7 @@ interface BeamSearchDecoder {
                 newbeam.add(item);
                 continue;
             }
-            for (Action action : state.possibleActions) {
+            for (Action action : state.getPossibleActions()) {
                 double score = item.getScore() + classifier.getScore(state.getFeatures(), action);
                 int priority = 2000 - i * 10 + action.index; // assign higher priority to the preceding item
                 newbeam.add(new BeamItem(action.apply(state), score, priority));
@@ -75,7 +75,7 @@ interface BeamSearchDecoder {
                 items.add(item);
                 return items;
             }
-            for (Action action : state.possibleActions) {
+            for (Action action : state.getPossibleActions()) {
                 double score = item.getScore() + classifier.getScore(state.getFeatures(), action);
                 int priority = 2000 - index * 10 + action.index; // assign higher priority to the preceding item
                 items.add(new BeamItem(action.apply(state), score, priority));

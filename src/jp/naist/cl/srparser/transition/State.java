@@ -26,7 +26,7 @@ public class State {
     final int[] leftmost;
     final int[] rightmost;
     private int[] features;
-    public final Set<Action> possibleActions;
+    private Set<Action> possibleActions;
     public final State prevState;
     public final Action prevAction;
 
@@ -45,7 +45,6 @@ public class State {
         this.rightmost       = new int[tokenLength]; // index: head, value: rightmost dependent
         Arrays.fill(this.leftmost, Integer.MAX_VALUE);
         Arrays.fill(this.rightmost, -1);
-        this.possibleActions = Action.getPossibleActions(this);
         this.prevState       = null;
         this.prevAction      = null;
     }
@@ -77,7 +76,6 @@ public class State {
             this.leftmost    = prevState.leftmost;
             this.rightmost   = prevState.rightmost;
         }
-        this.possibleActions = Action.getPossibleActions(this);
         this.prevState       = prevState;
         this.prevAction      = prevAction;
     }
@@ -173,6 +171,14 @@ public class State {
 
     public boolean hasDependentArc(int dependent) {
         return arcs[dependent] != null;
+    }
+
+    public Set<Action> getPossibleActions() {
+        // lazily initialization
+        if (possibleActions == null) {
+            possibleActions = Action.getPossibleActions(this);
+        }
+        return possibleActions;
     }
 
     public int[] getFeatures() {
