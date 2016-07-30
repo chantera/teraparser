@@ -6,8 +6,11 @@ import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.stream.Collectors;
 
 /**
  * jp.naist.cl.srparser.parser
@@ -19,10 +22,11 @@ interface BeamSearchDecoder {
     /**
      * beam-search with single thread
      */
-    default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier) {
-        List<BeamItem> newbeam = new ArrayList<>();
-        for (int i = 0; i < beam.length; i++) {
-            BeamItem item = beam[i];
+    default List<BeamItem> getNextBeamItems(List<BeamItem> beam, int beamWidth, Perceptron classifier) {
+        SortedSet<BeamItem> newbeam = new TreeSet<>();
+        int i = -1;
+        for (BeamItem item : beam) {
+            i++;
             State state = item.getState();
             if (state.isTerminal()) {
                 newbeam.add(item);
@@ -34,21 +38,22 @@ interface BeamSearchDecoder {
                 newbeam.add(new BeamItem(action.apply(state), score, priority));
             }
         }
-        return newbeam.stream().sorted().limit(beamWidth).toArray(BeamItem[]::new);
+        return newbeam.stream().limit(beamWidth).collect(Collectors.toList());
     }
 
     /**
      * beam-search with multi-thread
      */
-    default BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) throws Exception {
-        List<BeamItem> newbeam = new ArrayList<>();
-        for (int i = 0; i < beam.length; i++) {
-            completionService.submit(new BeamTask(beam[i], classifier, i));
+    default List<BeamItem> getNextBeamItems(List<BeamItem> beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) throws Exception {
+        SortedSet<BeamItem> newbeam = new TreeSet<>();
+        int i = -1;
+        for (BeamItem item : beam) {
+            completionService.submit(new BeamTask(item, classifier, ++i));
         }
-        for (int i = 0; i < beam.length; i++) {
+        for (int j = -1; j < i; j++) {
             newbeam.addAll(completionService.take().get());
         }
-        return newbeam.stream().sorted().limit(beamWidth).toArray(BeamItem[]::new);
+        return newbeam.stream().limit(beamWidth).collect(Collectors.toList());
     }
 
     class BeamTask implements Callable<List<BeamItem>> {

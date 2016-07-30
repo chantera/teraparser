@@ -3,7 +3,7 @@ package jp.naist.cl.srparser.parser;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.transition.State;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
@@ -34,16 +34,18 @@ public class BeamSearchParser extends GreedyParser implements BeamSearchDecoder 
         if (beamWidth == 1) {
             return super.parse(sentence); // same as greedy search
         }
-        BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+        List<BeamItem> beam = new ArrayList<>(1);
+        beam.add(new BeamItem(new State(sentence), 0.0));
 
         boolean terminate = false;
         while (!terminate) {
-            beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
-            terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
+            beam = getNextBeamItems(beam, beamWidth, classifier);
+            terminate = beam.stream().allMatch(item -> item.getState().isTerminal());
         }
-        return beam[0].getState();
+        return beam.get(0).getState();
     }
 
+    /*
     @Override
     public BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
         // try {
@@ -57,4 +59,5 @@ public class BeamSearchParser extends GreedyParser implements BeamSearchDecoder 
         // }
         return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
     }
+    */
 }

@@ -4,7 +4,7 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +52,14 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
     }
 
     private void trainWithMaxViolation(Sentence sentence) {
-        BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+        List<BeamItem> beam = new ArrayList<>(1);
+        beam.add(new BeamItem(new State(sentence), 0.0));
         Map<State, Double> scoreHistory = new IdentityHashMap<>(sentence.length * beamWidth * 2);
 
         // do beam-search storing score
         boolean terminate = false;
         while (!terminate) {
-            beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
+            beam = getNextBeamItems(beam, beamWidth, classifier);
             boolean allTerminal = true;
             for (BeamItem item : beam) {
                 scoreHistory.putIfAbsent(item.getState(), item.getScore());
@@ -68,7 +69,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
         }
 
         // find violation
-        State.StateIterator predStateIterator = beam[0].getState().getIterator();
+        State.StateIterator predStateIterator = beam.get(0).getState().getIterator();
         State.StateIterator oracleStateIterator = oracle.getState(sentence).getIterator();
         State predState = predStateIterator.next(); // initial state
         State oracleState = oracleStateIterator.next(); // initial state
@@ -100,23 +101,25 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
     private void trainWithEarlyUpdate(Sentence sentence) {
         State.StateIterator iterator = oracle.getState(sentence).getIterator();
         State oracleState = iterator.next(); // initial state
-        BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+        List<BeamItem> beam = new ArrayList<>(1);
+        beam.add(new BeamItem(new State(sentence), 0.0));
 
         boolean terminate = false;
         while (!terminate) {
             oracleState = iterator.next();
-            beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
-            terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
+            beam = getNextBeamItems(beam, beamWidth, classifier);
+            terminate = beam.stream().allMatch(item -> item.getState().isTerminal());
 
             final State finalOracleState = oracleState; // make a variable final to use it in lambda
-            boolean oracleInBeam = Arrays.stream(beam).anyMatch(item -> item.getState().equals(finalOracleState));;
+            boolean oracleInBeam = beam.stream().anyMatch(item -> item.getState().equals(finalOracleState));;
             if (!oracleInBeam || (!terminate && !iterator.hasNext())) {
-                classifier.update(oracleState, beam[0].getState()); // early update
+                classifier.update(oracleState, beam.get(0).getState()); // early update
                 break;
             }
         }
     }
 
+    /*
     @Override
     public BeamItem[] getNextBeamItems(BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
         // try {
@@ -130,4 +133,5 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
         // }
         return BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
     }
+    */
 }

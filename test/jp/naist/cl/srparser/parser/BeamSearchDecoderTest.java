@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
@@ -61,36 +61,39 @@ public class BeamSearchDecoderTest implements BeamSearchDecoder {
     private void trainEachWithEarlyUpdate(Sentence sentence, CompletionService<List<BeamItem>> completionService) {
         State.StateIterator iterator = oracle.getState(sentence).getIterator();
         State oracleState = iterator.next(); // initial state
-        BeamItem[] beam = {new BeamItem(new State(sentence), 0.0)};
+        List<BeamItem> beam = new ArrayList<>(1);
+        beam.add(new BeamItem(new State(sentence), 0.0));
 
         boolean terminate = false;
         while (!terminate) {
             oracleState = iterator.next();
             beam = getNextBeamItems(beam, beamWidth, classifier, completionService);
-            terminate = Arrays.stream(beam).allMatch(item -> item.getState().isTerminal());
+            terminate = beam.stream().allMatch(item -> item.getState().isTerminal());
 
             final State finalOracleState = oracleState; // make a variable final to use it in lambda
-            boolean oracleInBeam = Arrays.stream(beam).anyMatch(item -> item.getState().equals(finalOracleState));;
+            boolean oracleInBeam = beam.stream().anyMatch(item -> item.getState().equals(finalOracleState));;
             if (!oracleInBeam || (!terminate && !iterator.hasNext())) {
-                classifier.update(oracleState, beam[0].getState()); // early update
+                classifier.update(oracleState, beam.get(0).getState()); // early update
                 break;
             }
         }
     }
 
-    public BeamSearchDecoder.BeamItem[] getNextBeamItems(BeamSearchDecoder.BeamItem[] beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
+    public List<BeamItem> getNextBeamItems(List<BeamItem> beam, int beamWidth, Perceptron classifier, CompletionService<List<BeamItem>> completionService) {
         try {
-            BeamSearchDecoder.BeamItem[] item1 = BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
-            BeamSearchDecoder.BeamItem[] item2 = BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier, completionService);
-            for (int i = 0; i < item1.length; i++) {
-                System.out.println("item1: " + item1[i].getState() + ": score=" + item1[i].getScore());
-                System.out.println("item2: " + item2[i].getState() + ": score=" + item2[i].getScore());
-                if (!item1[i].equals(item2[i])) {
-                    throw new Exception(item1[i] + " != " + item2[i]);
+            List<BeamItem> items1 = BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier);
+            List<BeamItem> items2 = BeamSearchDecoder.super.getNextBeamItems(beam, beamWidth, classifier, completionService);
+            for (int i = 0; i < items1.size(); i++) {
+                BeamItem item1 = items1.get(i);
+                BeamItem item2 = items2.get(i);
+                System.out.println("item1: " + item1.getState() + ": score=" + item1.getScore());
+                System.out.println("item2: " + item2.getState() + ": score=" + item2.getScore());
+                if (!item1.equals(item2)) {
+                    throw new Exception(item1 + " != " + item2);
                 }
             }
             System.out.println("========");
-            return item2;
+            return items2;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
