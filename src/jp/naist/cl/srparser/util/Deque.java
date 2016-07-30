@@ -64,7 +64,7 @@ public class Deque<E> implements Iterable<E>, Cloneable {
     }
 
     public Deque() {
-        this(16);
+        elements = new Object[16];
     }
 
     public Deque(int numElements) {

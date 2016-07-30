@@ -61,7 +61,7 @@ public class Stack implements Cloneable {
     }
 
     public Stack() {
-        this(16);
+        elements = new int[16];
     }
 
     public Stack(int numElements) {
