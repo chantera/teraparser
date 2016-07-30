@@ -20,7 +20,7 @@ public class State {
     public final int step;
     final Token[] tokens;
     private final int tokenLength;
-    final Deque stack;
+    final Deque<Integer> stack;
     final int bufferHead;
     public final Arc[] arcs;
     final int[] leftmost;
@@ -37,7 +37,7 @@ public class State {
         this.step            = 0;
         this.tokens          = sentence.tokens;
         this.tokenLength     = tokens.length;
-        this.stack           = new Deque();
+        this.stack           = new Deque<>();
         this.stack.push(0);
         this.bufferHead      = 1;
         this.arcs            = new Arc[tokenLength]; // index: dependent, value: head
@@ -49,7 +49,7 @@ public class State {
         this.prevAction      = null;
     }
 
-    State(State prevState, Action prevAction, Arc prevArc, Deque stack, int bufferHead) {
+    State(State prevState, Action prevAction, Arc prevArc, Deque<Integer> stack, int bufferHead) {
         this.step            = prevState.step + 1;
         this.tokens          = prevState.tokens;
         this.tokenLength     = tokens.length;

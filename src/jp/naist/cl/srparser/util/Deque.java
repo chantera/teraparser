@@ -12,10 +12,10 @@ import java.util.NoSuchElementException;
  *
  * @author Hiroki Teranishi
  */
-public class Deque implements Iterable<Integer>, Cloneable {
+public class Deque<E> implements Iterable<E>, Cloneable {
     private static final int MIN_INITIAL_CAPACITY = 8;
 
-    private Integer[] elements;
+    private Object[] elements;
     private int head;
     private int tail;
 
@@ -39,7 +39,7 @@ public class Deque implements Iterable<Integer>, Cloneable {
                 initialCapacity >>>= 1;// Good luck allocating 2 ^ 30 elements
             }
         }
-        elements = new Integer[initialCapacity];
+        elements = new Object[initialCapacity];
     }
 
     /**
@@ -55,7 +55,7 @@ public class Deque implements Iterable<Integer>, Cloneable {
         if (newCapacity < 0) {
             throw new IllegalStateException("Sorry, deque too big");
         }
-        Integer[] a = new Integer[newCapacity];
+        Object[] a = new Object[newCapacity];
         System.arraycopy(elements, p, a, 0, r);
         System.arraycopy(elements, 0, a, r, p);
         elements = a;
@@ -71,7 +71,7 @@ public class Deque implements Iterable<Integer>, Cloneable {
         allocateElements(numElements);
     }
 
-    public void addFirst(Integer e) {
+    public void addFirst(E e) {
         if (e == null) {
             throw new IllegalArgumentException();
         }
@@ -81,7 +81,7 @@ public class Deque implements Iterable<Integer>, Cloneable {
         }
     }
 
-    public void addLast(Integer e) {
+    public void addLast(E e) {
         if (e == null) {
             throw new IllegalArgumentException();
         }
@@ -91,19 +91,20 @@ public class Deque implements Iterable<Integer>, Cloneable {
         }
     }
 
-    public boolean push(int e) {
+    public boolean push(E e) {
         addFirst(e);
         return true;
     }
 
-    public boolean add(int e) {
+    public boolean add(E e) {
         addLast(e);
         return true;
     }
 
-    public int removeFirst() {
+    public E removeFirst() {
         int h = head;
-        Integer result = elements[h];
+        @SuppressWarnings("unchecked")
+        E result = (E) elements[h];
         if (result == null) {
             throw new NoSuchElementException();
         }
@@ -112,9 +113,10 @@ public class Deque implements Iterable<Integer>, Cloneable {
         return result;
     }
 
-    public int removeLast() {
+    public E removeLast() {
         int t = (tail - 1) & (elements.length - 1);
-        Integer result = elements[t];
+        @SuppressWarnings("unchecked")
+        E result = (E) elements[t];
         if (result == null) {
             throw new NoSuchElementException();
         }
@@ -123,20 +125,22 @@ public class Deque implements Iterable<Integer>, Cloneable {
         return result;
     }
 
-    public int pop() {
+    public E pop() {
         return removeFirst();
     }
 
-    public int getFirst() {
-        Integer result = elements[head];
+    public E getFirst() {
+        @SuppressWarnings("unchecked")
+        E result = (E) elements[head];
         if (result == null) {
             throw new NoSuchElementException();
         }
         return result;
     }
 
-    public int getLast() {
-        Integer result = elements[(tail - 1) & (elements.length - 1)];
+    public E getLast() {
+        @SuppressWarnings("unchecked")
+        E result = (E) elements[(tail - 1) & (elements.length - 1)];
         if (result == null) {
             throw new NoSuchElementException();
         }
@@ -151,11 +155,11 @@ public class Deque implements Iterable<Integer>, Cloneable {
         return head == tail;
     }
 
-    public Iterator<Integer> iterator() {
+    public Iterator<E> iterator() {
         return new DequeIterator();
     }
 
-    private class DequeIterator implements Iterator<Integer> {
+    private class DequeIterator implements Iterator<E> {
         /**
          * Index of element to be returned by subsequent call to next.
          */
@@ -177,11 +181,12 @@ public class Deque implements Iterable<Integer>, Cloneable {
             return cursor != fence;
         }
 
-        public Integer next() {
+        public E next() {
             if (cursor == fence) {
                 throw new NoSuchElementException();
             }
-            Integer result = elements[cursor];
+            @SuppressWarnings("unchecked")
+            E result = (E) elements[cursor];
             // This check doesn't catch all possible comodifications,
             // but does catch the ones that corrupt traversal
             if (tail != fence || result == null) {
@@ -193,9 +198,10 @@ public class Deque implements Iterable<Integer>, Cloneable {
         }
     }
 
-    public Deque clone() {
+    public Deque<E> clone() {
         try {
-            Deque result = (Deque) super.clone();
+            @SuppressWarnings("unchecked")
+            Deque<E> result = (Deque<E>) super.clone();
             result.elements = Arrays.copyOf(elements, elements.length);
             return result;
         } catch (CloneNotSupportedException e) {
