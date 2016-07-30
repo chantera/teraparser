@@ -11,10 +11,9 @@ import java.util.NoSuchElementException;
  * @author Hiroki Teranishi
  */
 public class Stack implements Iterable<Integer>, Cloneable {
-    private static final int INITIAL_VALUE = Integer.MIN_VALUE;
     private static final int MIN_INITIAL_CAPACITY = 8;
 
-    private int[] elements;
+    private Integer[] elements;
     private int head;
     private int tail;
 
@@ -38,8 +37,7 @@ public class Stack implements Iterable<Integer>, Cloneable {
                 initialCapacity >>>= 1;// Good luck allocating 2 ^ 30 elements
             }
         }
-        elements = new int[initialCapacity];
-        Arrays.fill(elements, INITIAL_VALUE);
+        elements = new Integer[initialCapacity];
     }
 
     /**
@@ -55,8 +53,7 @@ public class Stack implements Iterable<Integer>, Cloneable {
         if (newCapacity < 0) {
             throw new IllegalStateException("Sorry, deque too big");
         }
-        int[] a = new int[newCapacity];
-        Arrays.fill(a, INITIAL_VALUE);
+        Integer[] a = new Integer[newCapacity];
         System.arraycopy(elements, p, a, 0, r);
         System.arraycopy(elements, 0, a, r, p);
         elements = a;
@@ -72,8 +69,8 @@ public class Stack implements Iterable<Integer>, Cloneable {
         allocateElements(numElements);
     }
 
-    public void addFirst(int e) {
-        if (e == INITIAL_VALUE) {
+    public void addFirst(Integer e) {
+        if (e == null) {
             throw new IllegalArgumentException();
         }
         elements[head = (head - 1) & (elements.length - 1)] = e;
@@ -82,8 +79,8 @@ public class Stack implements Iterable<Integer>, Cloneable {
         }
     }
 
-    public void addLast(int e) {
-        if (e == INITIAL_VALUE) {
+    public void addLast(Integer e) {
+        if (e == null) {
             throw new IllegalArgumentException();
         }
         elements[tail] = e;
@@ -104,22 +101,22 @@ public class Stack implements Iterable<Integer>, Cloneable {
 
     public int removeFirst() {
         int h = head;
-        int result = elements[h];
-        if (result == INITIAL_VALUE) {
+        Integer result = elements[h];
+        if (result == null) {
             throw new NoSuchElementException();
         }
-        elements[h] = INITIAL_VALUE;
+        elements[h] = null;
         head = (h + 1) & (elements.length - 1);
         return result;
     }
 
     public int removeLast() {
         int t = (tail - 1) & (elements.length - 1);
-        int result = elements[t];
-        if (result == INITIAL_VALUE) {
+        Integer result = elements[t];
+        if (result == null) {
             throw new NoSuchElementException();
         }
-        elements[t] = INITIAL_VALUE;
+        elements[t] = null;
         tail = t;
         return result;
     }
@@ -129,16 +126,16 @@ public class Stack implements Iterable<Integer>, Cloneable {
     }
 
     public int getFirst() {
-        int result = elements[head];
-        if (result == INITIAL_VALUE) {
+        Integer result = elements[head];
+        if (result == null) {
             throw new NoSuchElementException();
         }
         return result;
     }
 
     public int getLast() {
-        int result = elements[(tail - 1) & (elements.length - 1)];
-        if (result == INITIAL_VALUE) {
+        Integer result = elements[(tail - 1) & (elements.length - 1)];
+        if (result == null) {
             throw new NoSuchElementException();
         }
         return result;
@@ -182,10 +179,10 @@ public class Stack implements Iterable<Integer>, Cloneable {
             if (cursor == fence) {
                 throw new NoSuchElementException();
             }
-            int result = elements[cursor];
+            Integer result = elements[cursor];
             // This check doesn't catch all possible comodifications,
             // but does catch the ones that corrupt traversal
-            if (tail != fence || result == INITIAL_VALUE) {
+            if (tail != fence || result == null) {
                 throw new ConcurrentModificationException();
             }
             lastRet = cursor;
