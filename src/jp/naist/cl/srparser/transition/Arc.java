@@ -1,20 +1,17 @@
 package jp.naist.cl.srparser.transition;
 
-import jp.naist.cl.srparser.util.Tuple;
-
 /**
  * jp.naist.cl.srparser.transition
  *
  * @author Hiroki Teranishi
  */
-public class Arc extends Tuple<Integer, Integer> {
+public class Arc {
     public final int head;
     public final int dependent;
 
-    public Arc(Integer head, Integer dependent) {
-        super(head, dependent);
-        this.head = super.left;
-        this.dependent = super.right;
+    public Arc(int head, int dependent) {
+        this.head = head;
+        this.dependent = dependent;
     }
 
     public boolean isLeft() {
@@ -23,5 +20,31 @@ public class Arc extends Tuple<Integer, Integer> {
 
     public boolean isRight() {
         return head < dependent;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Arc) {
+            final Arc other = (Arc) obj;
+            return this.head == other.head && this.dependent == other.dependent;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * (31 * 17 + head) + dependent;
+    }
+
+    @Override
+    public String toString() {
+        if (isLeft()) {
+            return "(d:" + dependent + " <- h:" + head + ")";
+        } else {
+            return "(h:" + head + " -> d:" + dependent + ")";
+        }
     }
 }
