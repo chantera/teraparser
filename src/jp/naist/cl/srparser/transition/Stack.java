@@ -1,0 +1,206 @@
+package jp.naist.cl.srparser.transition;
+
+import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+/**
+ * jp.naist.cl.srparser.transition
+ *
+ * @author Hiroki Teranishi
+ */
+public class Stack implements Iterable<Integer>, Cloneable {
+    private static final int INITIAL_VALUE = Integer.MIN_VALUE;
+    private static final int MIN_INITIAL_CAPACITY = 8;
+
+    private int[] elements;
+    private int head;
+    private int tail;
+
+    /**
+     * Allocates empty array to hold the given number of elements.
+     */
+    private void allocateElements(int numElements) {
+        int initialCapacity = MIN_INITIAL_CAPACITY;
+        // Find the best power of two to hold elements.
+        // Tests "<=" because arrays aren't kept full.
+        if (numElements >= initialCapacity) {
+            initialCapacity = numElements;
+            initialCapacity |= (initialCapacity >>>  1);
+            initialCapacity |= (initialCapacity >>>  2);
+            initialCapacity |= (initialCapacity >>>  4);
+            initialCapacity |= (initialCapacity >>>  8);
+            initialCapacity |= (initialCapacity >>> 16);
+            initialCapacity++;
+
+            if (initialCapacity < 0) { // Too many elements, must back off
+                initialCapacity >>>= 1;// Good luck allocating 2 ^ 30 elements
+            }
+        }
+        elements = new int[initialCapacity];
+        Arrays.fill(elements, INITIAL_VALUE);
+    }
+
+    /**
+     * Doubles the capacity of this deque.  Call only when full, i.e.,
+     * when head and tail have wrapped around to become equal.
+     */
+    private void doubleCapacity() {
+        assert head == tail;
+        int p = head;
+        int n = elements.length;
+        int r = n - p; // number of elements to the right of p
+        int newCapacity = n << 1;
+        if (newCapacity < 0) {
+            throw new IllegalStateException("Sorry, deque too big");
+        }
+        int[] a = new int[newCapacity];
+        Arrays.fill(a, INITIAL_VALUE);
+        System.arraycopy(elements, p, a, 0, r);
+        System.arraycopy(elements, 0, a, r, p);
+        elements = a;
+        head = 0;
+        tail = n;
+    }
+
+    public Stack() {
+        this(16);
+    }
+
+    public Stack(int numElements) {
+        allocateElements(numElements);
+    }
+
+    public void addFirst(int e) {
+        if (e == INITIAL_VALUE) {
+            throw new IllegalArgumentException();
+        }
+        elements[head = (head - 1) & (elements.length - 1)] = e;
+        if (head == tail) {
+            doubleCapacity();
+        }
+    }
+
+    public void addLast(int e) {
+        if (e == INITIAL_VALUE) {
+            throw new IllegalArgumentException();
+        }
+        elements[tail] = e;
+        if ( (tail = (tail + 1) & (elements.length - 1)) == head) {
+            doubleCapacity();
+        }
+    }
+
+    public boolean push(int e) {
+        addFirst(e);
+        return true;
+    }
+
+    public boolean add(int e) {
+        addLast(e);
+        return true;
+    }
+
+    public int removeFirst() {
+        int h = head;
+        int result = elements[h];
+        if (result == INITIAL_VALUE) {
+            throw new NoSuchElementException();
+        }
+        elements[h] = INITIAL_VALUE;
+        head = (h + 1) & (elements.length - 1);
+        return result;
+    }
+
+    public int removeLast() {
+        int t = (tail - 1) & (elements.length - 1);
+        int result = elements[t];
+        if (result == INITIAL_VALUE) {
+            throw new NoSuchElementException();
+        }
+        elements[t] = INITIAL_VALUE;
+        tail = t;
+        return result;
+    }
+
+    public int pop() {
+        return removeFirst();
+    }
+
+    public int getFirst() {
+        int result = elements[head];
+        if (result == INITIAL_VALUE) {
+            throw new NoSuchElementException();
+        }
+        return result;
+    }
+
+    public int getLast() {
+        int result = elements[(tail - 1) & (elements.length - 1)];
+        if (result == INITIAL_VALUE) {
+            throw new NoSuchElementException();
+        }
+        return result;
+    }
+
+    public int size() {
+        return (tail - head) & (elements.length - 1);
+    }
+
+    public boolean isEmpty() {
+        return head == tail;
+    }
+
+    public Iterator<Integer> iterator() {
+        return new StackIterator();
+    }
+
+    private class StackIterator implements Iterator<Integer> {
+        /**
+         * Index of element to be returned by subsequent call to next.
+         */
+        private int cursor = head;
+
+        /**
+         * Tail recorded at construction (also in remove), to stop
+         * iterator and also to check for comodification.
+         */
+        private int fence = tail;
+
+        /**
+         * Index of element returned by most recent call to next.
+         * Reset to -1 if element is deleted by a call to remove.
+         */
+        private int lastRet = -1;
+
+        public boolean hasNext() {
+            return cursor != fence;
+        }
+
+        public Integer next() {
+            if (cursor == fence) {
+                throw new NoSuchElementException();
+            }
+            int result = elements[cursor];
+            // This check doesn't catch all possible comodifications,
+            // but does catch the ones that corrupt traversal
+            if (tail != fence || result == INITIAL_VALUE) {
+                throw new ConcurrentModificationException();
+            }
+            lastRet = cursor;
+            cursor = (cursor + 1) & (elements.length - 1);
+            return result;
+        }
+    }
+
+    public Stack clone() {
+        try {
+            Stack result = (Stack) super.clone();
+            result.elements = Arrays.copyOf(elements, elements.length);
+            return result;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+}

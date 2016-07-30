@@ -5,7 +5,6 @@ import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
 import jp.naist.cl.srparser.util.HashUtils;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,7 +18,7 @@ import java.util.Set;
 public class State {
     public final int step;
     final Token[] tokens;
-    final ArrayDeque<Integer> stack;
+    final Stack stack;
     final int bufferHead;
     public final Arc[] arcs;
     final int[] leftmost;
@@ -35,7 +34,7 @@ public class State {
     public State(Sentence sentence) {
         this.step            = 0;
         this.tokens          = sentence.tokens;
-        this.stack           = new ArrayDeque<>();
+        this.stack           = new Stack();
         this.stack.push(0);
         this.bufferHead      = 1;
         this.arcs            = new Arc[tokens.length]; // index: dependent, value: head
@@ -49,7 +48,7 @@ public class State {
         this.prevAction      = null;
     }
 
-    State(State prevState, Action prevAction, Arc prevArc, ArrayDeque<Integer> stack, int bufferHead) {
+    State(State prevState, Action prevAction, Arc prevArc, Stack stack, int bufferHead) {
         this.step            = prevState.step + 1;
         this.tokens          = prevState.tokens;
         this.stack           = stack;
@@ -106,7 +105,7 @@ public class State {
             return tokens[stack.getFirst()];
         }
         int i = 0;
-        for (Integer index : stack) {
+        for (int index : stack) {
             if (i == position) {
                 return tokens[index];
             }
@@ -120,7 +119,7 @@ public class State {
             return tokens[stack.getFirst()];
         }
         int i = 0;
-        for (Integer index : stack) {
+        for (int index : stack) {
             if (i == position) {
                 return tokens[index];
             }
@@ -215,7 +214,7 @@ public class State {
             if (step != other.step || bufferHead != other.bufferHead) {
                 return false;
             }
-            if (prevAction != null && !prevAction.equals(other.prevAction)) {
+            if (prevAction != null && prevAction != other.prevAction) {
                 return false;
             }
             if (prevState != null && !prevState.equals(other.prevState)) {
