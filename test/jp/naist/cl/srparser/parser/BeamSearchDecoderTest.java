@@ -71,6 +71,11 @@ public class BeamSearchDecoderTest implements BeamSearchDecoder {
             terminate = beam.stream().allMatch(item -> item.getState().isTerminal());
 
             final State finalOracleState = oracleState; // make a variable final to use it in lambda
+            beam.stream().forEach(item -> {
+                if (item.getState().equals(finalOracleState)) {
+                    System.out.println("pred.hashCode: " + item.getState().hashCode() + ", oracle.hashCode: " + finalOracleState.hashCode());
+                }
+            });
             boolean oracleInBeam = beam.stream().anyMatch(item -> item.getState().equals(finalOracleState));;
             if (!oracleInBeam || (!terminate && !iterator.hasNext())) {
                 classifier.update(oracleState, beam.get(0).getState()); // early update
