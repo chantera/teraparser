@@ -10,7 +10,7 @@ import java.io.PrintStream;
 public class ProgressBar {
     private static final String FORMAT = "\r%3d%% [%s]";
     private static final String DEFAULT_BARSTR = "#";
-    private static final int DEFAULT_WIDTH = 50;
+    private static final int DEFAULT_WIDTH = 60;
     private String barStr;
     private final int width;
     private final PrintStream stream;

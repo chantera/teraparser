@@ -91,10 +91,12 @@ public abstract class Trainer {
             int length = sentences.length;
             int i = 0;
             ProgressBar progressBar = new ProgressBar(System.out);
+            System.out.println("TESTING ...");
             for (Sentence sentence : sentences) {
                 predArcMap.put(sentence.id, parser.parse(sentence).arcs);
                 progressBar.setProgress(++i, length);
             }
+            System.out.println("DONE.");
         } else {
             for (Sentence sentence : sentences) {
                 predArcMap.put(sentence.id, parser.parse(sentence).arcs);

@@ -242,7 +242,7 @@ public final class App {
                 Logger.info("Per Sentence:\t\t%f milliseconds", (double) elapsedTime / sentenceSize);
                 Logger.info("Memory Usage:\t\t%.2fM of %.2fM", SystemUtils.getUsedMemoryMB(), SystemUtils.getTotalMemoryMB());
                 Logger.info("UAS:\t\t\t\t%1.6f", Evaluator.calcUAS(gold, pred));
-            }, false);
+            }, Config.getBoolean(Config.Key.VERBOSE));
             Logger.info("---- PARSING FINISHED ----");
 
             Logger.info("Parsing Finished Successfully.");
@@ -274,6 +274,7 @@ public final class App {
                 Logger.info("saving new config file to %s ...", newConfigFile);
                 Config.save(newConfigFile);
             }
+            boolean verbose = Config.getBoolean(Config.Key.VERBOSE);
 
             Logger.info("---- SETTING UP ----");
             int iteration    = Config.getInt(Config.Key.ITERATION);
@@ -295,12 +296,12 @@ public final class App {
                 Logger.info("Memory Usage:\t\t%.2fM of %.2fM", SystemUtils.getUsedMemoryMB(), SystemUtils.getTotalMemoryMB());
                 trainer.test((gold, pred) -> {
                     Logger.info("Training UAS:\t\t%1.6f", Evaluator.calcUAS(gold, pred));
-                }, false);
+                }, verbose);
                 if (i % testPeriod == 0) {
                     tester.setWeights(trainer.getWeights());
                     tester.test((gold, pred) -> {
                         Logger.info("Development UAS:\t%1.6f", Evaluator.calcUAS(gold, pred));
-                    }, Config.getBoolean(Config.Key.VERBOSE));
+                    }, verbose);
                 }
                 Logger.info("//----------------------------");
             }
@@ -312,7 +313,7 @@ public final class App {
                 tester.setWeights(trainer.getWeights());
                 tester.test((gold, pred) -> {
                     Logger.info("Test UAS:\t%1.6f", Evaluator.calcUAS(gold, pred));
-                }, Config.getBoolean(Config.Key.VERBOSE));
+                }, verbose);
                 Logger.info("---- TEST FINISHED ----");
             }
 
