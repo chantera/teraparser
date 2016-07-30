@@ -3,7 +3,6 @@ package jp.naist.cl.srparser.transition;
 import jp.naist.cl.srparser.model.Feature;
 import jp.naist.cl.srparser.model.Sentence;
 import jp.naist.cl.srparser.model.Token;
-import jp.naist.cl.srparser.util.Deque;
 import jp.naist.cl.srparser.util.HashUtils;
 
 import java.util.Arrays;
@@ -20,7 +19,7 @@ public class State {
     public final int step;
     final Token[] tokens;
     private final int tokenLength;
-    final Deque<Integer> stack;
+    final Stack stack;
     final int bufferHead;
     public final Arc[] arcs;
     final int[] leftmost;
@@ -38,7 +37,7 @@ public class State {
         this.step            = 0;
         this.tokens          = sentence.tokens;
         this.tokenLength     = tokens.length;
-        this.stack           = new Deque<>();
+        this.stack           = new Stack();
         this.stack.push(0);
         this.bufferHead      = 1;
         this.arcs            = new Arc[tokenLength]; // index: dependent, value: head
@@ -50,7 +49,7 @@ public class State {
         this.prevAction      = null;
     }
 
-    State(State prevState, Action prevAction, Arc prevArc, Deque<Integer> stack, int bufferHead) {
+    State(State prevState, Action prevAction, Arc prevArc, Stack stack, int bufferHead) {
         this.step            = prevState.step + 1;
         this.tokens          = prevState.tokens;
         this.tokenLength     = tokens.length;
@@ -98,33 +97,23 @@ public class State {
     }
 
     public Token getStackTopToken() {
-        return tokens[stack.getFirst()];
+        return tokens[stack.top()];
     }
 
     public Token getStackToken(int position) {
         if (position == 0) {
-            return tokens[stack.getFirst()];
+            return tokens[stack.top()];
         }
-        int i = 0;
-        for (int index : stack) {
-            if (i == position) {
-                return tokens[index];
-            }
-            i++;
-        }
-        return tokens[-1]; // throw new IndexOutOfBoundsException();
+        return tokens[stack.get(position, -1)]; // throw new IndexOutOfBoundsException();
     }
 
     public Token getStackTokenOrDefault(int position, Token defaultToken) {
         if (position == 0) {
-            return tokens[stack.getFirst()];
+            return tokens[stack.top()];
         }
-        int i = 0;
-        for (int index : stack) {
-            if (i == position) {
-                return tokens[index];
-            }
-            i++;
+        int index = stack.get(position, -1);
+        if (index != -1) {
+            return tokens[index];
         }
         return defaultToken;
     }

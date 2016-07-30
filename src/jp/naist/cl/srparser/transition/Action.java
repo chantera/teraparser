@@ -1,7 +1,6 @@
 package jp.naist.cl.srparser.transition;
 
 import jp.naist.cl.srparser.model.Token;
-import jp.naist.cl.srparser.util.Deque;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -20,7 +19,7 @@ public enum Action {
          */
         @Override
         public State apply(State state) {
-            Deque<Integer> stack = state.stack.clone();
+            Stack stack = state.stack.clone();
             Token head = state.getBufferHeadToken();
             Token dependent = state.tokens[stack.pop()];
             return new State(state, this, new Arc(head.id, dependent.id), stack, state.bufferHead);
@@ -33,7 +32,7 @@ public enum Action {
          */
         @Override
         public State apply(State state) {
-            Deque<Integer> stack = state.stack.clone();
+            Stack stack = state.stack.clone();
             Token head = state.getStackTopToken();
             Token dependent = state.getBufferHeadToken();
             stack.push(state.bufferHead);
@@ -47,7 +46,7 @@ public enum Action {
          */
         @Override
         public State apply(State state) {
-            Deque<Integer> stack = state.stack.clone();
+            Stack stack = state.stack.clone();
             stack.push(state.bufferHead);
             return new State(state, this, null, stack, state.bufferHead + 1);
         }
@@ -59,7 +58,7 @@ public enum Action {
          */
         @Override
         public State apply(State state) {
-            Deque<Integer> stack = state.stack.clone();
+            Stack stack = state.stack.clone();
             stack.pop();
             return new State(state, this, null, stack, state.bufferHead);
         }
