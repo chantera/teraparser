@@ -29,6 +29,7 @@ public class State {
     private Set<Action> possibleActions;
     public final State prevState;
     public final Action prevAction;
+    private double score; // only this property is mutable and optionally used.
 
     /**
      * Generate Initial State
@@ -187,6 +188,14 @@ public class State {
             features = Feature.extract(this);
         }
         return features;
+    }
+
+    public void setScore(double value) {
+        score = value;
+    }
+
+    public double getScore() {
+        return score;
     }
 
     /**

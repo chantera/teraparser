@@ -2,7 +2,6 @@ package jp.naist.cl.srparser.parser;
 
 import jp.naist.cl.srparser.transition.Action;
 import jp.naist.cl.srparser.transition.State;
-import jp.naist.cl.srparser.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,37 +83,39 @@ interface BeamSearchDecoder {
         }
     }
 
-    class BeamItem extends Tuple<State, Double> implements Comparable<BeamItem> {
+    class BeamItem implements Comparable<BeamItem> {
+        private State state;
+        private double score;
         private int priority;
 
-        BeamItem(State state, Double score) {
+        BeamItem(State state, double score) {
             this(state, score, 0);
         }
 
-        BeamItem(State state, Double score, int priority) {
-            super(state, score);
+        BeamItem(State state, double score, int priority) {
+            state.setScore(score);
+            this.state = state;
+            this.score = score;
             this.priority = priority;
         }
 
         State getState() {
-            return this.left;
+            return state;
         }
 
         double getScore() {
-            return this.right;
+            return score;
         }
 
         @Override
         public int compareTo(BeamItem another) {
-            int diff = another.right.compareTo(this.right);
-            if (diff != 0) {
-                return diff;
+            double diff = another.score - this.score;
+            if (diff > 0) {
+                return 1;
+            } else if (diff < 0) {
+                return -1;
             }
-            diff = another.priority - this.priority;
-            if (diff != 0) {
-                return diff;
-            }
-            return diff;
+            return another.priority - this.priority;
         }
     }
 }

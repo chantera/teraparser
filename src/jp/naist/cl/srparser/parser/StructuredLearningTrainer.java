@@ -5,9 +5,7 @@ import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +52,6 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
     private void trainWithMaxViolation(Sentence sentence) {
         List<BeamItem> beam = new ArrayList<>(1);
         beam.add(new BeamItem(new State(sentence), 0.0));
-        Map<State, Double> scoreHistory = new IdentityHashMap<>(sentence.length * beamWidth * 2);
 
         // do beam-search storing score
         boolean terminate = false;
@@ -62,7 +59,6 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
             beam = getNextBeamItems(beam, beamWidth, classifier);
             boolean allTerminal = true;
             for (BeamItem item : beam) {
-                scoreHistory.putIfAbsent(item.getState(), item.getScore());
                 allTerminal = allTerminal && item.getState().isTerminal();
             }
             terminate = allTerminal;
@@ -83,7 +79,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
             oracleState = oracleStateIterator.next();
 
             oracleScore += classifier.getScore(oracleState.prevState.getFeatures(), oracleState.prevAction);
-            double violation = scoreHistory.get(predState) - oracleScore;
+            double violation = predState.getScore() - oracleScore;
             if (violation > maxViolation) {
                 maxViolation = violation;
                 maxViolateState = predState;
