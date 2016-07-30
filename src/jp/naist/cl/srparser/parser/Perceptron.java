@@ -65,7 +65,7 @@ public class Perceptron {
         } else if (actions.size() == 1) {
             return (Action) actions.iterator();
         }
-        return classify(state.features, actions);
+        return classify(state.getFeatures(), actions);
     }
 
     public Action classify(int[] featureIndexes, Collection<Action> actions) {
@@ -83,13 +83,13 @@ public class Perceptron {
 
     public void update(State oracle, State predict) {
         while (predict.prevState != null) {
-            updateWeight(weights[predict.prevAction.index], predict.prevState.features, -1);
-            updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.features, -count);
+            updateWeight(weights[predict.prevAction.index], predict.prevState.getFeatures(), -1);
+            updateWeight(averagedWeights[predict.prevAction.index], predict.prevState.getFeatures(), -count);
             predict = predict.prevState;
         }
         while (oracle.prevState != null) {
-            updateWeight(weights[oracle.prevAction.index], oracle.prevState.features, 1);
-            updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.features, count);
+            updateWeight(weights[oracle.prevAction.index], oracle.prevState.getFeatures(), 1);
+            updateWeight(averagedWeights[oracle.prevAction.index], oracle.prevState.getFeatures(), count);
             oracle = oracle.prevState;
         }
     }

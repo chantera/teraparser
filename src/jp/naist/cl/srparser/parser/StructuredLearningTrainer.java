@@ -82,7 +82,7 @@ public class StructuredLearningTrainer extends Trainer implements BeamSearchDeco
             predState = predStateIterator.next();
             oracleState = oracleStateIterator.next();
 
-            oracleScore += classifier.getScore(oracleState.prevState.features, oracleState.prevAction);
+            oracleScore += classifier.getScore(oracleState.prevState.getFeatures(), oracleState.prevAction);
             double violation = scoreHistory.get(predState) - oracleScore;
             if (violation > maxViolation) {
                 maxViolation = violation;

@@ -25,7 +25,7 @@ public class State {
     public final Arc[] arcs;
     final int[] leftmost;
     final int[] rightmost;
-    public final int[] features;
+    private int[] features;
     public final Set<Action> possibleActions;
     public final State prevState;
     public final Action prevAction;
@@ -45,7 +45,6 @@ public class State {
         this.rightmost       = new int[tokenLength]; // index: head, value: rightmost dependent
         Arrays.fill(this.leftmost, Integer.MAX_VALUE);
         Arrays.fill(this.rightmost, -1);
-        this.features        = Feature.extract(this);
         this.possibleActions = Action.getPossibleActions(this);
         this.prevState       = null;
         this.prevAction      = null;
@@ -78,7 +77,6 @@ public class State {
             this.leftmost    = prevState.leftmost;
             this.rightmost   = prevState.rightmost;
         }
-        this.features        = Feature.extract(this);
         this.possibleActions = Action.getPossibleActions(this);
         this.prevState       = prevState;
         this.prevAction      = prevAction;
@@ -177,6 +175,14 @@ public class State {
         return arcs[dependent] != null;
     }
 
+    public int[] getFeatures() {
+        // lazily initialization
+        if (features == null) {
+            features = Feature.extract(this);
+        }
+        return features;
+    }
+
     /**
      * get iterator from the initial state of this.
      */
@@ -238,7 +244,7 @@ public class State {
         if (result == 0) {
             result = new HashUtils.HashCodeBuilder()
                     .append(step)
-                    .append(features)
+                    .append(getFeatures())
                     .append(prevAction.index)
                     .toHashCode();
             hashCode = result;

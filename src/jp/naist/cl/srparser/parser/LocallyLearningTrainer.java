@@ -22,7 +22,7 @@ public class LocallyLearningTrainer extends Trainer {
         State oracle = iterator.next(); // initial state
         while (iterator.hasNext()) {
             Action predictAction = classifier.getNextAction(oracle);
-            int[] predictFeatures = oracle.features;
+            int[] predictFeatures = oracle.getFeatures();
             oracle = iterator.next();
             Action oracleAction = oracle.prevAction;
             if (!predictAction.equals(oracleAction)) {
