@@ -1,5 +1,6 @@
 package jp.naist.cl.srparser.app;
 
+import jp.naist.cl.srparser.Main;
 import jp.naist.cl.srparser.io.Logger;
 import jp.naist.cl.srparser.util.CmdLineArgs;
 import jp.naist.cl.srparser.util.DateUtils;
@@ -287,8 +288,21 @@ public class Config {
         fw.close();
     }
 
+    static String getProductName() {
+        return Main.PRODUCT_NAME;
+    }
+
+    static String getVersion() {
+        return Main.VERSION;
+    }
+
+    static String getAuthor() {
+        return Main.AUTHOR;
+    }
+
     static void showHelp() {
         StringBuilder sb = new StringBuilder();
+
         sb.append("Usage:\n");
         System.out.println(sb.toString());
     }

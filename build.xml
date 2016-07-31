@@ -2,8 +2,8 @@
 <project name="ShiftReduceParser" default="build" basedir=".">
 
   <property name="product.name" value="${ant.project.name}"/>
-  <property name="main" value="jp.naist.cl.srparser.Main"/>
-  <property name="classpath" value=""/>
+  <property name="product.version" value="0.8.0-b1"/>
+  <property name="author" value="Teranishi Hiroki"/>
 
   <property name="build.dir" value="${basedir}/build"/>
   <property name="src.dir" value="${basedir}/src"/>
@@ -44,18 +44,35 @@
   <target name="compile" depends="init">
     <mkdir dir="${basedir}/config"/>
     <mkdir dir="${basedir}/logs"/>
-    <javac destdir="${build.dir}/classes" srcdir="${src.dir}" source="1.8" target="1.8" includeantruntime="false">
+    <javac destdir="${build.dir}/classes"
+           srcdir="${src.dir}"
+           encoding="UTF-8"
+           source="1.8"
+           target="1.8"
+           includeantruntime="false">
       <classpath refid="compile.classpath"/>
     </javac>
   </target>
 
   <target name="jar" depends="compile">
+    <tstamp>
+      <format property="built.date" pattern="yyyy-MM-dd HH:mm:ss z"/>
+    </tstamp>
     <jar destfile="${jar.filepath}" basedir="${build.dir}/classes">
       <zipgroupfileset refid="lib.fileset"/>
+      <!-- MANIFEST -->
       <manifest>
-        <attribute name="Main-Class" value="${main}" />
-        <attribute name="Class-Path" value="${classpath}" />
+        <attribute name="Manifest-Version" value="1.0"/>
+        <attribute name="Main-Class" value="jp.naist.cl.srparser.Main"/>
+        <attribute name="Class-Path" value="" />
+        <attribute name="Implementation-Title" value="${product.name}"/>
+        <attribute name="Implementation-Version" value="${product.version}"/>
+        <attribute name="Implementation-Vendor" value="${author}"/>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-Date" value="${built.date}"/>
+        <attribute name="Build-Jdk" value="${java.version}"/>
       </manifest>
+      <!-- ******** -->
     </jar>
   </target>
 

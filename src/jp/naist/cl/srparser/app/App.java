@@ -17,6 +17,7 @@ import jp.naist.cl.srparser.transition.Oracle;
 import jp.naist.cl.srparser.transition.State;
 import jp.naist.cl.srparser.util.DateUtils;
 import jp.naist.cl.srparser.util.FileUtils;
+import jp.naist.cl.srparser.util.StringUtils;
 import jp.naist.cl.srparser.util.SystemUtils;
 import jp.naist.cl.srparser.util.Tuple;
 
@@ -121,6 +122,7 @@ public final class App {
     }
 
     private void help() {
+        showCredit();
         Config.showHelp();
     }
 
@@ -410,5 +412,40 @@ public final class App {
                 throwable.printStackTrace();
             }
         }
+    }
+
+    private void showCredit() {
+        String product = String.format("\u00a9 %s (ver %s)", Config.getProductName(), Config.getVersion());
+        String copyright = String.format("Copyright %s %s",
+                DateUtils.getCurrentDateTimeString("yyyy"),
+                Config.getAuthor());
+
+        String[] lines = {
+                "   _____                       __   ",
+                "  / ___/____ _____ ___  ____  / /__ ",
+                "  \\__ \\/ __ `/ __ `__ \\/ __ \\/ / _ \\",
+                " ___/ / /_/ / / / / / / /_/ / /  __/",
+                "/____/\\__,_/_/ /_/ /_/ .___/_/\\___/ ",
+                "                    /_/             ",
+                "",
+                product,
+                copyright,
+                "",
+                "Licensed under the Apache License, Version 2.0 (the \"License\");",
+                "you may not use this file except in compliance with the License.",
+                "You may obtain a copy of the License at",
+                "",
+                "    http://www.apache.org/licenses/LICENSE-2.0",
+                "",
+                "Unless required by applicable law or agreed to in writing, software",
+                "distributed under the License is distributed on an \"AS IS\" BASIS,",
+                "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.",
+                "See the License for the specific language governing permissions and",
+                "limitations under the License.",
+                "",
+        };
+
+        String output = StringUtils.join(lines, StringUtils.NEW_LINE);
+        System.out.println(output);
     }
 }

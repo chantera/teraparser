@@ -1,5 +1,7 @@
 package jp.naist.cl.srparser.util;
 
+import java.util.Arrays;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
@@ -31,6 +33,12 @@ public class StringUtils {
         }
         result[0] = builder.toString();
         return result;
+    }
+
+    public static String join(Object[] array, final String delimiter) {
+        StringJoiner joiner = new StringJoiner(delimiter);
+        Arrays.stream(array).forEach(element -> joiner.add((String) element));
+        return joiner.toString();
     }
 
     public static String join(Object[] array, final char separator) {
