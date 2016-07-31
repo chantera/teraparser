@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="ShiftReduceParser" default="build" basedir=".">
+<project name="TeraParser" default="build" basedir=".">
 
   <property name="product.name" value="${ant.project.name}"/>
   <property name="product.version" value="0.8.0-b1"/>
-  <property name="author" value="Teranishi Hiroki"/>
+  <property name="author" value="Hiroki Teranishi"/>
 
   <property name="build.dir" value="${basedir}/build"/>
   <property name="src.dir" value="${basedir}/src"/>
   <property name="lib.dir" value="${basedir}/libs"/>
-  <property name="jar.filepath" value="${build.dir}/${product.name}.jar"/>
+  <property name="jar.filepath" value="${build.dir}/teraparser.jar"/>
 
   <target name="build">
     <antcall target="all"/>
@@ -63,7 +63,7 @@
       <!-- MANIFEST -->
       <manifest>
         <attribute name="Manifest-Version" value="1.0"/>
-        <attribute name="Main-Class" value="jp.naist.cl.srparser.Main"/>
+        <attribute name="Main-Class" value="jp.teraparser.Main"/>
         <attribute name="Class-Path" value="" />
         <attribute name="Implementation-Title" value="${product.name}"/>
         <attribute name="Implementation-Version" value="${product.version}"/>

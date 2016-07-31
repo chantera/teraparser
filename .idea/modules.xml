@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ShiftReduceParser.iml" filepath="$PROJECT_DIR$/ShiftReduceParser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/teraparser.iml" filepath="$PROJECT_DIR$/teraparser.iml" />
     </modules>
   </component>
 </project>
