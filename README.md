@@ -1,8 +1,8 @@
-# ShiftReduceParser
+# TeraParser
 
-ShiftReduceParser is preliminary implementation for Transition-Based parsing.
+TeraParser is preliminary implementation for Transition-Based parsing.
 
-ShiftReduceParser supports following methods:
+TeraParser supports following methods:
   - Online Learning and Structured Learning
   - Early-update and Max-violation
 
@@ -18,17 +18,17 @@ This currently does not supports:
 
 ### Tech
 
-ShiftReduceParser uses following techniques:
+TeraParser uses following techniques:
 
   - 
 
 ## Installation
 
-ShiftReduceParser works on java 1.8.0+
+TeraParser works on java 1.8.0+
 
 ```sh
-$ git clone [git-repo-url] ShiftReduceParser
-$ cd ShiftReduceParser
+$ git clone [git-repo-url] TeraParser
+$ cd TeraParser
 $ ant
 ```
 
@@ -36,12 +36,12 @@ $ ant
 
 ```sh
 Usage:
-  java -jar build/ShiftReduceParser.jar COMMAND [OPTIONS]
+  java -jar build/TeraParser.jar COMMAND [OPTIONS]
 
 Example:
-  java -jar build/ShiftReduceParser.jar help
-  java -jar build/ShiftReduceParser.jar train --trainfile <file> --devfile <file> [OPTIONS]
-  java -jar build/ShiftReduceParser.jar parse --input <file> --modelin <file> [OPTIONS]
+  java -jar build/TeraParser.jar help
+  java -jar build/TeraParser.jar train --trainfile <file> --devfile <file> [OPTIONS]
+  java -jar build/TeraParser.jar parse --input <file> --modelin <file> [OPTIONS]
 
 train options:
       --trainfile <file>     [required] Conll file to train

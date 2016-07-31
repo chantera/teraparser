@@ -56,6 +56,7 @@ public final class App {
         App app = getInstance();
         try {
             app.initialize(Config.getMode());
+            app.showCredit();
             switch (app.mode) {
                 case PARSE:
                     app.parse();
@@ -123,7 +124,6 @@ public final class App {
     }
 
     private void help() {
-        showCredit();
         System.out.println(StringUtils.join(Config.getUsage(), StringUtils.NEW_LINE));
     }
 
@@ -423,12 +423,12 @@ public final class App {
 
         String[] lines = {
                 "",
-                "   _____                       __   ",
-                "  / ___/____ _____ ___  ____  / /__ ",
-                "  \\__ \\/ __ `/ __ `__ \\/ __ \\/ / _ \\",
-                " ___/ / /_/ / / / / / / /_/ / /  __/",
-                "/____/\\__,_/_/ /_/ /_/ .___/_/\\___/ ",
-                "                    /_/             ",
+                "  ______                ____                           ",
+                " /_  __/__  _________ _/ __ \\____ ______________  _____",
+                "  / / / _ \\/ ___/ __ `/ /_/ / __ `/ ___/ ___/ _ \\/ ___/",
+                " / / /  __/ /  / /_/ / ____/ /_/ / /  (__  )  __/ /    ",
+                "/_/  \\___/_/   \\__,_/_/    \\__,_/_/  /____/\\___/_/     ",
+                "                                                       ",
                 "",
                 product,
                 copyright,
