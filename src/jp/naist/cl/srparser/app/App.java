@@ -114,6 +114,7 @@ public final class App {
                     .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
                     .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
                     .build();
+            Logger.info("[Version] %s %s", Config.getProductName(), Config.getVersion());
             Logger.info("[OS INFO] " + SystemUtils.getOSInfo());
             Logger.info("[settings] " + Config.getDump());
         }
@@ -123,7 +124,7 @@ public final class App {
 
     private void help() {
         showCredit();
-        Config.showHelp();
+        System.out.println(StringUtils.join(Config.getUsage(), StringUtils.NEW_LINE));
     }
 
     private void parse() {
@@ -421,6 +422,7 @@ public final class App {
                 Config.getAuthor());
 
         String[] lines = {
+                "",
                 "   _____                       __   ",
                 "  / ___/____ _____ ___  ____  / /__ ",
                 "  \\__ \\/ __ `/ __ `__ \\/ __ \\/ / _ \\",
@@ -431,6 +433,7 @@ public final class App {
                 product,
                 copyright,
                 "",
+                "------------------------------------------------------------",
                 "Licensed under the Apache License, Version 2.0 (the \"License\");",
                 "you may not use this file except in compliance with the License.",
                 "You may obtain a copy of the License at",
@@ -442,6 +445,7 @@ public final class App {
                 "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.",
                 "See the License for the specific language governing permissions and",
                 "limitations under the License.",
+                "------------------------------------------------------------",
                 "",
         };
 

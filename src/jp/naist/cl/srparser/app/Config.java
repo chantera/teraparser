@@ -30,33 +30,29 @@ public class Config {
     private Map<Key, Object> values = new EnumMap<>(Key.class);
 
     enum Key {
-        CONFIG_FILE      ("config",     null,                 false, ""),
-        SAVE_CONFIG      ("saveconfig", null,                 false, ""),
-        INPUT            ("input",      "",                   true,  ""),
-        MODEL_INPUT      ("modelin",    "",                   true,  ""),
-        TRAINING_FILE    ("trainfile",  "",                   true,  ""),
-        DEVELOPMENT_FILE ("devfile",    "",                   false, ""),
-        TEST_FILE        ("testfile",   "",                   false, ""),
-        MODEL_OUTPUT     ("modelout",   "",                   false, ""),
-        ITERATION        ("iteration",  20,                   false, ""),
-        // N_THREADS        ("nthreads",   8,                    false, ""),
-        TRAIN_LOCALLY    ("locally",    false,                false, ""),
-        BEAM_WIDTH       ("beamwidth",  16,                   false, ""),
-        EARLY_UPDATE     ("early",      false,                false, ""),
-        VERBOSE          ("verbose",    true,                 false, ""),
-        LOGDIR           ("logdir",     "logs",               false, ""),
-        LOGLEVEL         ("loglevel",   Logger.LogLevel.INFO, false, "");
+        CONFIG_FILE      ("config",     null                ),
+        SAVE_CONFIG      ("saveconfig", null                ),
+        INPUT            ("input",      ""                  ),
+        MODEL_INPUT      ("modelin",    ""                  ),
+        TRAINING_FILE    ("trainfile",  ""                  ),
+        DEVELOPMENT_FILE ("devfile",    ""                  ),
+        TEST_FILE        ("testfile",   ""                  ),
+        MODEL_OUTPUT     ("modelout",   ""                  ),
+        ITERATION        ("iteration",  20                  ),
+        // N_THREADS        ("nthreads",   8                   ),
+        TRAIN_LOCALLY    ("locally",    false               ),
+        BEAM_WIDTH       ("beamwidth",  16                  ),
+        EARLY_UPDATE     ("early",      false               ),
+        VERBOSE          ("verbose",    true                ),
+        LOGDIR           ("logdir",     "logs"              ),
+        LOGLEVEL         ("loglevel",   Logger.LogLevel.INFO);
 
         String name;
         Object defaultValue;
-        Boolean required;
-        String description;
 
-        Key(String name, Object defaultValue, Boolean required, String description) {
+        Key(String name, Object defaultValue) {
             this.name = name;
             this.defaultValue = defaultValue;
-            this.required = required;
-            this.description = description;
         }
     }
 
@@ -300,10 +296,40 @@ public class Config {
         return Main.AUTHOR;
     }
 
-    static void showHelp() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Usage:\n");
-        System.out.println(sb.toString());
+    static String[] getUsage() {
+        String[] lines = {
+                "Usage:",
+                "  java -jar build/ShiftReduceParser.jar COMMAND [OPTIONS]",
+                "",
+                "Example:",
+                "  java -jar build/ShiftReduceParser.jar help",
+                "  java -jar build/ShiftReduceParser.jar train --trainfile <file> --devfile <file> [OPTIONS]",
+                "  java -jar build/ShiftReduceParser.jar parse --input <file> --modelin <file> [OPTIONS]",
+                "",
+                "train options:",
+                "      --trainfile <file>     [required] Conll file to train",
+                "      --devfile <file>       [required] Conll file used as development set",
+                "      --testfile <file>      Conll file used for final testing (optional)",
+                "      --iteration            Training iteration (default: 20)",
+                "      --locally              Train greedily, otherwise train globally (structured learing)",
+                "      --beamwidth <num>      Train globally using beam-search with specified beam-width (default: 16)",
+                "      --early                Update weight with \"early-update\" method, otherwise use \"max-violation\"",
+                "      --modelout <file>      Output learned parameters to the specified file",
+                "",
+                "parse options:",
+                "      --input <file>         [required] Target conll file to parse",
+                "      --modelin <file>       [required] Model file for parsing, which contains learing parameters",
+                "      --locally              Parse greedily, otherwise parse globally (structured parsing)",
+                "      --beamwidth <num>      Parse globally using beam-search with specified beam-width (default: 16)",
+                "",
+                "common options:",
+                "      --config <file>        Specify options using config file",
+                "      --saveconfig <file>    Save current options to the file",
+                "      --verbose false        Turn off displaying messages to stdin and stderr",
+                "      --logdir <dir>         Log output directory (default: logs)",
+                "      --loglevel (info|off)  Log level (default: info)",
+                "",
+        };
+        return lines;
     }
 }
