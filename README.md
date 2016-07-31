@@ -1,47 +1,49 @@
-# TeraParser
+# TeraParser : Fast Transition-Based Parser
 
 TeraParser is preliminary implementation for Transition-Based parsing.
 
 TeraParser supports following methods:
+
+  - Arc-Eager dependency parsing
   - Online Learning and Structured Learning
   - Early-update and Max-violation
 
-This currently does not supports:
+This parser currently does not support:
+
   - Non-local feature learing
   - Raw text parsing
   - Labeled arc prediction
 
-> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+### Latest release
 
-### Version
-0.8.0-b1 (beta)
-
-### Tech
-
-TeraParser uses following techniques:
-
-  - 
+The most recent release is TeraParser 0.8.0-b1 (beta), released July 31, 2016
 
 ## Installation
 
-TeraParser works on java 1.8.0+
+TeraParser requires JDK 1.8 or higher
 
 ```sh
-$ git clone [git-repo-url] TeraParser
-$ cd TeraParser
+$ git clone https://github.com/chantera/teraparser
+$ cd teraparser
 $ ant
+```
+
+Then you can try the parser using the following command:
+
+```sh
+$ java -jar build/teraparser.jar train --config sample/sample.properties
 ```
 
 ## Usage
 
 ```sh
 Usage:
-  java -jar build/TeraParser.jar COMMAND [OPTIONS]
+  java -jar build/teraparser.jar COMMAND [OPTIONS]
 
 Example:
-  java -jar build/TeraParser.jar help
-  java -jar build/TeraParser.jar train --trainfile <file> --devfile <file> [OPTIONS]
-  java -jar build/TeraParser.jar parse --input <file> --modelin <file> [OPTIONS]
+  java -jar build/teraparser.jar help
+  java -jar build/teraparser.jar train --trainfile <file> --devfile <file> [OPTIONS]
+  java -jar build/teraparser.jar parse --input <file> --modelin <file> [OPTIONS]
 
 train options:
       --trainfile <file>     [required] Conll file to train
@@ -67,27 +69,29 @@ common options:
       --loglevel (info|off)  Log level (default: info)
 ```
 
-### Train
-
-### Parse
-
-### Performance
+## Performance
 
 More details coming soon.
 
-### Todos
+## References
 
- - Write Javadoc and Tests
-
-
-#### References
-
-  - 
-
+  - Collins, M., 2002, July. Discriminative training methods for hidden markov models: Theory and experiments with perceptron algorithms. In Proceedings of the ACL-02 conference on Empirical methods in natural language processing-Volume 10 (pp. 1-8). Association for Computational Linguistics.
+  - Daume, H.C., 2006. Practical structured learning techniques for natural language processing. ProQuest.
+  - Goldberg, Y. and Nivre, J., 2012. A Dynamic Oracle for Arc-Eager Dependency Parsing. In COLING (pp. 959-976).
+  - Goldberg, Y. and Nivre, J., 2013. Training deterministic parsers with non-deterministic oracles. Transactions of the association for Computational Linguistics, 1, pp.403-414.
+  - Huang, L. and Sagae, K., 2010, July. Dynamic programming for linear-time incremental parsing. In Proceedings of the 48th Annual Meeting of the Association for Computational Linguistics (pp. 1077-1086). Association for Computational Linguistics.
+  - Huang, L., Fayong, S. and Guo, Y., 2012, June. Structured perceptron with inexact search. In Proceedings of the 2012 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (pp. 142-151). Association for Computational Linguistics.
+  - Nivre, J., 2003. An efficient algorithm for projective dependency parsing. In Proceedings of the 8th International Workshop on Parsing Technologies (IWPT.
+  - Nivre, J., 2008. Algorithms for deterministic incremental dependency parsing. Computational Linguistics, 34(4), pp.513-553.
+  - Rasooli, M.S. and Tetreault, J., 2015. Yara parser: A fast and accurate dependency parser. arXiv preprint arXiv:1503.06733.
+  - Yamada, H. and Matsumoto, Y., 2003, April. Statistical dependency analysis with support vector machines. In Proceedings of IWPT (Vol. 3, pp. 195-206).
+  - Zhang, Y. and Clark, S., 2008, October. A tale of two parsers: investigating and combining graph-based and transition-based dependency parsing using beam-search. In Proceedings of the Conference on Empirical Methods in Natural Language Processing (pp. 562-571). Association for Computational Linguistics.
+  - Zhang, Y. and Nivre, J., 2011, June. Transition-based dependency parsing with rich non-local features. In Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies: short papers-Volume 2 (pp. 188-193). Association for Computational Linguistics.
+  - Zhang, Y. and Nivre, J., 2012, December. Analyzing the Effect of Global Learning and Beam-Search on Transition-Based Dependency Parsing. In COLING (Posters) (pp. 1391-1400).
 
 License
 ----
 Apache License Version 2.0
 
-Copyright 2016 Teranishi Hiroki
+&copy; Copyright 2016 Teranishi Hiroki
 
