@@ -25,7 +25,7 @@ public class LocallyLearningTrainer extends Trainer {
             int[] predictFeatures = oracle.getFeatures();
             oracle = iterator.next();
             Action oracleAction = oracle.prevAction;
-            if (!predictAction.equals(oracleAction)) {
+            if (predictAction != oracleAction) {
                 classifier.update(oracleAction, predictAction, predictFeatures);
             }
             classifier.incrementCount();
