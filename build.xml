@@ -2,7 +2,7 @@
 <project name="TeraParser" default="build" basedir=".">
 
   <property name="product.name" value="${ant.project.name}"/>
-  <property name="product.version" value="0.8.0-b1"/>
+  <property name="product.version" value="0.8.1-a2"/>
   <property name="author" value="Hiroki Teranishi"/>
 
   <property name="build.dir" value="${basedir}/build"/>

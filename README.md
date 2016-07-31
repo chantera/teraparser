@@ -16,7 +16,7 @@ This parser currently does not support:
 
 ### Latest release
 
-The most recent release is TeraParser 0.8.0-b1 (beta), released July 31, 2016
+The most recent release is TeraParser 0.8.1-a2 (alpha), released July 31, 2016
 
 ## Installation
 
