@@ -1,6 +1,6 @@
 # IDE
 /.idea/
-*.imi
+*.iml
 
 # Application
 /build/
