@@ -3,7 +3,7 @@
 
   <property name="product.name" value="${ant.project.name}"/>
   <property name="main" value="jp.naist.cl.srparser.Main"/>
-  <property name="classpath" value="../libs/guava-19.0.jar"/>
+  <property name="classpath" value=""/>
 
   <property name="build.dir" value="${basedir}/build"/>
   <property name="src.dir" value="${basedir}/src"/>
@@ -34,7 +34,7 @@
   </target>
 
   <path id="compile.classpath">
-    <fileset dir="${lib.dir}">
+    <fileset id="lib.fileset" dir="${lib.dir}">
       <include name="*.jar"/>
       <exclude name="hamcrest-core*"/>
       <exclude name="junit*"/>
@@ -51,6 +51,7 @@
 
   <target name="jar" depends="compile">
     <jar destfile="${jar.filepath}" basedir="${build.dir}/classes">
+      <zipgroupfileset refid="lib.fileset"/>
       <manifest>
         <attribute name="Main-Class" value="${main}" />
         <attribute name="Class-Path" value="${classpath}" />

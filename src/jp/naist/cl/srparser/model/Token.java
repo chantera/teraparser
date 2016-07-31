@@ -1,7 +1,7 @@
 package jp.naist.cl.srparser.model;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import jp.naist.cl.srparser.util.BiMap;
+import jp.naist.cl.srparser.util.HashBiMap;
 import jp.naist.cl.srparser.util.Tuple;
 
 /**
@@ -10,7 +10,7 @@ import jp.naist.cl.srparser.util.Tuple;
  * @author Hiroki Teranishi
  */
 public class Token implements Cloneable {
-    private static BiMap<Integer, Tuple<Attribute, String>> attributeRegistry = HashBiMap.create();
+    private static BiMap<Tuple<Attribute, String>, Integer> attributeRegistry = new HashBiMap<>();
 
     public final int id;
     public final int form;
@@ -23,29 +23,29 @@ public class Token implements Cloneable {
     // public final int phead;
     // public final int pdeprel;
 
-    public static void setAttributeMap(BiMap<Integer, Tuple<Attribute, String>> attributeMap) {
+    public static void setAttributeMap(BiMap<Tuple<Attribute, String>, Integer> attributeMap) {
         attributeRegistry = attributeMap;
         clearCache();
     }
 
-    public static BiMap<Integer, Tuple<Attribute, String>> getAttributeMap() {
+    public static BiMap<Tuple<Attribute, String>, Integer> getAttributeMap() {
         return attributeRegistry;
     }
 
     private static int registerAttribute(Attribute name, String value) {
         Tuple<Attribute, String> attribute = new Tuple<>(name, value);
-        int index = attributeRegistry.inverse().getOrDefault(attribute, -1);
+        int index = attributeRegistry.getOrDefault(attribute, -1);
         if (index == -1) {
             synchronized (Token.class) {
                 index = attributeRegistry.size();
-                attributeRegistry.put(index, attribute);
+                attributeRegistry.put(attribute, index);
             }
         }
         return index;
     }
 
     public static String getAttribute(int index) {
-        Tuple<Attribute, String> attribute = attributeRegistry.get(index);
+        Tuple<Attribute, String> attribute = attributeRegistry.getKey(index);
         if (attribute == null) {
             return null;
         }
