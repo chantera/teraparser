@@ -9,9 +9,11 @@ import java.util.Set;
  *
  * @author Hiroki Teranishi
  */
-public class BiMap<K,V> implements Map<K,V> {
-    final Map<K,V> kvMap;
-    final Map<V,K> vkMap;
+public abstract class BiMap<K,V> implements Map<K,V> {
+    transient Map<K,V> kvMap;
+    transient Map<V,K> vkMap;
+
+    BiMap() {}
 
     BiMap(Map<K,V> kvMap, Map<V,K> vkMap) {
         if (kvMap == null || vkMap == null) {
@@ -45,6 +47,11 @@ public class BiMap<K,V> implements Map<K,V> {
     @Override
     public V get(Object key) {
         return kvMap.get(key);
+    }
+
+    @Override
+    public V getOrDefault(Object key, V defaultValue) {
+        return kvMap.getOrDefault(key, defaultValue);
     }
 
     public K getKey(Object value) {
@@ -99,7 +106,5 @@ public class BiMap<K,V> implements Map<K,V> {
         return vkMap.keySet();
     }
 
-    public Map<V,K> inverse() {
-        return new BiMap<>(vkMap, kvMap);
-    }
+    public abstract Map<V,K> inverse();
 }

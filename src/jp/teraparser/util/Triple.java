@@ -50,18 +50,11 @@ public class Triple<L, M, R> implements Serializable {
         return right;
     }
 
-    private volatile int hashCode;
-
     @Override
     public int hashCode() {
-        int h = hashCode;
-        if (h == 0) {
-            h = (left == null ? 0 : left.hashCode()) ^
+        return  (left == null ? 0 : left.hashCode()) ^
                 (middle == null ? 0 : middle.hashCode()) ^
                 (right == null ? 0 : right.hashCode());
-            hashCode = h;
-        }
-        return h;
     }
 
     @Override
