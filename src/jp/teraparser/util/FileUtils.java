@@ -38,6 +38,14 @@ public class FileUtils {
         return new File(path).canWrite();
     }
 
+    public static boolean isDirWritable(String path) {
+        File file = new File(path);
+        if (!file.isDirectory()) {
+            file = file.getParentFile();
+        }
+        return file.canWrite();
+    }
+
     public static Object readObject(String path) throws IOException, ClassNotFoundException {
         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path));
         ObjectInputStream reader;
