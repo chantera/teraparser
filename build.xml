@@ -74,6 +74,7 @@
       </manifest>
       <!-- ******** -->
     </jar>
+    <chmod file="${jar.filepath}" perm="755"/>
   </target>
 
   <target name="all" depends="clean,init,compile,jar"/>

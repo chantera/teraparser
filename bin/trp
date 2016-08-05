@@ -1,0 +1,58 @@
+#!/bin/sh
+
+if [ -z "$TRP_APP_HOME" ]; then
+  appDir=
+  if [ -x "$appDir/build/teraparser.jar" ]; then
+      TRP_APP_HOME="$appDir"
+      break
+  fi
+fi
+
+if [ -z "$TRP_APP_HOME" ]; then
+  echo "Sorry, cannot find teraparser.jar. Try setting the TRP_APP_HOME environment variable to the directory containing build/teraparser.jar."
+  exit 1
+fi
+
+binary="$TRP_APP_HOME/build/teraparser.jar"
+opts=
+config=()
+
+function set_config() {
+  for i in `\find $TRP_APP_HOME/config -maxdepth 1 -type f`; do
+      config+=($i)
+  done
+}
+
+if [ $# -eq 0 ]; then
+  opts="help"
+fi
+
+case "$1" in
+  ls)
+    set_config
+    c=0
+    for i in ${config[@]}; do
+      echo "[$c] -- $i"
+      c=$((c+1))
+    done
+    exit 1
+    ;;
+esac
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c | *-config)
+      if [ $# -gt 1 ]; then
+        shift
+        set_config
+        opts+=" --config ${config[$1]}"
+      fi
+      ;;
+    *)
+      opts+=" $1"
+      ;;
+  esac
+  shift
+done
+
+exec java -jar "$binary" $opts
