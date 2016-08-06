@@ -56,12 +56,13 @@ public final class App {
         App app = getInstance();
         try {
             app.initialize(Config.getMode());
-            app.showCredit();
             switch (app.mode) {
                 case PARSE:
+                    app.showCredit();
                     app.parse();
                     break;
                 case TRAIN:
+                    app.showCredit();
                     app.train();
                     break;
                 case NONE:
@@ -110,8 +111,15 @@ public final class App {
             } else {
                 executor = Executors.newSingleThreadExecutor();
             }
+            String logDir = Config.getString(Config.Key.LOGDIR);
+            if (!FileUtils.isWritable(logDir)) {
+                System.err.println("log directory " + logDir + " is not writable");
+                this.mode = Mode.NONE;
+                this.initialized = true;
+                return;
+            }
             new Logger.Builder()
-                    .setOutputDir(Config.getString(Config.Key.LOGDIR))
+                    .setOutputDir(logDir)
                     .setLogLevel((Logger.LogLevel) Config.getObject(Config.Key.LOGLEVEL))
                     .setVerbose(Config.getBoolean(Config.Key.VERBOSE))
                     .build();

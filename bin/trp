@@ -45,7 +45,12 @@ while [ $# -gt 0 ]; do
       if [ $# -gt 1 ]; then
         shift
         set_config
-        opts+=" --config ${config[$1]}"
+        expr "$1" + 1 > /dev/null 2>&1
+        if [ $? -lt 2 ]; then
+            opts+=" --config ${config[$1]}"
+        else
+            opts+=" --config $1"
+        fi
       fi
       ;;
     *)
