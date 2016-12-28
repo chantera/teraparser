@@ -92,11 +92,15 @@ public class Stack implements Cloneable {
     }
 
     public int get(int position, int defaultValue) {
-        int p = head + position;
-        if (p <= tail) {
-            return elements[p];
+        if (position < 0 || position >= size()) {
+            return defaultValue;
         }
-        return defaultValue;
+        int mask = elements.length - 1;
+        int h = head;
+        for (int i = 0; i < position; i++) {
+            h = (h + 1) & mask;
+        }
+        return elements[h];
     }
 
     public int size() {

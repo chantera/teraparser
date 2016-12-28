@@ -102,7 +102,7 @@ public class ActionTest {
         State state = new Oracle(Oracle.Algorithm.STATIC).getState(sentence);
         Token leftmost = state.getLeftmostToken(7);
         assertTrue(leftmost.id == 3);
-        leftmost = state.getLeftmostToken(26);
+        leftmost = state.getLeftmostTokenOrDefault(26, null);
         assertTrue(leftmost == null);
         Token rightmost = state.getRightmostToken(26);
         assertTrue(rightmost.id == 29);
