@@ -6,4 +6,5 @@
 /build/
 /config/
 /logs/
+/out/
 *.gz
