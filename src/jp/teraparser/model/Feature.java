@@ -18,7 +18,7 @@ public class Feature {
         Token s0l;
         Token s0r;
         if (!s0.isPad()) {
-            s0h = !s0.isRoot() ? state.getToken(s0.head) : pad;
+            s0h = state.arcs[s0.id] != null ? state.getToken(state.arcs[s0.id].head) : pad;
             s0l = state.getLeftmostTokenOrDefault(s0.id, pad);
             s0r = state.getRightmostTokenOrDefault(s0.id, pad);
         } else {
